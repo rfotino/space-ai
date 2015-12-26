@@ -10,6 +10,13 @@
 .clearfix {
     clear: both;
 }
+.notransition {
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+    -ms-transition: none !important;
+    transition: none !important;
+}
 html, body {
     height: 100%;
     overflow: hidden;
@@ -74,14 +81,18 @@ html, body {
     background: #f7f7f7;
     width: 50%;
     height: 100%;
-    padding: 15px;
     box-sizing: border-box;
     border-right: 2px solid #999;
     z-index: 9;
+
+    -webkit-transition: 0.25s;
+    -moz-transition: 0.25s;
+    -o-transition: 0.25s;
+    -ms-transition: 0.25s;
+    transition: 0.25s;
 }
 #code-window.hidden {
     width: 0;
-    padding: 0;
 }
 #code {
     width: 100%;
@@ -103,7 +114,7 @@ html, body {
     font-weight: bold;
     text-decoration: none;
     position: absolute;
-    top: 50px;
+    top: 10%;
     right: -17px;
     width: 10px;
     padding: 30px 2px;
@@ -122,6 +133,12 @@ html, body {
     box-sizing: border-box;
     border-top: 2px solid #999;
     z-index: 8;
+
+    -webkit-transition: 0.25s;
+    -moz-transition: 0.25s;
+    -o-transition: 0.25s;
+    -ms-transition: 0.25s;
+    transition: 0.25s;
 }
 #console-window.hidden {
     height: 0;
@@ -147,7 +164,7 @@ html, body {
     text-decoration: none;
     position: absolute;
     top: -21px;
-    right: 50px;
+    right: 10%;
     padding: 0 40px;
     background: #ccc;
     z-index: 10;
