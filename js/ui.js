@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2015 Robert Fotino.
+ */
+
 var codeWindow, consoleWindow, mainWindow, gameCanvas,
     codeHidden = true, consoleHidden = true,
     codePosition, consolePosition;

@@ -10,3 +10,7 @@ destroy all enemy ships or outposts, to defend your own ships or outposts,
 etc. Each level can be specified in a standard JSON format that supplies
 the initial conditions and win conditions, so it is easy to create new
 challenges.
+
+## Copyright
+
+Copyright (c) 2015 Robert Fotino.
