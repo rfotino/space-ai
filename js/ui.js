@@ -2,47 +2,49 @@
  * Copyright (c) 2015 Robert Fotino.
  */
 
-/**
- * setCode(code);
- * Overwrites the contents of the code window.
- */
-var setCode;
-/**
- * getCode();
- * Returns the contents of the code window.
- */
-var getCode;
-/**
- * showCode();
- * Pops out the code window.
- */
-var showCode;
-/**
- * hideCode();
- * Hides the code window.
- */
-var hideCode;
-/**
- * scrollConsole();
- * Scrolls down to the bottom of the console.
- */
-var scrollConsole;
-/**
- * writeConsole(line, color = 'black');
- * Writes the given text to the console window, optionally with the
- * given color.
- */
-var writeConsole;
-/**
- * showConsole();
- * Pops out the console window.
- */
-var showConsole;
-/**
- * hideConsole();
- * Hides the console window.
- */
-var hideConsole;
+var ui = {
+    /**
+     * setCode(code);
+     * Overwrites the contents of the code window.
+     */
+    setCode: function(code) { },
+    /**
+     * getCode();
+     * Returns the contents of the code window.
+     */
+    getCode: function() { },
+    /**
+     * showCode();
+     * Pops out the code window.
+     */
+    showCode: function() { },
+    /**
+     * hideCode();
+     * Hides the code window.
+     */
+    hideCode: function() { },
+    /**
+     * scrollConsole();
+     * Scrolls down to the bottom of the console.
+     */
+    scrollConsole: function() { },
+    /**
+     * writeConsole(line, color = 'black');
+     * Writes the given text to the console window, optionally with the
+     * given color.
+     */
+    writeConsole: function(line, color) { },
+    /**
+     * showConsole();
+     * Pops out the console window.
+     */
+    showConsole: function() { },
+    /**
+     * hideConsole();
+     * Hides the console window.
+     */
+    hideConsole: function() { }
+};
 
 // Wrap local variables in a function so that we hide implementation
 // details and don't pollute the global scope.
@@ -52,13 +54,13 @@ var hideConsole;
         codePosition, consolePosition,
         codeMirror, consoleContent;
 
-    setCode = function(code) {
+    ui.setCode = function(code) {
         codeMirror.getDoc().setValue(code);
     };
-    getCode = function() {
+    ui.getCode = function() {
         return codeMirror.getDoc().getValue();
     };
-    showCode = function() {
+    ui.showCode = function() {
         codeHidden = false;
         codeWindow.removeClass('hidden');
         codeWindow.css('width', codePosition);
@@ -66,7 +68,7 @@ var hideConsole;
         consoleWindow.css('width', $(window).width() - codePosition);
         $('#code-popout-btn').text('<');
     };
-    hideCode = function() {
+    ui.hideCode = function() {
         codeHidden = true;
         codeWindow.addClass('hidden');
         codeWindow.css('width', '');
@@ -74,10 +76,10 @@ var hideConsole;
         consoleWindow.css('width', $(window).width());
         $('#code-popout-btn').text('>');
     };
-    scrollConsole = function() {
+    ui.scrollConsole = function() {
         consoleContent.scrollTop(consoleContent[0].scrollHeight);
     };
-    writeConsole = function(line, color) {
+    ui.writeConsole = function(line, color) {
         if (color === undefined) {
             color = 'black';
         }
@@ -91,13 +93,13 @@ var hideConsole;
             scrollConsole();
         }
     };
-    showConsole = function() {
+    ui.showConsole = function() {
         consoleHidden = false;
         consoleWindow.removeClass('hidden');
         consoleWindow.css('height', $(window).height() - consolePosition);
         $('#console-popout-btn').text('v');
     };
-    hideConsole = function() {
+    ui.hideConsole = function() {
         consoleHidden = true;
         consoleWindow.addClass('hidden');
         consoleWindow.css('height', '');
@@ -113,18 +115,20 @@ var hideConsole;
         consoleContent = $('#console');
 
         // Show/hide code and console windows when clicking their popout buttons
-        $('#code-popout-btn').on('click', function() {
+        $('#code-popout-btn').on('click', function(e) {
+            e.preventDefault();
             if (codeHidden) {
-                showCode();
+                ui.showCode();
             } else {
-                hideCode();
+                ui.hideCode();
             }
         });
         $('#console-popout-btn').on('click', function(e) {
+            e.preventDefault();
             if (consoleHidden) {
-                showConsole();
+                ui.showConsole();
             } else {
-                hideConsole();
+                ui.hideConsole();
             }
         });
 
@@ -164,11 +168,11 @@ var hideConsole;
             e.preventDefault();
             if (codeDragging) {
                 codePosition = e.pageX;
-                showCode();
+                ui.showCode();
             }
             if (consoleDragging) {
                 consolePosition = e.pageY;
-                showConsole();
+                ui.showConsole();
             }
         });
 
@@ -194,15 +198,15 @@ var hideConsole;
             resizeCanvas();
 
             if (codeHidden) {
-                hideCode();
+                ui.hideCode();
             } else {
-                showCode();
+                ui.showCode();
             }
 
             if (consoleHidden) {
-                hideConsole();
+                ui.hideConsole();
             } else {
-                showConsole();
+                ui.showConsole();
             }
 
             codeWindow[0].offsetHeight; // Flush cached CSS changes
