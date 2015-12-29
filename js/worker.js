@@ -5,7 +5,7 @@
 // Wrap this in a function so that nothing is accessible from
 // a global context where user code is executed
 (function() {
-    var userCode = null;
+    var userFunc = null;
     var locals = {
         // Don't allow sending/receiving of messages by user code
         onmessage: undefined,
@@ -27,12 +27,8 @@
         accelerate: function() { },
         turn: function() { }
     };
-    var execute = function() {
-        // Make sure there is code to execute
-        if (null === userCode) {
-            return;
-        }
-        // Create a sandbox for and execute the user code
+    var install = function(userCode) {
+        // Create a sandbox for user code
         var params = [], args = [];
         for (var param in locals) {
             if (locals.hasOwnProperty(param)) {
@@ -45,6 +41,13 @@
         var sandbox = new (Function.prototype.bind.apply(Function, context1));
         var context2 = Array.prototype.concat.call(that, args);
         userFunc = Function.prototype.bind.apply(sandbox, context2);
+    };
+    var execute = function() {
+        // Make sure there is user code to execute
+        if (null === userFunc) {
+            return;
+        }
+        // Try to execute user code
         try {
             userFunc();
         } catch (e) {
@@ -60,11 +63,11 @@
             return;
         }
         switch (message.type) {
-        case 'code':
+        case 'install':
             if (undefined === message.value) {
                 return;
             }
-            userCode = message.value;
+            install(message.value);
             break;
         case 'execute':
             execute();

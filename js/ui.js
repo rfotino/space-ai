@@ -35,6 +35,11 @@ var ui = {
      */
     writeConsole: function(line, color) { },
     /**
+     * clearConsole();
+     * Clears all text from the console window.
+     */
+    clearConsole: function() { },
+    /**
      * showConsole();
      * Pops out the console window.
      */
@@ -100,6 +105,9 @@ var ui = {
         if (shouldScroll) {
             ui.scrollConsole();
         }
+    };
+    ui.clearConsole = function() {
+        consoleContent.html('');
     };
     ui.showConsole = function() {
         consoleHidden = false;

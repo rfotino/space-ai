@@ -37,11 +37,13 @@ var game = {
     var canvas, ctx, worker = null, running = false, executing = false;
 
     game.install = function(code) {
-        // Make sure web workers are suppored
+        // Make sure web workers are supported
         if (!window.Worker) {
             alert('Your browser must support web workers to play the game.');
             return;
         }
+        // Clear the console
+        ui.clearConsole();
         // Kill any currently running worker
         if (null !== worker) {
             worker.terminate();
@@ -63,6 +65,7 @@ var game = {
                 break;
             case 'complete':
                 executing = false;
+                // TODO: update and redraw the game
                 if (running) {
                     worker.postMessage({ type: 'execute' });
                 }
@@ -72,7 +75,7 @@ var game = {
         worker.onerror = function(e) {
             ui.writeConsole(e.message, 'error');
         };
-        worker.postMessage({ type: 'code', value: code });
+        worker.postMessage({ type: 'install', value: code });
         game.run();
     };
     game.run = function() {
