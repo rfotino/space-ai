@@ -49,7 +49,7 @@ var ui = {
 // Wrap local variables in a function so that we hide implementation
 // details and don't pollute the global scope.
 (function () {
-    var menuBar, codeWindow, consoleWindow, mainWindow, gameCanvas,
+    var codeWindow, consoleWindow, mainWindow,
         codeHidden = true, consoleHidden = true,
         codePosition, consolePosition,
         codeMirror, consoleContent;
@@ -79,18 +79,26 @@ var ui = {
     ui.scrollConsole = function() {
         consoleContent.scrollTop(consoleContent[0].scrollHeight);
     };
-    ui.writeConsole = function(line, color) {
-        if (color === undefined) {
-            color = 'black';
+    ui.writeConsole = function(line, level) {
+        if (undefined === level) {
+            level = 'log';
         }
         var scrollBottom =
             consoleContent.scrollTop() + consoleContent[0].offsetHeight;
         var shouldScroll = scrollBottom === consoleContent[0].scrollHeight;
-        consoleContent.append('<span style="color: ' + color + ';">' +
-                              $('<div/>').text(line + "\n").html() +
-                              '</span>');
+        switch (level) {
+        case 'warn':
+            consoleContent.append('<span style="color: orange;">Warning: </span>');
+            break;
+        case 'error':
+            consoleContent.append('<span style="color: red;">Error: </span>');
+            ui.showConsole();
+            shouldScroll = true;
+            break;
+        }
+        consoleContent.append($('<div/>').text(line + "\n").html());
         if (shouldScroll) {
-            scrollConsole();
+            ui.scrollConsole();
         }
     };
     ui.showConsole = function() {
@@ -107,11 +115,9 @@ var ui = {
     };
 
     $(document).ready(function() {
-        menuBar = $('#menubar');
         codeWindow = $('#code-window');
         consoleWindow = $('#console-window');
         mainWindow = $('#main-window');
-        gameCanvas = document.getElementById('game-canvas');
         consoleContent = $('#console');
 
         // Show/hide code and console windows when clicking their popout buttons
@@ -181,9 +187,7 @@ var ui = {
         var windowHeight = $(window).height();
         var resizeCanvas = function() {
             mainWindow.css('width', windowWidth);
-            mainWindow.css('height', windowHeight - menuBar.height());
-            gameCanvas.width = windowWidth;
-            gameCanvas.height = windowHeight - menuBar.height();
+            mainWindow.css('height', windowHeight - $('#menubar').height());
         }
         resizeCanvas();
         $(window).resize(function() {
