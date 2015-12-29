@@ -34,7 +34,22 @@ var game = {
 // Wrap local variables in a function so that we hide implementation
 // details and don't pollute the global scope.
 (function() {
-    var canvas, ctx, worker = null, running = false, executing = false;
+    var canvas, ctx, worker = null, running = false,
+        frameComplete = true, timerComplete = true;
+
+    // Begins executing the user's code for the next frame, and sets a timer
+    // for the minimum length of a frame.
+    var execute = function() {
+        var minFrameTime = 15;
+        frameComplete = timerComplete = false;
+        setTimeout(function() {
+            timerComplete = true;
+            if (frameComplete && running) {
+                execute();
+            }
+        }, minFrameTime);
+        worker.postMessage({ type: 'execute' });
+    };
 
     game.install = function(code) {
         // Make sure web workers are supported
@@ -47,7 +62,7 @@ var game = {
         // Kill any currently running worker
         if (null !== worker) {
             worker.terminate();
-            executing = false;
+            frameComplete = timerComplete = true;
         }
         // Spawn a new worker and listen for messages
         worker = new Worker('js/worker.js');
@@ -64,10 +79,10 @@ var game = {
                 ui.writeConsole(message.value, 'error');
                 break;
             case 'complete':
-                executing = false;
                 // TODO: update and redraw the game
-                if (running) {
-                    worker.postMessage({ type: 'execute' });
+                frameComplete = true;
+                if (timerComplete && running) {
+                    execute();
                 }
                 break;
             }
@@ -81,12 +96,9 @@ var game = {
     game.run = function() {
         // Start the game worker's execution
         running = true;
-        if (executing) {
-            return;
-        } else {
-            executing = true;
+        if (frameComplete && timerComplete) {
+            execute();
         }
-        worker.postMessage({ type: 'execute' });
     };
     game.pause = function() {
         // Pause the game worker's execution
