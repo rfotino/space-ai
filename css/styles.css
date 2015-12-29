@@ -149,7 +149,7 @@ html, body {
     padding: 5px;
     box-sizing: border-box;
     background: #fff;
-    white-space: pre;
+    white-space: pre-wrap;
     overflow-y: scroll;
     font-family: monospace;
     font-size: 13px;

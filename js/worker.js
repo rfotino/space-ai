@@ -36,11 +36,18 @@
                 args.push(locals[param]);
             }
         }
-        var that = { };
-        var context1 = Array.prototype.concat.call(that, params, userCode);
-        var sandbox = new (Function.prototype.bind.apply(Function, context1));
-        var context2 = Array.prototype.concat.call(that, args);
-        userFunc = Function.prototype.bind.apply(sandbox, context2);
+        try {
+            var that = { };
+            var context1 = Array.prototype.concat.call(that, params, userCode);
+            var sandbox = new (Function.prototype.bind.apply(Function, context1));
+            var context2 = Array.prototype.concat.call(that, args);
+            userFunc = Function.prototype.bind.apply(sandbox, context2);
+        } catch (e) {
+            postMessage({ type: 'error',
+                          value: e.message,
+                          lineNumber: e.lineNumber,
+                          columnNumber: e.columnNumber });
+        }
     };
     var execute = function() {
         // Make sure there is user code to execute
@@ -51,7 +58,10 @@
         try {
             userFunc();
         } catch (e) {
-            postMessage({ type: 'error', value: e.message });
+            postMessage({ type: 'error',
+                          value: e.message,
+                          lineNumber: e.lineNumber,
+                          columnNumber: e.columnNumber });
         }
         // Let the main thread know that we have finished execution
         postMessage({ type: 'complete' });

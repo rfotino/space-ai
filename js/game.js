@@ -76,7 +76,14 @@ var game = {
                 ui.writeConsole(message.value, message.level);
                 break;
             case 'error':
-                ui.writeConsole(message.value, 'error');
+                // Write the error to the console and stop executing
+                var errorMsg = message.value;
+                if (message.lineNumber) {
+                    errorMsg = 'line ' + message.lineNumber + ', col ' +
+                        message.columnNumber + ': ' + errorMsg;
+                }
+                ui.writeConsole(errorMsg, 'error');
+                running = false;
                 break;
             case 'complete':
                 // TODO: update and redraw the game
