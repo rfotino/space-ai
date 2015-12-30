@@ -88,20 +88,27 @@ var ui = {
         if (undefined === level) {
             level = 'log';
         }
+        var maxLines = 300;
         var scrollBottom =
             consoleContent.scrollTop() + consoleContent[0].offsetHeight;
         var shouldScroll = scrollBottom === consoleContent[0].scrollHeight;
+        var newContent = '<div class="console-line">';
         switch (level) {
         case 'warn':
-            consoleContent.append('<span style="color: orange;">Warning: </span>');
+            newContent += '<span style="color: orange;">Warning: </span>';
             break;
         case 'error':
-            consoleContent.append('<span style="color: red;">Error: </span>');
+            newContent += '<span style="color: red;">Error: </span>';
             ui.showConsole();
             shouldScroll = true;
             break;
         }
-        consoleContent.append($('<div/>').text(line + "\n").html());
+        newContent += $('<div/>').text(line + "\n").html();
+        newContent += '</div>';
+        consoleContent.append(newContent);
+        while (maxLines < consoleContent.children().length) {
+            consoleContent.children().first().remove();
+        }
         if (shouldScroll) {
             ui.scrollConsole();
         }
