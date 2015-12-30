@@ -28,18 +28,24 @@ var game = {
      * Resets the game to the initial conditions for the currently
      * loaded level.
      */
-    restart: function() { }
+    restart: function() { },
+    /**
+     * draw();
+     * Redraws the game state on the canvas.
+     */
+    draw: function() { }
 };
 
 // Wrap local variables in a function so that we hide implementation
 // details and don't pollute the global scope.
 (function() {
     var canvas, ctx, worker = null, running = false,
-        frameComplete = true, timerComplete = true;
+        frameComplete = true, timerComplete = true,
+        level = null;
 
     // Begins executing the user's code for the next frame, and sets a timer
     // for the minimum length of a frame.
-    var execute = function() {
+    function execute() {
         var minFrameTime = 15;
         frameComplete = timerComplete = false;
         setTimeout(function() {
@@ -49,7 +55,7 @@ var game = {
             }
         }, minFrameTime);
         worker.postMessage({ type: 'execute' });
-    };
+    }
 
     game.install = function(code) {
         // Make sure web workers are supported
@@ -86,7 +92,12 @@ var game = {
                 running = false;
                 break;
             case 'complete':
-                // TODO: update and redraw the game
+                // Update the game objects, redraw the frame, and set it
+                // to complete
+                if (null !== level) {
+                    level.update();
+                    level.draw(ctx);
+                }
                 frameComplete = true;
                 if (timerComplete && running) {
                     execute();
@@ -101,7 +112,10 @@ var game = {
         game.run();
     };
     game.run = function() {
-        // Start the game worker's execution
+        // Start the game worker's execution, if it exists
+        if (null === worker) {
+            return;
+        }
         running = true;
         if (frameComplete && timerComplete) {
             execute();
@@ -111,25 +125,29 @@ var game = {
         // Pause the game worker's execution
         running = false;
     };
-    game.load = function(level) {
-        // TODO: Load the level format
+    game.load = function(newLevel) {
+        // Save the initial state and start the game
+        level = newLevel;
+        game.restart();
     };
     game.restart = function() {
-        // TODO: Reset the game to the level's initial conditions
+        // Reset the game to the level's initial conditions and redraw
+        if (null === level) {
+            return;
+        }
+        level.init();
+        game.draw();
+    };
+    game.draw = function() {
+        // Redraws the game state on the canvas
+        if (null === level) {
+            return;
+        }
+        level.draw(ctx);
     };
 
     $(document).ready(function() {
         canvas = document.getElementById('game-canvas');
         ctx = canvas.getContext('2d');
-
-        var gameResize = function() {
-            var menuBar = $('#menubar');
-            var width = $(window).width();
-            var height = $(window).height() - $('#menubar').height();
-            canvas.width = width;
-            canvas.height = height;
-        };
-        gameResize();
-        $(window).resize(gameResize());
     });
 })();

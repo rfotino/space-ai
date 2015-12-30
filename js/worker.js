@@ -27,7 +27,7 @@
         accelerate: function() { },
         turn: function() { }
     };
-    var install = function(userCode) {
+    function install(userCode) {
         // Create a sandbox for user code
         var params = [], args = [];
         for (var param in locals) {
@@ -49,7 +49,7 @@
                           columnNumber: e.columnNumber });
         }
     };
-    var execute = function() {
+    function execute() {
         // Make sure there is user code to execute
         if (null === userFunc) {
             return;

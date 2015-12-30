@@ -201,11 +201,17 @@ var ui = {
         var windowWidth = $(window).width();
         var windowHeight = $(window).height();
         var resizeCanvas = function() {
-            mainWindow.css('width', windowWidth);
-            mainWindow.css('height', windowHeight - $('#menubar').height());
+            var width = $(window).width();
+            var height = $(window).height() - $('#menubar').height();
+            var canvas = document.getElementById('game-canvas');
+            mainWindow.css('width', width);
+            mainWindow.css('height', height);
+            canvas.width = width;
+            canvas.height = height;
+            game.draw();
         }
         resizeCanvas();
-        $(window).resize(function() {
+        $(window).on('resize', function() {
             codePosition = (codePosition / windowWidth) * $(window).width();
             consolePosition = (consolePosition / windowHeight) * $(window).height();
             windowWidth = $(window).width();
