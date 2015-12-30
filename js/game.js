@@ -46,6 +46,9 @@ var game = {
     // Begins executing the user's code for the next frame, and sets a timer
     // for the minimum length of a frame.
     function execute() {
+        if (null === level) {
+            return;
+        }
         var minFrameTime = 15;
         frameComplete = timerComplete = false;
         setTimeout(function() {
@@ -54,7 +57,7 @@ var game = {
                 execute();
             }
         }, minFrameTime);
-        worker.postMessage({ type: 'execute' });
+        worker.postMessage({ type: 'execute', world: level.getWorld() });
     }
 
     game.install = function(code) {
@@ -95,6 +98,7 @@ var game = {
                 // Update the game objects, redraw the frame, and set it
                 // to complete
                 if (null !== level) {
+                    level.setWorld(message.world);
                     level.update();
                     level.draw(ctx);
                 }
@@ -108,7 +112,7 @@ var game = {
         worker.onerror = function(e) {
             ui.writeConsole(e.message, 'error');
         };
-        worker.postMessage({ type: 'install', value: code });
+        worker.postMessage({ type: 'install', code: code });
         game.run();
     };
     game.run = function() {

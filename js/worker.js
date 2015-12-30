@@ -6,6 +6,7 @@
 // a global context where user code is executed
 (function() {
     var userFunc = null;
+    var world = null;
     var locals = {
         // Don't allow sending/receiving of messages by user code
         onmessage: undefined,
@@ -23,9 +24,32 @@
             }
         },
         // API functions accessible from user code
-        // TODO: complete and implement this list of API functions
-        accelerate: function() { },
-        turn: function() { }
+        // TODO: complete this list of API functions
+        thrust: function(power) {
+            if (undefined === power) {
+                return world.player.thrustPower;
+            } else if (1 < power) {
+                power = 1;
+            } else if (power < -1) {
+                power = -1;
+            }
+            var maxThrust = 0.5;
+            world.player.thrustPower = power;
+            world.player.thrust = maxThrust * world.player.thrustPower;
+        },
+        turn: function(power) {
+            if (undefined === power) {
+                return world.player.turnPower;
+            } else if (1 < power) {
+                power = 1;
+            } else if (power < -1) {
+                power = -1;
+            }
+            var maxAngularAcceleration = 0.005;
+            world.player.turnPower = power;
+            world.player.angularAcceleration =
+                maxAngularAcceleration * world.player.turnPower;
+        }
     };
     function install(userCode) {
         // Create a sandbox for user code
@@ -64,22 +88,17 @@
                           columnNumber: e.columnNumber });
         }
         // Let the main thread know that we have finished execution
-        postMessage({ type: 'complete' });
+        postMessage({ type: 'complete', world: world });
     };
     // Handle messages from the main thread
     onmessage = function(e) {
         var message = e.data;
-        if (undefined === message.type) {
-            return;
-        }
         switch (message.type) {
         case 'install':
-            if (undefined === message.value) {
-                return;
-            }
-            install(message.value);
+            install(message.code);
             break;
         case 'execute':
+            world = message.world;
             execute();
             break;
         default:

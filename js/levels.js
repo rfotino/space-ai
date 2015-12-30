@@ -35,6 +35,14 @@ Level.prototype.init = function() {
         var obj = objects[i];
         $.extend(obj, $.extend(defaults, obj));
     }
+    // Make sure the player has certain properties
+    var defaults = {
+        thrust: 0,
+        thrustPower: 0,
+        turnPower: 0
+    };
+    var player = this._state.player;
+    $.extend(player, $.extend(defaults, player));
     // Make sure the asteroids have certain properties
     for (var i = 0; i < this._state.asteroids.length; i++) {
         var defaults = {
@@ -55,6 +63,11 @@ Level.prototype.init = function() {
 
 // Update the positions and velocities of game objects
 Level.prototype.update = function() {
+    // Calculate the player's acceleration from thrust and rotation
+    var player = this._state.player;
+    player.acceleration.x = player.thrust * Math.sin(player.rotation);
+    player.acceleration.y = player.thrust * -Math.cos(player.rotation);
+    // Update the velocity/position/rotation of all game objects
     var objects = this._getObjects();
     for (var i = 0; i < objects.length; i++) {
         var obj = objects[i];
@@ -113,3 +126,32 @@ Level.prototype.draw = function(ctx) {
         ctx.fillRect(-10, -20, 20, 40);
     }, player.position.x, player.position.y, player.rotation);
 };
+
+Level.prototype.getWorld = function() {
+    return this._state;
+};
+
+Level.prototype.setWorld = function(world) {
+    this._state = world;
+}
+
+var level1 = new Level({
+    player: {
+        position: { x: 0, y: 0 },
+        rotation: 0
+    },
+    asteroids: [
+        {
+            position: { x: -300, y: -100 },
+            radius: 100
+        }
+    ],
+    targets: [
+        {
+            name: 'target1',
+            type: 'reach',
+            position: { x: 0, y: -100 },
+        }
+    ],
+    win: 'target1'
+});
