@@ -41,7 +41,7 @@ var game = {
 (function() {
     var canvas, ctx, worker = null, running = false,
         frameComplete = true, timerComplete = true,
-        level = null;
+        level = null, installedCode = null;
 
     // Begins executing the user's code for the next frame, and sets a timer
     // for the minimum length of a frame.
@@ -113,7 +113,8 @@ var game = {
             ui.writeConsole(e.message, 'error');
         };
         worker.postMessage({ type: 'install', code: code });
-        game.run();
+        // Save the installed code so that we can restart
+        installedCode = code;
     };
     game.run = function() {
         // Start the game worker's execution, if it exists
@@ -136,11 +137,13 @@ var game = {
     };
     game.restart = function() {
         // Reset the game to the level's initial conditions and redraw
-        if (null === level) {
-            return;
+        if (null !== installedCode) {
+            game.install(installedCode);
         }
-        level.init();
-        game.draw();
+        if (null !== level) {
+            level.init();
+            game.draw();
+        }
     };
     game.draw = function() {
         // Redraws the game state on the canvas

@@ -9,6 +9,7 @@
     var world = null;
     var locals = {
         // Don't allow sending/receiving of messages by user code
+        self: undefined,
         onmessage: undefined,
         postMessage: undefined,
         // Change console context in user code
@@ -49,10 +50,12 @@
             world.player.turnPower = power;
             world.player.angularAcceleration =
                 maxAngularAcceleration * world.player.turnPower;
-        }
+        },
+        // Persistent storage for user code
+        storage: {}
     };
+    // Create a sandbox for user code
     function install(userCode) {
-        // Create a sandbox for user code
         var params = [], args = [];
         for (var param in locals) {
             if (locals.hasOwnProperty(param)) {
@@ -61,7 +64,7 @@
             }
         }
         try {
-            var that = { };
+            var that = {};
             var context1 = Array.prototype.concat.call(that, params, userCode);
             var sandbox = new (Function.prototype.bind.apply(Function, context1));
             var context2 = Array.prototype.concat.call(that, args);
@@ -95,14 +98,14 @@
         var message = e.data;
         switch (message.type) {
         case 'install':
+            // Install the new user code
             install(message.code);
             break;
         case 'execute':
+            // Refresh the world and execute the user code again
             world = message.world;
             execute();
             break;
-        default:
-            return;
         }
     };
 })();
