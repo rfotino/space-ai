@@ -105,7 +105,7 @@ var ui = {
         }
         // If line is an object, print out its JSON equivalent
         if (typeof line === 'object') {
-            line = JSON.stringify(line);
+            line = JSON.stringify(line, null, 2);
         }
         newContent += $('<div/>').text(line + "\n").html();
         newContent += '</div>';

@@ -61,16 +61,32 @@
         accel: function() {
             return JSON.parse(JSON.stringify(world.player.accel));
         },
-        radar: function(type) {
-            if (undefined === type) {
+        radar: function(filter) {
+            switch (typeof filter) {
+            case 'undefined':
                 // No filter, return everything
                 return JSON.parse(JSON.stringify(world.objects));
-            } else {
+            case 'string':
                 // Filter by type
                 var filteredObjects = world.objects.filter(function(obj) {
-                    return obj.type === type;
+                    return obj.type === filter;
                 });
                 return JSON.parse(JSON.stringify(filteredObjects));
+            case 'object':
+                // Filter by multiple attributes
+                var filteredObjects = world.objects.filter(function(obj) {
+                    for (var attr in filter) {
+                        if (obj[attr] !== filter[attr]) {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+                return JSON.parse(JSON.stringify(filteredObjects));
+            case 'function':
+                // Filter by custom function
+                var objectsCopy = JSON.parse(JSON.stringify(world.objects));
+                return objectsCopy.filter(filter);
             }
         },
         fire: function(x, y) {
