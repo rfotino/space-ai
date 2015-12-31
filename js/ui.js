@@ -103,6 +103,10 @@ var ui = {
             shouldScroll = true;
             break;
         }
+        // If line is an object, print out its JSON equivalent
+        if (typeof line === 'object') {
+            line = JSON.stringify(line);
+        }
         newContent += $('<div/>').text(line + "\n").html();
         newContent += '</div>';
         consoleContent.append(newContent);

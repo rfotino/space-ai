@@ -25,31 +25,62 @@
             }
         },
         // API functions accessible from user code
-        // TODO: complete this list of API functions
         thrust: function(power) {
+            var player = world.player;
             if (undefined === power) {
-                return world.player.thrustPower;
+                return player.thrustPower;
             } else if (1 < power) {
                 power = 1;
-            } else if (power < -1) {
-                power = -1;
+            } else if (power < 0) {
+                power = 0;
             }
             var maxThrust = 0.5;
-            world.player.thrustPower = power;
-            world.player.thrust = maxThrust * world.player.thrustPower;
+            var thrust = maxThrust * power;
+            player.thrustPower = power;
+            player.thrust = maxThrust * player.thrustPower;
         },
         turn: function(power) {
+            var player = world.player;
             if (undefined === power) {
-                return world.player.turnPower;
+                return player.turnPower;
             } else if (1 < power) {
                 power = 1;
             } else if (power < -1) {
                 power = -1;
             }
-            var maxAngularAcceleration = 0.005;
-            world.player.turnPower = power;
-            world.player.angularAcceleration =
-                maxAngularAcceleration * world.player.turnPower;
+            var maxAngularAccel = 0.005;
+            player.turnPower = power;
+            player.accel.angular = maxAngularAccel * player.turnPower;
+        },
+        pos: function() {
+            return JSON.parse(JSON.stringify(world.player.pos));
+        },
+        vel: function() {
+            return JSON.parse(JSON.stringify(world.player.vel));
+        },
+        accel: function() {
+            return JSON.parse(JSON.stringify(world.player.accel));
+        },
+        radar: function(type) {
+            if (undefined === type) {
+                // No filter, return everything
+                return JSON.parse(JSON.stringify(world.objects));
+            } else {
+                // Filter by type
+                var filteredObjects = world.objects.filter(function(obj) {
+                    return obj.type === type;
+                });
+                return JSON.parse(JSON.stringify(filteredObjects));
+            }
+        },
+        fire: function(x, y) {
+            // TODO: implement fire(x, y) API function
+        },
+        equip: function(weapon) {
+            // TODO: implement equip(weapon) API function
+        },
+        weapons: function() {
+            // TODO: implement weapons() API function
         },
         // Persistent storage for user code
         storage: {}
