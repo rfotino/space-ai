@@ -7,6 +7,7 @@
 (function() {
     var userFunc = null;
     var world = null;
+    var storage = {};
     var locals = {
         // Don't allow sending/receiving of messages by user code
         self: undefined,
@@ -90,16 +91,64 @@
             }
         },
         fire: function(x, y) {
-            // TODO: implement fire(x, y) API function
+            // Save the location that was fired at for the main thread to use
+            switch (arguments.length) {
+            case 2:
+                // Arguments in fire(x, y) format
+                world.player.fired = { x: arguments[0], y: arguments[1] };
+                break;
+            case 1:
+                // Arguments in fire(coord) format
+                world.player.fired = { x: arguments[0].x, y: arguments[0].y };
+                break;
+            case 0:
+            default:
+                // No arguments or too many
+                world.player.fired = false;
+                break;
+            }
         },
         equip: function(weapon) {
-            // TODO: implement equip(weapon) API function
+            if (!weapon) {
+                // Unequip weapon
+                world.player.equipped = null;
+            } else {
+                // Find the weapon to equip and equip it. The weapon can
+                // be either a name or a weapon object
+                for (var i = 0; i < world.player.weapons.length; i++) {
+                    var w = world.player.weapons[i];
+                    if (w.name === weapon.name || w.name === weapon) {
+                        world.player.equipped = w.name;
+                    }
+                }
+            }
+        },
+        equipped: function() {
+            // Return the currently equipped weapon (useful for getting
+            // ammo or other information)
+            for (var i = 0; i < world.player.weapons.length; i++) {
+                var weapon = world.player.weapons[i];
+                if (world.player.equipped === weapon.name) {
+                    return JSON.parse(JSON.stringify(weapon));
+                }
+            }
+            return null;
         },
         weapons: function() {
-            // TODO: implement weapons() API function
+            // Return a list of weapons available to equip
+            return JSON.parse(JSON.stringify(world.player.weapons));
         },
         // Persistent storage for user code
-        storage: {}
+        store: function(key, value) {
+            storage[key] = value;
+        },
+        load: function(key, defaultValue) {
+            if (storage.hasOwnProperty(key)) {
+                return storage[key];
+            } else {
+                return defaultValue;
+            }
+        }
     };
     // Create a sandbox for user code
     function install(userCode) {

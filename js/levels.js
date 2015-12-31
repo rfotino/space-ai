@@ -42,7 +42,7 @@ Level.prototype.init = function() {
             defaults.objective = 'reach';
             break;
         }
-        $.extend(obj, $.extend(true, defaults, obj));
+        $.extend(true, obj, $.extend(true, defaults, obj));
     }
     // Make sure the player has certain properties
     var defaults = {
@@ -53,16 +53,29 @@ Level.prototype.init = function() {
         accel: { x: 0, y: 0, angular: 0 },
         thrust: 0,
         thrustPower: 0,
-        turnPower: 0
+        turnPower: 0,
+        weapons: [],
+        equipped: null,
+        fired: false
     };
     var player = this._state.player;
-    $.extend(player, $.extend(true, defaults, player));
+    $.extend(true, player, $.extend(true, defaults, player));
 };
 
 // Update the positions and velocities of game objects
 Level.prototype.update = function() {
-    // Calculate the player's acceleration from thrust and rotation
     var player = this._state.player;
+    // Fire the player's weapon if it was fired and there is a weapon equipped
+    if (player.fired && player.equipped) {
+        for (var i = 0; i < player.weapons.length; i++) {
+            var weapon = player.weapons[i];
+            if (player.equipped === weapon.name) {
+                weapon.fire(player.fired.x, player.fired.y);
+            }
+        }
+    }
+    player.fired = false;
+    // Calculate the player's acceleration from thrust and rotation
     player.accel.x = player.thrust * Math.sin(player.pos.angular);
     player.accel.y = player.thrust * -Math.cos(player.pos.angular);
     // A function to update an object's velocity and position
@@ -84,6 +97,7 @@ Level.prototype.update = function() {
 
 // Draw the game objects on screen
 Level.prototype.draw = function(ctx) {
+    var player = this._state.player;
     // Clear the canvas
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     // Make a function to easily draw rotated/scaled/translated objects
@@ -94,8 +108,8 @@ Level.prototype.draw = function(ctx) {
         if (scalex === undefined) { scalex = 1; }
         if (scaley === undefined) { scaley = 1; }
         ctx.save();
-        ctx.translate(dx + (ctx.canvas.width / 2),
-                      dy + (ctx.canvas.height / 2));
+        ctx.translate(dx - player.pos.x + (ctx.canvas.width / 2),
+                      dy - player.pos.y + (ctx.canvas.height / 2));
         ctx.rotate(theta);
         ctx.scale(scalex, scaley);
         cb();
@@ -126,7 +140,6 @@ Level.prototype.draw = function(ctx) {
         drawObj(drawFunc, obj.pos.x, obj.pos.y, obj.pos.angular);
     }
     // Draw the player
-    var player = this._state.player;
     drawObj(function() {
         ctx.fillStyle = 'green';
         ctx.fillRect(-player.width / 2, -player.height / 2,
@@ -136,17 +149,40 @@ Level.prototype.draw = function(ctx) {
 
 // Gets the state of the game world
 Level.prototype.getWorld = function() {
-    return this._state;
+    // Strip functions by doing a deep copy to and from JSON. We can't
+    // do worker.postMessage() on an object with functions
+    return JSON.parse(JSON.stringify(this._state));
 };
 
 // Sets the state of the game world
 Level.prototype.setWorld = function(world) {
-    this._state = world;
+    // Anything changed in the world should be reflected in the game state,
+    // but we don't want to clear out functions, so we extend.
+    $.extend(true, this._state, world);
 };
 
 // A sample level, can be loaded with game.load(level1)
 var level1 = new Level({
-    player: { },
+    player: {
+        equipped: 'laser',
+        weapons: [
+            {
+                name: 'laser',
+                damage: 5,
+                fire: function(x, y) {
+                    // TODO: implement laser firing function
+                }
+            },
+            {
+                name: 'rocket',
+                ammo: 3,
+                damage: 50,
+                fire: function(x, y) {
+                    // TODO: implement rocket firing function
+                }
+            }
+        ]
+    },
     objects: [
         {
             type: 'asteroid',
