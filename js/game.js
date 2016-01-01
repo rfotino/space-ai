@@ -44,9 +44,9 @@ var game = {
         level = null, installedCode = null;
 
     // Begins executing the user's code for the next frame, and sets a timer
-    // for the minimum length of a frame.
+    // for the minimum length of a frame. If the game is over, this does nothing
     function execute() {
-        if (null === level) {
+        if (null === level || level.complete()) {
             return;
         }
         var minFrameTime = 15;

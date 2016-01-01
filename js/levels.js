@@ -15,22 +15,23 @@ function Level(initial) {
     if (typeof this._initial.objects === 'undefined') {
         this._initial.objects = [];
     }
-    if (typeof this._initial.win === 'undefined') {
-        this._initial.win = '';
-    }
 }
 
 // Initialize the state to start the level
 Level.prototype.init = function() {
     // Deep copy the state from the initial level objects
     this._state = $.extend(true, {}, this._initial);
-    // Make sure every object has certain properties
+    // Make sure every object has the correct properties
+    // Temporarily add the player to the object array
+    this._state.player.type = 'player';
+    this._state.objects.push(this._state.player);
     for (var i = 0; i < this._state.objects.length; i++) {
         var obj = this._state.objects[i];
         var defaults = {
             pos: { x: 0, y: 0, angular: 0 },
             vel: { x: 0, y: 0, angular: 0 },
-            accel: { x: 0, y: 0, angular: 0 }
+            accel: { x: 0, y: 0, angular: 0 },
+            collide: function(other, result) { }
         };
         // Give specific properties based on object type
         switch (obj.type) {
@@ -41,25 +42,22 @@ Level.prototype.init = function() {
             defaults.radius = 30;
             defaults.objective = 'reach';
             break;
+        case 'player':
+            defaults.width = 20;
+            defaults.height = 40;
+            defaults.thrust = 0;
+            defaults.thrustPower = 0;
+            defaults.turnPower = 0;
+            defaults.health = 100;
+            defaults.weapons = [];
+            defaults.equipped = null;
+            defaults.fired = false;
+            break;
         }
         $.extend(true, obj, $.extend(true, defaults, obj));
     }
-    // Make sure the player has certain properties
-    var defaults = {
-        width: 20,
-        height: 40,
-        pos: { x: 0, y: 0, angular: 0 },
-        vel: { x: 0, y: 0, angular: 0 },
-        accel: { x: 0, y: 0, angular: 0 },
-        thrust: 0,
-        thrustPower: 0,
-        turnPower: 0,
-        weapons: [],
-        equipped: null,
-        fired: false
-    };
-    var player = this._state.player;
-    $.extend(true, player, $.extend(true, defaults, player));
+    // Remove the temporarily added player from the object list
+    this._state.objects.pop();
 };
 
 // Update the positions and velocities of game objects
@@ -92,7 +90,48 @@ Level.prototype.update = function() {
     for (var i = 0; i < this._state.objects.length; i++) {
         updateObj(this._state.objects[i]);
     }
-    // TODO: collision detection + checking win conditions
+    // Collision detection - compare every pair of objects, including
+    // the player
+    this._state.objects.push(player);
+    var objectsCopy = $.extend(true, [], this._state.objects);
+    for (var i = 0; i < this._state.objects.length; i++) {
+        var objA = this._state.objects[i];
+        for (var j = 0; j < this._state.objects.length; j++) {
+            // Make sure we don't compare the object with itself
+            if (i === j) {
+                continue;
+            }
+            var objB = this._state.objects[j];
+            var objBCopy = objectsCopy[j];
+            objA.collide(objB, objBCopy);
+        }
+    }
+    this._state.objects = objectsCopy;
+    this._state.player = player = this._state.objects.pop();
+    // Check win conditions
+    var gameWon = true, gameLost = false;
+    if (player.health <= 0) {
+        gameLost = true;
+    }
+    for (var i = 0; i < this._state.objects.length; i++) {
+        var obj = this._state.objects[i];
+        if ('target' === obj.type) {
+            if (obj.complete(player)) {
+                if (obj.lose) {
+                    gameLost = true;
+                }
+            } else {
+                if (obj.win) {
+                    gameWon = false;
+                }
+            }
+        }
+    }
+    if (gameLost) {
+        this._state.gameOver = 'lose';
+    } else if (gameWon) {
+        this._state.gameOver = 'win';
+    }
 };
 
 // Draw the game objects on screen
@@ -145,6 +184,24 @@ Level.prototype.draw = function(ctx) {
         ctx.fillRect(-player.width / 2, -player.height / 2,
                      player.width, player.height);
     }, player.pos.x, player.pos.y, player.pos.angular);
+    // Draw win/lose screen if necessary
+    if (typeof this._state.gameOver !== 'undefined') {
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.font = 'bold 72px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        var text = '';
+        if ('win' === this._state.gameOver) {
+            ctx.fillStyle = '#0f0';
+            text = 'YOU WIN';
+        } else if ('lose' === this._state.gameOver) {
+            ctx.fillStyle = '#f00';
+            text = 'GAME OVER';
+        }
+        ctx.strokeText(text, ctx.canvas.width / 2, ctx.canvas.height / 2);
+        ctx.fillText(text, ctx.canvas.width / 2, ctx.canvas.height / 2);
+    }
 };
 
 // Gets the state of the game world
@@ -159,6 +216,11 @@ Level.prototype.setWorld = function(world) {
     // Anything changed in the world should be reflected in the game state,
     // but we don't want to clear out functions, so we extend.
     $.extend(true, this._state, world);
+};
+
+// Returns true if the game is over
+Level.prototype.complete = function() {
+    return typeof this._state.gameOver !== 'undefined';
 };
 
 // A sample level, can be loaded with game.load(level1)
@@ -187,13 +249,28 @@ var level1 = new Level({
         {
             type: 'asteroid',
             pos: { x: -300, y: -100 },
-            radius: 100
+            radius: 100,
+            collide: function(other, result) {
+                var distance = Math.sqrt(Math.pow(other.pos.x - this.pos.x, 2) +
+                                         Math.pow(other.pos.y - this.pos.y, 2));
+                if ('player' === other.type && distance < this.radius) {
+                    result.health = 0;
+                }
+            }
         },
         {
             type: 'target',
             name: 'target1',
             objective: 'reach',
-            pos: { x: 0, y: -100 }
+            win: true,
+            pos: { x: 0, y: -100 },
+            complete: function(player) {
+                var distance = Math.sqrt(Math.pow(player.pos.x - this.pos.x, 2) +
+                                         Math.pow(player.pos.y - this.pos.y, 2));
+                if (distance < this.radius) {
+                    return true;
+                }
+            }
         }
     ]
 });
