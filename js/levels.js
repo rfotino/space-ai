@@ -31,6 +31,14 @@ Level.prototype.init = function() {
             pos: { x: 0, y: 0, angular: 0 },
             vel: { x: 0, y: 0, angular: 0 },
             accel: { x: 0, y: 0, angular: 0 },
+            update: function() {
+                this.vel.x += this.accel.x;
+                this.vel.y += this.accel.y;
+                this.vel.angular += this.accel.angular;
+                this.pos.x += this.vel.x;
+                this.pos.y += this.vel.y;
+                this.pos.angular += this.vel.angular;
+            },
             collide: function(other, result) { }
         };
         // Give specific properties based on object type
@@ -60,8 +68,9 @@ Level.prototype.init = function() {
     this._state.objects.pop();
 };
 
-// Update the positions and velocities of game objects
+// Update all game objects, do collision detection, and check win conditions
 Level.prototype.update = function() {
+    console.log('am I updating?');
     var player = this._state.player;
     // Fire the player's weapon if it was fired and there is a weapon equipped
     if (player.fired && player.equipped) {
@@ -72,23 +81,16 @@ Level.prototype.update = function() {
             }
         }
     }
+    // Reset the player's fired flag
     player.fired = false;
     // Calculate the player's acceleration from thrust and rotation
     player.accel.x = player.thrust * Math.sin(player.pos.angular);
     player.accel.y = player.thrust * -Math.cos(player.pos.angular);
-    // A function to update an object's velocity and position
-    function updateObj(obj) {
-        obj.vel.x += obj.accel.x;
-        obj.vel.y += obj.accel.y;
-        obj.vel.angular += obj.accel.angular;
-        obj.pos.x += obj.vel.x;
-        obj.pos.y += obj.vel.y;
-        obj.pos.angular += obj.vel.angular;
-    }
-    // Update the velocity/position of all game objects
-    updateObj(player);
+    // Update all game objects
+    player.update();
     for (var i = 0; i < this._state.objects.length; i++) {
-        updateObj(this._state.objects[i]);
+        var obj = this._state.objects[i];
+        obj.update();
     }
     // Collision detection - compare every pair of objects, including
     // the player
@@ -139,51 +141,24 @@ Level.prototype.draw = function(ctx) {
     var player = this._state.player;
     // Clear the canvas
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    // Make a function to easily draw rotated/scaled/translated objects
-    var drawObj = function(cb, dx, dy, theta, scalex, scaley) {
-        if (dx === undefined) { dx = 0; }
-        if (dy === undefined) { dy = 0; }
-        if (theta === undefined) { theta = 0; }
-        if (scalex === undefined) { scalex = 1; }
-        if (scaley === undefined) { scaley = 1; }
-        ctx.save();
-        ctx.translate(dx - player.pos.x + (ctx.canvas.width / 2),
-                      dy - player.pos.y + (ctx.canvas.height / 2));
-        ctx.rotate(theta);
-        ctx.scale(scalex, scaley);
-        cb();
-        ctx.restore();
-    };
     // Draw the game objects
     for (var i = 0; i < this._state.objects.length; i++) {
         var obj = this._state.objects[i];
-        var drawFunc;
-        switch (obj.type) {
-        case 'asteroid':
-            drawFunc = function() {
-                ctx.fillStyle = 'blue';
-                ctx.beginPath();
-                ctx.arc(0, 0, obj.radius, 0, Math.PI * 2);
-                ctx.fill();
-            };
-            break;
-        case 'target':
-            drawFunc = function() {
-                ctx.fillStyle = 'red';
-                ctx.beginPath();
-                ctx.arc(0, 0, obj.radius, 0, Math.PI * 2);
-                ctx.fill();
-            };
-            break;
-        }
-        drawObj(drawFunc, obj.pos.x, obj.pos.y, obj.pos.angular);
+        ctx.save();
+        ctx.translate(obj.pos.x - player.pos.x + (ctx.canvas.width / 2),
+                      obj.pos.y - player.pos.y + (ctx.canvas.height / 2));
+        ctx.rotate(obj.pos.angular);
+        obj.draw(ctx);
+        ctx.restore();
     }
     // Draw the player
-    drawObj(function() {
-        ctx.fillStyle = 'green';
-        ctx.fillRect(-player.width / 2, -player.height / 2,
-                     player.width, player.height);
-    }, player.pos.x, player.pos.y, player.pos.angular);
+    ctx.save();
+    ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
+    ctx.rotate(player.pos.angular);
+    ctx.fillStyle = 'green';
+    ctx.fillRect(-player.width / 2, -player.height / 2,
+                 player.width, player.height);
+    ctx.restore();
     // Draw win/lose screen if necessary
     if (typeof this._state.gameOver !== 'undefined') {
         ctx.strokeStyle = '#000';
@@ -220,7 +195,8 @@ Level.prototype.setWorld = function(world) {
 
 // Returns true if the game is over
 Level.prototype.complete = function() {
-    return typeof this._state.gameOver !== 'undefined';
+    return typeof this._state !== 'undefined' &&
+           typeof this._state.gameOver !== 'undefined';
 };
 
 // A sample level, can be loaded with game.load(level1)
@@ -256,7 +232,13 @@ var level1 = new Level({
                 if ('player' === other.type && distance < this.radius) {
                     result.health = 0;
                 }
-            }
+            },
+            draw: function(ctx) {
+                ctx.fillStyle = 'blue';
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            },
         },
         {
             type: 'target',
@@ -270,6 +252,12 @@ var level1 = new Level({
                 if (distance < this.radius) {
                     return true;
                 }
+            },
+            draw: function(ctx) {
+                ctx.fillStyle = 'red';
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                ctx.fill();
             }
         }
     ]

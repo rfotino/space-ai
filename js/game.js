@@ -59,6 +59,16 @@ var game = {
         }, minFrameTime);
         worker.postMessage({ type: 'execute', world: level.getWorld() });
     }
+    // Update the run/pause button in the menu to the correct state
+    function updateMenu() {
+        if (null === installedCode || null === level || level.complete()) {
+            menu.setState('waiting');
+        } else if (running) {
+            menu.setState('running');
+        } else {
+            menu.setState('paused');
+        }
+    }
 
     game.install = function(code) {
         // Make sure web workers are supported
@@ -93,7 +103,7 @@ var game = {
                 }
                 ui.writeConsole(errorMsg, 'error');
                 running = false;
-                menu.setState('paused');
+                updateMenu();
                 break;
             case 'complete':
                 // Update the game objects, redraw the frame, and set it
@@ -104,7 +114,7 @@ var game = {
                     level.draw(ctx);
                     if (level.complete()) {
                         running = false;
-                        menu.setState('waiting');
+                        updateMenu();
                     }
                 }
                 frameComplete = true;
@@ -120,14 +130,15 @@ var game = {
         worker.postMessage({ type: 'install', code: code });
         // Save the installed code so that we can restart
         installedCode = code;
+        updateMenu();
     };
     game.run = function() {
         // Start the game worker's execution, if it exists
-        if (null === worker) {
+        if (null === worker || null === level || level.complete()) {
             return;
         }
         running = true;
-        menu.setState('running');
+        updateMenu();
         if (frameComplete && timerComplete) {
             execute();
         }
@@ -135,7 +146,7 @@ var game = {
     game.pause = function() {
         // Pause the game worker's execution
         running = false;
-        menu.setState('paused');
+        updateMenu();
     };
     game.load = function(newLevel) {
         // Save the initial state and start the game
@@ -144,13 +155,15 @@ var game = {
     };
     game.restart = function() {
         // Reset the game to the level's initial conditions and redraw
-        if (null !== installedCode && null !== level) {
-            running = false;
-            menu.setState('paused');
-            level.init();
+        if (null !== installedCode) {
             game.install(installedCode);
+            running = false;
+        }
+        if (null !== level) {
+            level.init();
             game.draw();
         }
+        updateMenu();
     };
     game.draw = function() {
         // Redraws the game state on the canvas
