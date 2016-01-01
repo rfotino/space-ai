@@ -43,6 +43,14 @@ html, body {
     text-decoration: underline;
     background: #ccc;
 }
+#menubar a.disabled {
+    color: #999;
+}
+#menubar a.disabled:hover {
+    text-decoration: none;
+    background: none;
+    cursor: default;
+}
 #menubar-left {
     float: left;
 }

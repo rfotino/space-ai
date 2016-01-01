@@ -93,6 +93,7 @@ var game = {
                 }
                 ui.writeConsole(errorMsg, 'error');
                 running = false;
+                menu.setState('paused');
                 break;
             case 'complete':
                 // Update the game objects, redraw the frame, and set it
@@ -101,6 +102,10 @@ var game = {
                     level.setWorld(message.world);
                     level.update();
                     level.draw(ctx);
+                    if (level.complete()) {
+                        running = false;
+                        menu.setState('waiting');
+                    }
                 }
                 frameComplete = true;
                 if (timerComplete && running) {
@@ -122,6 +127,7 @@ var game = {
             return;
         }
         running = true;
+        menu.setState('running');
         if (frameComplete && timerComplete) {
             execute();
         }
@@ -129,6 +135,7 @@ var game = {
     game.pause = function() {
         // Pause the game worker's execution
         running = false;
+        menu.setState('paused');
     };
     game.load = function(newLevel) {
         // Save the initial state and start the game
@@ -137,11 +144,11 @@ var game = {
     };
     game.restart = function() {
         // Reset the game to the level's initial conditions and redraw
-        if (null !== installedCode) {
-            game.install(installedCode);
-        }
-        if (null !== level) {
+        if (null !== installedCode && null !== level) {
+            running = false;
+            menu.setState('paused');
             level.init();
+            game.install(installedCode);
             game.draw();
         }
     };
