@@ -15,58 +15,59 @@
         postMessage: undefined,
         // Change console context in user code
         console: {
-            log: function(str) {
-                postMessage({ type: 'console', level: 'log', value: str });
+            log: function(message) {
+                postMessage({ type: 'console', level: 'log', value: message });
             },
-            warn: function(str) {
-                postMessage({ type: 'console', level: 'warn', value: str });
+            warn: function(message) {
+                postMessage({ type: 'console', level: 'warn', value: message });
             },
-            error: function(str) {
-                postMessage({ type: 'console', level: 'error', value: str });
+            error: function(message) {
+                postMessage({ type: 'console', level: 'error', value: message });
             }
         },
         // API functions accessible from user code
-        thrust: function(power) {
-            var player = world.player;
-            if (undefined === power) {
-                return player.thrustPower;
-            } else if (1 < power) {
-                power = 1;
-            } else if (power < 0) {
-                power = 0;
-            }
-            var maxThrust = 0.5;
-            var thrust = maxThrust * power;
-            player.thrustPower = power;
-            player.thrust = maxThrust * player.thrustPower;
-        },
-        turn: function(power) {
-            var player = world.player;
-            if (undefined === power) {
-                return player.turnPower;
-            } else if (1 < power) {
-                power = 1;
-            } else if (power < -1) {
-                power = -1;
-            }
-            var maxAngularAccel = 0.005;
-            player.turnPower = power;
-            player.accel.angular = maxAngularAccel * player.turnPower;
+        // Movement-related functions:
+        accel: function() {
+            return JSON.parse(JSON.stringify(world.player.accel));
         },
         pos: function() {
             return JSON.parse(JSON.stringify(world.player.pos));
         },
+        thrust: function(power) {
+            var player = world.player;
+            if ('number' === typeof power) {
+                if (1 < power) {
+                    power = 1;
+                } else if (power < 0) {
+                    power = 0;
+                }
+                var maxThrust = 0.5;
+                var thrust = maxThrust * power;
+                player.thrustPower = power;
+                player.thrust = maxThrust * player.thrustPower;
+            }
+            return player.thrustPower;
+        },
+        turn: function(power) {
+            var player = world.player;
+            if ('number' === typeof power) {
+                if (1 < power) {
+                    power = 1;
+                } else if (power < -1) {
+                    power = -1;
+                }
+                var maxAngularAccel = 0.005;
+                player.turnPower = power;
+                player.accel.angular = maxAngularAccel * player.turnPower;
+            }
+            return player.turnPower;
+        },
         vel: function() {
             return JSON.parse(JSON.stringify(world.player.vel));
         },
-        accel: function() {
-            return JSON.parse(JSON.stringify(world.player.accel));
-        },
+        // Radar-related functions
         radar: function(filter) {
             switch (typeof filter) {
-            case 'undefined':
-                // No filter, return everything
-                return JSON.parse(JSON.stringify(world.objects));
             case 'string':
                 // Filter by type
                 var filteredObjects = world.objects.filter(function(obj) {
@@ -88,26 +89,13 @@
                 // Filter by custom function
                 var objectsCopy = JSON.parse(JSON.stringify(world.objects));
                 return objectsCopy.filter(filter);
-            }
-        },
-        fire: function(x, y) {
-            // Save the location that was fired at for the main thread to use
-            switch (arguments.length) {
-            case 2:
-                // Arguments in fire(x, y) format
-                world.player.fired = { x: arguments[0], y: arguments[1] };
-                break;
-            case 1:
-                // Arguments in fire(coord) format
-                world.player.fired = { x: arguments[0].x, y: arguments[0].y };
-                break;
-            case 0:
+            case 'undefined':
             default:
-                // No arguments or too many
-                world.player.fired = false;
-                break;
+                // No filter, return everything
+                return JSON.parse(JSON.stringify(world.objects));
             }
         },
+        // Weapons-related functions
         equip: function(weapon) {
             if (!weapon) {
                 // Unequip weapon
@@ -134,20 +122,24 @@
             }
             return null;
         },
+        fire: function(x, y) {
+            // Save the location that was fired at for the main thread to use
+            world.player.fired = { x: x, y: y };
+        },
         weapons: function() {
             // Return a list of weapons available to equip
             return JSON.parse(JSON.stringify(world.player.weapons));
         },
-        // Persistent storage for user code
-        store: function(key, value) {
-            storage[key] = value;
-        },
+        // Storage-relate dfunctions
         load: function(key, defaultValue) {
             if (storage.hasOwnProperty(key)) {
                 return storage[key];
             } else {
                 return defaultValue;
             }
+        },
+        store: function(key, value) {
+            storage[key] = value;
         }
     };
     // Create a sandbox for user code

@@ -70,7 +70,6 @@ Level.prototype.init = function() {
 
 // Update all game objects, do collision detection, and check win conditions
 Level.prototype.update = function() {
-    console.log('am I updating?');
     var player = this._state.player;
     // Fire the player's weapon if it was fired and there is a weapon equipped
     if (player.fired && player.equipped) {
@@ -163,6 +162,7 @@ Level.prototype.draw = function(ctx) {
     if (typeof this._state.gameOver !== 'undefined') {
         ctx.strokeStyle = '#000';
         ctx.lineWidth = 3;
+        ctx.lineJoin = 'bevel';
         ctx.font = 'bold 72px monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';

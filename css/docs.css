@@ -1,0 +1,36 @@
+/**
+ * Copyright (c) 2016 Robert Fotino.
+ */
+
+/* General */
+* {
+    margin: 0;
+    padding: 0;
+}
+.clearfix {
+    clear: both;
+}
+body {
+    max-width: 800px;
+    padding: 20px 30px;
+    margin: 0 auto;
+}
+
+/* API Reference */
+h2.function-class {
+    margin-top: 30px;
+}
+.function {
+    padding: 20px 10px;
+    border-bottom: 1px solid #000;
+}
+.function .name {
+    font-size: 1.2em;
+    padding-bottom: 5px;
+}
+.function .params, .function .returns {
+    margin-top: 15px;
+}
+.function .params ul {
+    margin-left: 30px;
+}
