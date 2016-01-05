@@ -6,6 +6,7 @@
 * {
     margin: 0;
     padding: 0;
+    font-family: monospace;
 }
 .clearfix {
     clear: both;
@@ -34,7 +35,6 @@ html, body {
 }
 #menubar a {
     color: #333;
-    font-family: monospace;
     padding: 15px 15px;
     text-decoration: none;
     display: inline-block;
@@ -54,26 +54,116 @@ html, body {
 #menubar-left {
     float: left;
 }
-#docs {
-
-}
-#level {
-
-}
 #menubar-right {
     float: right;
 }
-#install {
 
+/* Level selector */
+#level-selector {
+    position: absolute;
+    z-index: 50;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 500px;
+    max-width: 70%;
+    top: 10%;
+    height: 80%;
+    padding-top: 40px;
+    padding-bottom: 50px;
+    box-sizing: border-box;
+    background: #f7f7f7;
+    border-radius: 15px;
+    border: 1px solid #999;
+    overflow: hidden;
 }
-#run {
-
+#level-selector h3 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 40px;
+    line-height: 30px;
+    font-size: 2em;
+    width: 100%;
+    padding: 5px 20px;
+    box-sizing: border-box;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
 }
-#pause {
-
+#level-selector #levels {
+    height: 100%;
+    overflow-y: auto;
+    padding: 15px 12px;
+    box-sizing: border-box;
 }
-#restart {
-
+#level-selector #levels .level {
+    display: inline-block;
+    width: 130px;
+    height: 130px;
+    margin: 10px;
+    background: #eee;
+    border-radius: 10px;
+    border: 1px solid #999;
+    vertical-align: bottom;
+}
+#level-selector #levels .level:hover {
+    background: #ddd;
+}
+#level-selector #levels .level:active {
+    background: #bbb;
+}
+#level-selector #levels .level.selected {
+    background: #ccc;
+}
+#level-selector #levels .level .img {
+    overflow: hidden;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    width: 130px;
+    height: 100px;
+}
+#level-selector #levels .level .name {
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    border-top: 1px solid #999;
+}
+#level-selector #level-selector-menu {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    right: 0;
+    height: 50px;
+    line-height: 50px;
+    text-align: right;
+    box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.25);
+}
+#level-selector #hide-levels, #level-selector #load-level {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    font-size: 1.2em;
+    padding: 0 20px;
+    display: inline-block;
+}
+#level-selector #hide-levels:hover {
+    text-decoration: underline;
+}
+#level-selector #load-level {
+    border-left: 1px solid #999;
+}
+#level-selector #load-level.disabled {
+    color: #999;
+}
+#level-selector #load-level:hover {
+    text-decoration: underline;
+    background: #ddd;
+}
+#level-selector #load-level.disabled:hover {
+    text-decoration: none;
+    background: none;
+    cursor: default;
 }
 
 /* Game canvas */
@@ -159,7 +249,6 @@ html, body {
     background: #fff;
     white-space: pre-wrap;
     overflow-y: scroll;
-    font-family: monospace;
     font-size: 13px;
 }
 #console-dragbar {

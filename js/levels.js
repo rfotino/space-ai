@@ -5,8 +5,23 @@
 /**
  * Creates a game level from some initial state.
  */
-function Level(initial) {
-    this._initial = initial;
+function Level(name, image, initial) {
+    switch (arguments.length) {
+    case 3:
+        this.name = arguments[0];
+        this.image = arguments[1];
+        this._initial = arguments[2];
+        break;
+    case 2:
+        this.name = arguments[0];
+        this._initial = arguments[1];
+        break;
+    case 1:
+        this._initial = arguments[0];
+        break;
+    default:
+        throw 'Invalid number of arguments for Level().';
+    }
     // Make sure there are certain properties like a player object,
     // an object array, a win condition, etc.
     if (typeof this._initial.player === 'undefined') {
@@ -199,66 +214,87 @@ Level.prototype.complete = function() {
            typeof this._state.gameOver !== 'undefined';
 };
 
-// A sample level, can be loaded with game.load(level1)
-var level1 = new Level({
-    player: {
-        equipped: 'laser',
-        weapons: [
-            {
-                name: 'laser',
-                damage: 5,
-                fire: function(x, y) {
-                    // TODO: implement laser firing function
+// An array of levels that can be loaded from the level selector
+var levels = [
+    new Level('Level 1', 'images/level1.jpg', {
+        player: {
+            equipped: 'laser',
+            weapons: [
+                {
+                    name: 'laser',
+                    damage: 5,
+                    fire: function(x, y) {
+                        // TODO: implement laser firing function
+                    }
+                },
+                {
+                    name: 'rocket',
+                    ammo: 3,
+                    damage: 50,
+                    fire: function(x, y) {
+                            // TODO: implement rocket firing function
+                    }
                 }
+            ]
+        },
+        objects: [
+            {
+                type: 'asteroid',
+                pos: { x: -300, y: -100 },
+                radius: 100,
+                collide: function(other, result) {
+                    var distance = Math.sqrt(Math.pow(other.pos.x - this.pos.x, 2) +
+                                             Math.pow(other.pos.y - this.pos.y, 2));
+                    if ('player' === other.type && distance < this.radius) {
+                        result.health = 0;
+                    }
+                },
+                draw: function(ctx) {
+                    ctx.fillStyle = 'blue';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                },
             },
             {
-                name: 'rocket',
-                ammo: 3,
-                damage: 50,
-                fire: function(x, y) {
-                    // TODO: implement rocket firing function
+                type: 'target',
+                name: 'target1',
+                objective: 'reach',
+                win: true,
+                pos: { x: 0, y: -100 },
+                complete: function(player) {
+                    var distance = Math.sqrt(Math.pow(player.pos.x - this.pos.x, 2) +
+                                             Math.pow(player.pos.y - this.pos.y, 2));
+                    if (distance < this.radius) {
+                        return true;
+                    }
+                },
+                draw: function(ctx) {
+                    ctx.fillStyle = 'red';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                    ctx.fill();
                 }
             }
         ]
-    },
-    objects: [
-        {
-            type: 'asteroid',
-            pos: { x: -300, y: -100 },
-            radius: 100,
-            collide: function(other, result) {
-                var distance = Math.sqrt(Math.pow(other.pos.x - this.pos.x, 2) +
-                                         Math.pow(other.pos.y - this.pos.y, 2));
-                if ('player' === other.type && distance < this.radius) {
-                    result.health = 0;
-                }
-            },
-            draw: function(ctx) {
-                ctx.fillStyle = 'blue';
-                ctx.beginPath();
-                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-                ctx.fill();
-            },
-        },
-        {
-            type: 'target',
-            name: 'target1',
-            objective: 'reach',
-            win: true,
-            pos: { x: 0, y: -100 },
-            complete: function(player) {
-                var distance = Math.sqrt(Math.pow(player.pos.x - this.pos.x, 2) +
-                                         Math.pow(player.pos.y - this.pos.y, 2));
-                if (distance < this.radius) {
-                    return true;
-                }
-            },
-            draw: function(ctx) {
-                ctx.fillStyle = 'red';
-                ctx.beginPath();
-                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-    ]
-});
+    }),
+    new Level('Level 2', {}),
+    new Level('Level 3', {}),
+    new Level('Level 4', {}),
+    new Level('Level 5', {}),
+    new Level('Level 6', {}),
+    new Level('Level 7', {}),
+    new Level('Level 8', {}),
+    new Level('Level 9', {}),
+    new Level('Level 10', {}),
+    new Level('Level 11', {}),
+    new Level('Level 12', {}),
+    new Level('Level 13', {}),
+    new Level('Level 14', {}),
+    new Level('Level 15', {}),
+    new Level('Level 16', {}),
+    new Level('Level 17', {}),
+    new Level('Level 18', {}),
+    new Level('Level 19', {}),
+    new Level('Level 20', {})
+];

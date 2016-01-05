@@ -4,7 +4,7 @@
   <head>
     <title>Space AI Game</title>
     <meta charset="utf-8" />
-    
+
     <!-- JavaScript libraries -->
     <script type="text/javascript" src="lib/phaser/phaser.js"></script>
     <script type="text/javascript" src="lib/jquery/jquery.js"></script>
@@ -29,15 +29,25 @@
     <!-- Menu bar -->
     <div id="menubar">
       <div id="menubar-left">
-        <a id="docs" href="docs.html" target="_blank">Docs</a>
-        <a id="level" href="#">Level 1</a>
+        <a id="docs" href="docs.html" target="_blank">Docs</a><!--
+     --><a id="show-levels" href="#">Select Level</a>
       </div>
       <div id="menubar-right">
-        <a id="install" href="#">Install</a>
-        <a id="run" href="#">Run</a>
-        <a id="restart" href="#">Restart</a>
+        <a id="install" href="#">Install</a><!--
+     --><a id="run" href="#">Run</a><!--
+     --><a id="restart" href="#">Restart</a>
       </div>
       <div class="clearfix"></div>
+    </div>
+
+    <!-- Level selector -->
+    <div id="level-selector">
+      <h3>Level Selector</h3>
+      <div id="levels"></div>
+      <div id="level-selector-menu">
+        <a href="#" id="hide-levels">Cancel</a><!--
+     --><a href="#" id="load-level">Load</a>
+      </div>
     </div>
 
     <div id="main-window">

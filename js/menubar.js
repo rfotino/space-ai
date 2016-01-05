@@ -7,13 +7,53 @@ var menu = {
      * setState(state);
      * Sets the menu state to 'running', 'paused', or 'waiting'.
      */
-    setState: function(state) { }
+    setState: function(state) { },
+    /**
+     * showLevels();
+     * Shows the level selector.
+     */
+    showLevels: function() { },
+    /**
+     * hideLevels();
+     * Hides the level selector.
+     */
+    hideLevels: function() { }
 };
 
 $(document).ready(function() {
-    var state, installBtn = $('#install'),
+    var state, selectedLevel = null,
+        showLevelsBtn = $('#show-levels'), hideLevelsBtn = $('#hide-levels'),
+        loadLevelBtn = $('#load-level'), installBtn = $('#install'),
         runBtn = $('#run'), restartBtn = $('#restart');
 
+    // Set up level selector interface
+    var levelsDiv = $('#levels');
+    for (var i = 0; i < levels.length; i++) {
+        var level = levels[i];
+        var div = $('<div class="level" />');
+        var img = $('<div class="img" />');
+        if (level.image) {
+            img.css('background-image', 'url(' + level.image + ')');
+        }
+        div.append(img);
+        var name = $('<div class="name" />');
+        name.text(level.name);
+        div.append(img);
+        div.append(name);
+        var selectLevelHandler = (function(level, div) {
+            return function(e) {
+                e.preventDefault();
+                $('#level-selector .level').removeClass('selected');
+                div.addClass('selected');
+                selectedLevel = level;
+                loadLevelBtn.removeClass('disabled');
+            };
+        })(level, div);
+        div.on('click', selectLevelHandler);
+        levelsDiv.append(div);
+    }
+
+    // Define public menu functions
     menu.setState = function(newState) {
         state = newState;
         switch (state) {
@@ -32,13 +72,39 @@ $(document).ready(function() {
             break;
         }
     };
+    menu.showLevels = function() {
+        $('#level-selector').show();
+    };
+    menu.hideLevels = function() {
+        $('#level-selector').hide();
+    };
     menu.setState('waiting');
+    menu.hideLevels();
 
+    // Set up show/hide/load button listeners for level selector
+    showLevelsBtn.on('click', function(e) {
+        e.preventDefault();
+        menu.showLevels();
+    });
+    hideLevelsBtn.on('click', function(e) {
+        e.preventDefault();
+        menu.hideLevels();
+    });
+    loadLevelBtn.on('click', function(e) {
+        e.preventDefault();
+        if (selectedLevel) {
+            menu.hideLevels();
+            showLevelsBtn.text(selectedLevel.name);
+            game.load(selectedLevel);
+        }
+    });
+    loadLevelBtn.addClass('disabled');
+
+    // Set up install/run/restart button listeners
     installBtn.on('click', function(e) {
         e.preventDefault();
         game.install(ui.getCode());
     });
-
     runBtn.on('click', function(e) {
         e.preventDefault();
         switch (state) {
@@ -54,7 +120,6 @@ $(document).ready(function() {
             break;
         }
     });
-
     restartBtn.on('click', function(e) {
         e.preventDefault();
         game.restart();
