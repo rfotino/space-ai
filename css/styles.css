@@ -168,6 +168,7 @@ html, body {
 
 /* Game canvas */
 #game-canvas {
+    outline: none;
     background: #ddd;
 }
 
