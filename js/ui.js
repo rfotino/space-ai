@@ -72,6 +72,11 @@ var ui = {
         consoleWindow.css('left', codePosition);
         consoleWindow.css('width', $(window).width() - codePosition);
         $('#code-popout-btn').text('<');
+        // Make sure the CodeMirror instance repaints
+        var i = setInterval(function() { codeMirror.refresh(); }, 25);
+        setTimeout(function() { clearInterval(i); }, 125);
+        // Focus the coding area
+        codeMirror.focus();
     };
     ui.hideCode = function() {
         codeHidden = true;
@@ -80,6 +85,8 @@ var ui = {
         consoleWindow.css('left', 0);
         consoleWindow.css('width', $(window).width());
         $('#code-popout-btn').text('>');
+        // Blur the coding area by focusing on something else
+        $('#game-canvas').focus();
     };
     ui.scrollConsole = function() {
         consoleContent.scrollTop(consoleContent[0].scrollHeight);
