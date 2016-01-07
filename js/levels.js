@@ -10,96 +10,37 @@ function Level(name, image, initial) {
     case 3:
         this.name = arguments[0];
         this.image = arguments[1];
-        this._initial = arguments[2];
+        this._stateFunc = arguments[2];
         break;
     case 2:
         this.name = arguments[0];
-        this._initial = arguments[1];
+        this._stateFunc = arguments[1];
         break;
     case 1:
-        this._initial = arguments[0];
+        this._stateFunc = arguments[0];
         break;
     default:
         throw 'Invalid number of arguments for Level().';
-    }
-    // Make sure there are certain properties like a player object,
-    // an object array, a win condition, etc.
-    if (typeof this._initial.player === 'undefined') {
-        this._initial.player = {};
-    }
-    if (typeof this._initial.objects === 'undefined') {
-        this._initial.objects = [];
     }
 }
 
 // Initialize the state to start the level
 Level.prototype.init = function() {
-    // Deep copy the state from the initial level objects
-    this._state = $.extend(true, {}, this._initial);
-    // Make sure every object has the correct properties
-    // Temporarily add the player to the object array
-    this._state.player.type = 'player';
-    this._state.objects.push(this._state.player);
-    for (var i = 0; i < this._state.objects.length; i++) {
-        var obj = this._state.objects[i];
-        var defaults = {
-            pos: { x: 0, y: 0, angular: 0 },
-            vel: { x: 0, y: 0, angular: 0 },
-            accel: { x: 0, y: 0, angular: 0 },
-            update: function() {
-                this.vel.x += this.accel.x;
-                this.vel.y += this.accel.y;
-                this.vel.angular += this.accel.angular;
-                this.pos.x += this.vel.x;
-                this.pos.y += this.vel.y;
-                this.pos.angular += this.vel.angular;
-            },
-            collide: function(other, result) { }
-        };
-        // Give specific properties based on object type
-        switch (obj.type) {
-        case 'asteroid':
-            defaults.radius = 75;
-            break;
-        case 'target':
-            defaults.radius = 30;
-            defaults.objective = 'reach';
-            break;
-        case 'player':
-            defaults.width = 20;
-            defaults.height = 40;
-            defaults.thrust = 0;
-            defaults.thrustPower = 0;
-            defaults.turnPower = 0;
-            defaults.health = 100;
-            defaults.weapons = [];
-            defaults.equipped = null;
-            defaults.fired = false;
-            break;
-        }
-        $.extend(true, obj, $.extend(true, defaults, obj));
+    // Initialize the state from the state function
+    this._state = this._stateFunc();
+    // Make sure there are certain properties like a player,
+    // object array, etc
+    if (typeof this._state.player === 'undefined') {
+        this._state.player = new Player();
     }
-    // Remove the temporarily added player from the object list
-    this._state.objects.pop();
+    if (typeof this._state.objects === 'undefined') {
+        this._state.objects = [];
+    }
 };
 
 // Update all game objects, do collision detection, and check win conditions
 Level.prototype.update = function() {
     var player = this._state.player;
-    // Fire the player's weapon if it was fired and there is a weapon equipped
-    if (player.fired && player.equipped) {
-        for (var i = 0; i < player.weapons.length; i++) {
-            var weapon = player.weapons[i];
-            if (player.equipped === weapon.name) {
-                weapon.fire(player.fired.x, player.fired.y);
-            }
-        }
-    }
-    // Reset the player's fired flag
-    player.fired = false;
-    // Calculate the player's acceleration from thrust and rotation
-    player.accel.x = player.thrust * Math.sin(player.pos.angular);
-    player.accel.y = player.thrust * -Math.cos(player.pos.angular);
     // Update all game objects
     player.update();
     for (var i = 0; i < this._state.objects.length; i++) {
@@ -109,7 +50,6 @@ Level.prototype.update = function() {
     // Collision detection - compare every pair of objects, including
     // the player
     this._state.objects.push(player);
-    var objectsCopy = $.extend(true, [], this._state.objects);
     for (var i = 0; i < this._state.objects.length; i++) {
         var objA = this._state.objects[i];
         for (var j = 0; j < this._state.objects.length; j++) {
@@ -118,12 +58,10 @@ Level.prototype.update = function() {
                 continue;
             }
             var objB = this._state.objects[j];
-            var objBCopy = objectsCopy[j];
-            objA.collide(objB, objBCopy);
+            objA.collide(objB);
         }
     }
-    this._state.objects = objectsCopy;
-    this._state.player = player = this._state.objects.pop();
+    this._state.objects.pop();
     // Check win conditions
     var gameWon = true, gameLost = false;
     if (player.health <= 0) {
@@ -131,7 +69,7 @@ Level.prototype.update = function() {
     }
     for (var i = 0; i < this._state.objects.length; i++) {
         var obj = this._state.objects[i];
-        if ('target' === obj.type) {
+        if (obj instanceof Target) {
             if (obj.complete(player)) {
                 if (obj.lose) {
                     gameLost = true;
@@ -201,11 +139,15 @@ Level.prototype.getWorld = function() {
     return JSON.parse(JSON.stringify(this._state));
 };
 
-// Sets the state of the game world
-Level.prototype.setWorld = function(world) {
-    // Anything changed in the world should be reflected in the game state,
-    // but we don't want to clear out functions, so we extend.
-    $.extend(true, this._state, world);
+// Updates the state of the game world
+Level.prototype.updateWorld = function(world) {
+    var player = this._state.player;
+    player.thrustPower = world.player.thrustPower;
+    player.thrust = world.player.thrust;
+    player.turnPower = world.player.turnPower;
+    player.accel.angular = world.player.accel.angular;
+    player.equipped = world.player.equipped;
+    player.fired = world.player.fired;
 };
 
 // Returns true if the game is over
@@ -214,87 +156,202 @@ Level.prototype.complete = function() {
            typeof this._state.gameOver !== 'undefined';
 };
 
+/**
+ * A superclass for all game objects, including the player.
+ */
+var GameObject = function(props) {
+    props = props || {};
+    this.pos = props.pos || { x: 0, y: 0, angular: 0 };
+    this.vel = props.vel || { x: 0, y: 0, angular: 0 };
+    this.accel = props.accel || { x: 0, y: 0, angular: 0 };
+    return this;
+};
+GameObject.prototype.update = function() {
+    this.vel.x += this.accel.x;
+    this.vel.y += this.accel.y;
+    this.vel.angular += this.accel.angular;
+    this.pos.x += this.vel.x;
+    this.pos.y += this.vel.y;
+    this.pos.angular += this.vel.angular;
+};
+GameObject.prototype.collide = function(other, result) { };
+GameObject.prototype.draw = function(ctx) { };
+
+/**
+ * A class for the player.
+ */
+var Player = function(props) {
+    props = props || {};
+    GameObject.prototype.constructor.call(this, props);
+    this.weapons = props.weapons || [];
+    this.equipped = props.equipped || null;
+    this.health = props.health || 100;
+    this.thrust = props.thrust || 0;
+    this.thrustPower = props.thrustPower || 0;
+    this.turnPower = props.turnPower || 0;
+    this.fired = props.fired || false;
+    this.width = 20;
+    this.height = 40;
+};
+Player.prototype = Object.create(GameObject.prototype);
+Player.prototype.constructor = Player;
+Player.prototype.update = function() {
+    // Fire the player's weapon if it was fired and there is a weapon equipped
+    if (this.fired && this.equipped) {
+        for (var i = 0; i < this.weapons.length; i++) {
+            var weapon = this.weapons[i];
+            if (this.equipped === weapon.name) {
+                weapon.fire(this.fired.x, this.fired.y);
+            }
+        }
+    }
+    // Reset the player's fired flag
+    this.fired = false;
+    // Calculate the player's acceleration from thrust and rotation
+    this.accel.x = this.thrust * Math.sin(this.pos.angular);
+    this.accel.y = this.thrust * -Math.cos(this.pos.angular);
+    // Update the game object
+    GameObject.prototype.update.call(this);
+};
+Player.prototype.draw = function(ctx) {
+    ctx.fillStyle = 'green';
+    ctx.fillRect(-this.width / 2, -this.height / 2,
+                 this.width, this.height);
+};
+
+/**
+ * A class for asteroids.
+ */
+var Asteroid = function(props) {
+    props = props || {};
+    GameObject.prototype.constructor.call(this, props);
+    this.radius = props.radius || 50;
+};
+Asteroid.prototype = Object.create(GameObject.prototype);
+Asteroid.prototype.constructor = Asteroid;
+Asteroid.prototype.collide = function(other, result) {
+    var distance = Math.sqrt(Math.pow(other.pos.x - this.pos.x, 2) +
+                             Math.pow(other.pos.y - this.pos.y, 2));
+    if (other instanceof Player && distance < this.radius) {
+        result.health = 0;
+    }
+};
+Asteroid.prototype.draw = function(ctx) {
+    ctx.fillStyle = 'blue';
+    ctx.beginPath();
+    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+};
+
+/**
+ * An abstract class for targets.
+ */
+var Target = function(props) {
+    props = props || {};
+    GameObject.prototype.constructor.call(this, props);
+    this.name = props.name || '';
+    this.win = props.win || true;
+};
+Target.prototype = Object.create(GameObject.prototype);
+Target.prototype.constructor = Target;
+Target.prototype.complete = function(player) { return false; }
+Target.prototype.draw = function(ctx) {
+    ctx.fillStyle = 'red';
+    ctx.beginPath();
+    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+};
+
+/**
+ * A class for reach targets.
+ */
+var ReachTarget = function(props) {
+    props = props || {};
+    Target.prototype.constructor.call(this, props);
+    this.radius = props.radius || 30;
+};
+ReachTarget.prototype = Object.create(Target.prototype);
+ReachTarget.prototype.constructor = ReachTarget;
+ReachTarget.prototype.complete = function(player) {
+    var distance = Math.sqrt(Math.pow(player.pos.x - this.pos.x, 2) +
+                             Math.pow(player.pos.y - this.pos.y, 2));
+    return distance < this.radius;
+};
+
+/**
+ * An abstract class for weapons.
+ */
+var Weapon = function(props) {
+    props = props || {};
+    this.name = props.name || '';
+    this.damage = props.damage || 0;
+    this.ammo = props.ammo || null;
+};
+Weapon.prototype.fire = function(x, y) { };
+
+/**
+ * A class for a basic laser weapon.
+ */
+var LaserWeapon = function() {
+    Weapon.prototype.constructor.call(this, {
+        name: 'laser',
+        damage: 5
+    });
+};
+LaserWeapon.prototype = Object.create(Weapon.prototype);
+LaserWeapon.prototype.constructor = LaserWeapon;
+LaserWeapon.prototype.fire = function(x, y) {
+    // TODO: implement laser firing function
+};
+
+/**
+ * A class for a rocket weapon.
+ */
+var RocketWeapon = function(props) {
+    props = props || {};
+    Weapon.prototype.constructor.call(this, {
+        name: 'rocket',
+        damage: 50,
+        ammo: props.ammo || 0
+    });
+};
+RocketWeapon.prototype = Object.create(Weapon.prototype);
+RocketWeapon.prototype.constructor = RocketWeapon;
+RocketWeapon.prototype.fire = function(x, y) {
+    // TODO: implement rocket firing function
+};
+
 // An array of levels that can be loaded from the level selector
 var levels = [
-    new Level('Level 1', 'images/level1.jpg', {
-        player: {
-            equipped: 'laser',
-            weapons: [
-                {
-                    name: 'laser',
-                    damage: 5,
-                    fire: function(x, y) {
-                        // TODO: implement laser firing function
-                    }
-                },
-                {
-                    name: 'rocket',
-                    ammo: 3,
-                    damage: 50,
-                    fire: function(x, y) {
-                            // TODO: implement rocket firing function
-                    }
-                }
+    new Level('Level 1', 'images/level1.jpg', function() {
+        return {
+            player: new Player({
+                equipped: 'laser',
+                weapons: [ new LaserWeapon(), new RocketWeapon({ ammo: 3 }) ]
+            }),
+            objects: [
+                new Asteroid({ pos: { x: -300, y: -100 }, radius: 100 }),
+                new ReachTarget({ name: 'target1', win: true, pos: { x: 0, y: -100 } })
             ]
-        },
-        objects: [
-            {
-                type: 'asteroid',
-                pos: { x: -300, y: -100 },
-                radius: 100,
-                collide: function(other, result) {
-                    var distance = Math.sqrt(Math.pow(other.pos.x - this.pos.x, 2) +
-                                             Math.pow(other.pos.y - this.pos.y, 2));
-                    if ('player' === other.type && distance < this.radius) {
-                        result.health = 0;
-                    }
-                },
-                draw: function(ctx) {
-                    ctx.fillStyle = 'blue';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                },
-            },
-            {
-                type: 'target',
-                name: 'target1',
-                objective: 'reach',
-                win: true,
-                pos: { x: 0, y: -100 },
-                complete: function(player) {
-                    var distance = Math.sqrt(Math.pow(player.pos.x - this.pos.x, 2) +
-                                             Math.pow(player.pos.y - this.pos.y, 2));
-                    if (distance < this.radius) {
-                        return true;
-                    }
-                },
-                draw: function(ctx) {
-                    ctx.fillStyle = 'red';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        ]
+        };
     }),
-    new Level('Level 2', {}),
-    new Level('Level 3', {}),
-    new Level('Level 4', {}),
-    new Level('Level 5', {}),
-    new Level('Level 6', {}),
-    new Level('Level 7', {}),
-    new Level('Level 8', {}),
-    new Level('Level 9', {}),
-    new Level('Level 10', {}),
-    new Level('Level 11', {}),
-    new Level('Level 12', {}),
-    new Level('Level 13', {}),
-    new Level('Level 14', {}),
-    new Level('Level 15', {}),
-    new Level('Level 16', {}),
-    new Level('Level 17', {}),
-    new Level('Level 18', {}),
-    new Level('Level 19', {}),
-    new Level('Level 20', {})
+    new Level('Level 2', function() { return {}; }),
+    new Level('Level 3', function() { return {}; }),
+    new Level('Level 4', function() { return {}; }),
+    new Level('Level 5', function() { return {}; }),
+    new Level('Level 6', function() { return {}; }),
+    new Level('Level 7', function() { return {}; }),
+    new Level('Level 8', function() { return {}; }),
+    new Level('Level 9', function() { return {}; }),
+    new Level('Level 10', function() { return {}; }),
+    new Level('Level 11', function() { return {}; }),
+    new Level('Level 12', function() { return {}; }),
+    new Level('Level 13', function() { return {}; }),
+    new Level('Level 14', function() { return {}; }),
+    new Level('Level 15', function() { return {}; }),
+    new Level('Level 16', function() { return {}; }),
+    new Level('Level 17', function() { return {}; }),
+    new Level('Level 18', function() { return {}; }),
+    new Level('Level 19', function() { return {}; }),
+    new Level('Level 20', function() { return {}; })
 ];

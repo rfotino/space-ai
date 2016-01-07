@@ -109,7 +109,7 @@ var game = {
                 // Update the game objects, redraw the frame, and set it
                 // to complete
                 if (null !== level) {
-                    level.setWorld(message.world);
+                    level.updateWorld(message.world);
                     level.update();
                     level.draw(ctx);
                     if (level.complete()) {
