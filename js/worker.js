@@ -123,7 +123,8 @@
             return null;
         },
         fire: function(x, y) {
-            // Save the location that was fired at for the main thread to use
+            // Save the direction in which the weapon was fired for the
+            // main thread to use
             world.player.fired = { x: x, y: y };
         },
         weapons: function() {

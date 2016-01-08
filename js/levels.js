@@ -41,15 +41,24 @@ Level.prototype.init = function() {
 // Update all game objects, do collision detection, and check win conditions
 Level.prototype.update = function() {
     var player = this._state.player;
+    // Add the player to the beginning of the game object list
+    this._state.objects.unshift(player);
     // Update all game objects
-    player.update();
     for (var i = 0; i < this._state.objects.length; i++) {
         var obj = this._state.objects[i];
         obj.update();
     }
+    // Add generated game objects and remove dead ones
+    for (var i = this._state.objects.length - 1; 0 <= i; i--) {
+        var obj = this._state.objects[i];
+        this._state.objects.push.apply(this._state.objects, obj.newObjects);
+        obj.newObjects = [];
+        if (!obj.alive) {
+            this._state.objects.splice(i, 1);
+        }
+    }
     // Collision detection - compare every pair of objects, including
     // the player
-    this._state.objects.push(player);
     for (var i = 0; i < this._state.objects.length; i++) {
         var objA = this._state.objects[i];
         for (var j = 0; j < this._state.objects.length; j++) {
@@ -61,7 +70,8 @@ Level.prototype.update = function() {
             objA.collide(objB);
         }
     }
-    this._state.objects.pop();
+    // Remove the player from the beginning of the game object list
+    this._state.objects.shift();
     // Check win conditions
     var gameWon = true, gameLost = false;
     if (player.health <= 0) {
@@ -161,10 +171,15 @@ Level.prototype.complete = function() {
  */
 var GameObject = function(props) {
     props = props || {};
-    this.pos = props.pos || { x: 0, y: 0, angular: 0 };
-    this.vel = props.vel || { x: 0, y: 0, angular: 0 };
-    this.accel = props.accel || { x: 0, y: 0, angular: 0 };
-    return this;
+    this.pos = $.extend({ x: 0, y: 0, angular: 0 }, props.pos);
+    this.vel = $.extend({ x: 0, y: 0, angular: 0 }, props.vel);
+    this.accel = $.extend({ x: 0, y: 0, angular: 0 }, props.accel);
+    // If the alive flag is set to false, the object is removed from the
+    // list of game objects
+    this.alive = true;
+    // A list of new game objects to add to the scene, usually generated
+    // in this.update() or this.collide()
+    this.newObjects = [];
 };
 GameObject.prototype.update = function() {
     this.vel.x += this.accel.x;
@@ -196,12 +211,24 @@ var Player = function(props) {
 Player.prototype = Object.create(GameObject.prototype);
 Player.prototype.constructor = Player;
 Player.prototype.update = function() {
+    // Update the player's weapons
+    for (var i = 0; i < this.weapons.length; i++) {
+        var weapon = this.weapons[i];
+        weapon.update();
+    }
     // Fire the player's weapon if it was fired and there is a weapon equipped
     if (this.fired && this.equipped) {
         for (var i = 0; i < this.weapons.length; i++) {
             var weapon = this.weapons[i];
             if (this.equipped === weapon.name) {
-                weapon.fire(this.fired.x, this.fired.y);
+                var bullet = weapon.getBullet(
+                    { x: this.fired.x, y: this.fired.y },
+                    { x: this.pos.x, y: this.pos.y });
+                if (Array.isArray(bullet)) {
+                    this.newObjects.push.apply(this.newObjects, bullet);
+                } else if (null !== bullet) {
+                    this.newObjects.push(bullet);
+                }
             }
         }
     }
@@ -229,11 +256,11 @@ var Asteroid = function(props) {
 };
 Asteroid.prototype = Object.create(GameObject.prototype);
 Asteroid.prototype.constructor = Asteroid;
-Asteroid.prototype.collide = function(other, result) {
+Asteroid.prototype.collide = function(other) {
     var distance = Math.sqrt(Math.pow(other.pos.x - this.pos.x, 2) +
                              Math.pow(other.pos.y - this.pos.y, 2));
     if (other instanceof Player && distance < this.radius) {
-        result.health = 0;
+        other.health = 0;
     }
 };
 Asteroid.prototype.draw = function(ctx) {
@@ -286,8 +313,11 @@ var Weapon = function(props) {
     this.name = props.name || '';
     this.damage = props.damage || 0;
     this.ammo = props.ammo || null;
+    this.cooldown = props.cooldown || 0;
+    this.cooldownTimer = 0;
 };
-Weapon.prototype.fire = function(x, y) { };
+Weapon.prototype.getBullet = function(dir, pos) { return null; }
+Weapon.prototype.update = function() { this.cooldownTimer--; }
 
 /**
  * A class for a basic laser weapon.
@@ -295,13 +325,20 @@ Weapon.prototype.fire = function(x, y) { };
 var LaserWeapon = function() {
     Weapon.prototype.constructor.call(this, {
         name: 'laser',
-        damage: 5
+        damage: 5,
+        cooldown: 20
     });
 };
 LaserWeapon.prototype = Object.create(Weapon.prototype);
 LaserWeapon.prototype.constructor = LaserWeapon;
-LaserWeapon.prototype.fire = function(x, y) {
-    // TODO: implement laser firing function
+LaserWeapon.prototype.getBullet = function(dir, pos) {
+    if (this.cooldownTimer <= 0) {
+        if ({ x: 0, y: 0 } !== dir) {
+            this.cooldownTimer = this.cooldown;
+            return new LaserBullet({ dir: dir, pos: pos });
+        }
+    }
+    return null;
 };
 
 /**
@@ -312,13 +349,101 @@ var RocketWeapon = function(props) {
     Weapon.prototype.constructor.call(this, {
         name: 'rocket',
         damage: 50,
-        ammo: props.ammo || 0
+        ammo: props.ammo || 0,
+        cooldown: 60
     });
 };
 RocketWeapon.prototype = Object.create(Weapon.prototype);
 RocketWeapon.prototype.constructor = RocketWeapon;
-RocketWeapon.prototype.fire = function(x, y) {
-    // TODO: implement rocket firing function
+RocketWeapon.prototype.getBullet = function(dir, pos) {
+    if (this.cooldownTimer <= 0 && 0 < this.ammo) {
+        if ({ x: 0, y: 0 } !== dir) {
+            this.cooldownTimer = this.cooldown;
+            this.ammo--;
+            return new RocketBullet({ dir: dir, pos: pos });
+        }
+    }
+    return null;
+};
+
+/**
+ * An abstract class for a bullet fired from a Weapon object.
+ */
+var Bullet = function(props) {
+    props = props || {};
+    // Get direction of bullet, if set
+    var dir = props.dir || { x: 0, y: 0 };
+    dir.x = dir.x || 0;
+    dir.y = dir.y || 0;
+    if ({ x: 0, y: 0 } !== dir) {
+        // Turn the direction into a unit vector
+        var magnitude = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2));
+        dir.x /= magnitude;
+        dir.y /= magnitude;
+        // Multiply the direction by the speed to get the velocity
+        var speed = props.speed || 0;
+        var rotation = Math.atan2(dir.x, -dir.y);
+        props.pos = props.pos || {};
+        props.pos.angular = Math.atan2(dir.x, -dir.y);
+        props.vel = props.vel || {};
+        props.vel.x = speed * dir.x;
+        props.vel.y = speed * dir.y;
+    }
+    GameObject.prototype.constructor.call(this, props);
+    this.damage = props.damage || 0;
+    this.lifespan = props.lifespan || 0;
+};
+Bullet.prototype = Object.create(GameObject.prototype);
+Bullet.prototype.constructor = Bullet;
+Bullet.prototype.collide = function(other) {
+    // TODO: if this collides with other and other.health exists,
+    // subtract this.damage from other.health
+};
+Bullet.prototype.update = function() {
+    // If this bullet has been in the scene for too many ticks,
+    // set its alive flag to false
+    this.lifespan--;
+    if (this.lifespan <= 0) {
+        this.alive = false;
+    }
+    // Call parent update function
+    GameObject.prototype.update.call(this);
+};
+
+/**
+ * A class for a bullet fired from a LaserWeapon.
+ */
+var LaserBullet = function(props) {
+    props = props || {};
+    props.speed = 5;
+    props.lifespan = 180;
+    Bullet.prototype.constructor.call(this, props);
+    this.width = 2;
+    this.height = 10;
+};
+LaserBullet.prototype = Object.create(Bullet.prototype);
+LaserBullet.prototype.constructor = LaserBullet;
+LaserBullet.prototype.draw = function(ctx) {
+    ctx.fillStyle = 'red';
+    ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+};
+
+/**
+ * A class for a bullet fired from a RocketWeapon.
+ */
+var RocketBullet = function(props) {
+    props = props || {};
+    props.speed = 5;
+    props.lifespan = 180;
+    Bullet.prototype.constructor.call(this, props);
+    this.width = 8;
+    this.height = 20;
+};
+RocketBullet.prototype = Object.create(Bullet.prototype);
+RocketBullet.prototype.constructor = RocketBullet;
+RocketBullet.prototype.draw = function(ctx) {
+    ctx.fillStyle = 'orange';
+    ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
 };
 
 // An array of levels that can be loaded from the level selector
