@@ -114,12 +114,13 @@ html, body {
 #level-selector #levels .level.selected {
     background: #ccc;
 }
-#level-selector #levels .level .img {
+#level-selector #levels .level .thumbnail {
     overflow: hidden;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     width: 130px;
     height: 100px;
+    display: block;
 }
 #level-selector #levels .level .name {
     height: 30px;

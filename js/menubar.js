@@ -31,14 +31,21 @@ $(document).ready(function() {
     for (var i = 0; i < levels.length; i++) {
         var level = levels[i];
         var div = $('<div class="level" />');
-        var img = $('<div class="img" />');
-        if (level.image) {
-            img.css('background-image', 'url(' + level.image + ')');
-        }
-        div.append(img);
+        // Get the bounding box of the initial level, used for the thumbnail
+        level.init();
+        var levelBounds = level.bounds();
+        // Get the right scale for the thumbnail
+        var canvasWidth = 130;
+        var canvasHeight = 100;
+        var scaleWidth = canvasWidth / levelBounds.width;
+        var scaleHeight = canvasHeight / levelBounds.height;
+        var scale = Math.min(scaleWidth, scaleHeight);
+        var thumbnail = $('<canvas width="' + (canvasWidth / scale) + '" ' +
+                                  'height="' + (canvasHeight / scale) + '" ' +
+                                  'class="thumbnail" />');
         var name = $('<div class="name" />');
         name.text(level.name);
-        div.append(img);
+        div.append(thumbnail);
         div.append(name);
         var selectLevelHandler = (function(level, div) {
             return function(e) {
@@ -51,6 +58,12 @@ $(document).ready(function() {
         })(level, div);
         div.on('click', selectLevelHandler);
         levelsDiv.append(div);
+        // Draw the thumbnail
+        var ctx = thumbnail[0].getContext('2d');
+        var transX = -(levelBounds.x + (levelBounds.width / 2));
+        var transY = -(levelBounds.y + (levelBounds.height / 2));
+        ctx.translate(transX, transY);
+        level.draw(ctx);
     }
 
     // Define public menu functions

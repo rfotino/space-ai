@@ -166,6 +166,31 @@ Level.prototype.complete = function() {
            typeof this._state.gameOver !== 'undefined';
 };
 
+// Returns a bounding box containing the level objects
+Level.prototype.bounds = function() {
+    var minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity,
+        padding = 20;
+    this._state.objects.push(this._state.player);
+    for (var i = 0; i < this._state.objects.length; i++) {
+        var obj = this._state.objects[i];
+        var bounds = obj.bounds();
+        minX = Math.min(minX, bounds.x);
+        minY = Math.min(minY, bounds.y);
+        maxX = Math.max(maxX, bounds.x + bounds.width);
+        maxY = Math.max(maxY, bounds.y + bounds.height);
+    }
+    this._state.objects.pop();
+    return {
+        x: minX - padding,
+        y: minY - padding,
+        width: maxX - minX + (padding * 2),
+        height: maxY - minY + (padding * 2)
+    };
+};
+
 /**
  * A superclass for all game objects, including the player.
  */
@@ -194,6 +219,24 @@ GameObject.prototype.update = function() {
 };
 GameObject.prototype.collide = function(other) { };
 GameObject.prototype.draw = function(ctx) { };
+GameObject.prototype.bounds = function() {
+    if (this.radius) {
+        return {
+            x: this.pos.x - this.radius,
+            y: this.pos.y - this.radius,
+            width: this.radius * 2,
+            height: this.radius * 2
+        };
+    } else if (this.width && this.height) {
+        return {
+            x: this.pos.x - (this.width / 2),
+            y: this.pos.y - (this.height / 2),
+            width: this.width,
+            height: this.height
+        }
+    }
+    return { x: Infinity, y: Infinity, width: -Infinity, height: -Infinity };
+};
 
 /**
  * A class for the player.
