@@ -142,14 +142,17 @@ Level.prototype.draw = function(ctx) {
     }
 };
 
-// Gets the state of the game world
+// Gets the state of the game world to pass to the worker thread
 Level.prototype.getWorld = function() {
-    // Strip functions by doing a deep copy to and from JSON. We can't
-    // do worker.postMessage() on an object with functions
-    return JSON.parse(JSON.stringify(this._state));
+    var getObj = function(obj) { return obj.getObj(); };
+    var isObj = function(obj) { return 'object' === typeof obj; };
+    return {
+        player: this._state.player.getObj(),
+        objects: this._state.objects.map(getObj).filter(isObj)
+    };
 };
 
-// Updates the state of the game world
+// Updates the state of the game world due to changes made in the worker thread
 Level.prototype.updateWorld = function(world) {
     var player = this._state.player;
     player.thrustPower = world.player.thrustPower;
@@ -200,8 +203,9 @@ var GameObject = function(props) {
     this.pos = $.extend({ x: 0, y: 0, angular: 0 }, props.pos);
     this.vel = $.extend({ x: 0, y: 0, angular: 0 }, props.vel);
     this.accel = $.extend({ x: 0, y: 0, angular: 0 }, props.accel);
-    // Every object gets a name
+    // Every object gets a name and a type
     this.name = props.name || '';
+    this.type = props.type || '';
     // If the alive flag is set to false, the object is removed from the
     // list of game objects
     this.alive = true;
@@ -237,12 +241,22 @@ GameObject.prototype.bounds = function() {
     }
     return { x: Infinity, y: Infinity, width: -Infinity, height: -Infinity };
 };
+GameObject.prototype.getObj = function() {
+    return {
+        pos: $.extend({}, this.pos),
+        vel: $.extend({}, this.vel),
+        accel: $.extend({}, this.accel),
+        name: this.name,
+        type: this.type
+    };
+};
 
 /**
  * A class for the player.
  */
 var Player = function(props) {
     props = props || {};
+    props.type = 'player';
     GameObject.prototype.constructor.call(this, props);
     this.weapons = props.weapons || [];
     this.equipped = props.equipped || null;
@@ -291,12 +305,25 @@ Player.prototype.draw = function(ctx) {
     ctx.fillRect(-this.width / 2, -this.height / 2,
                  this.width, this.height);
 };
+Player.prototype.getObj = function() {
+    var obj = GameObject.prototype.getObj.call(this);
+    return $.extend(obj, {
+        weapons: this.weapons.map(function(weap) { return weap.getObj(); }),
+        equipped: this.equipped,
+        health: this.health,
+        thrust: this.thrust,
+        thrustPower: this.thrustPower,
+        turnPower: this.turnPower,
+        fired: this.fired
+    });
+};
 
 /**
  * A class for asteroids.
  */
 var Asteroid = function(props) {
     props = props || {};
+    props.type = 'asteroid';
     GameObject.prototype.constructor.call(this, props);
     this.radius = props.radius || 50;
 };
@@ -315,12 +342,19 @@ Asteroid.prototype.draw = function(ctx) {
     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
     ctx.fill();
 };
+Asteroid.prototype.getObj = function() {
+    var obj = GameObject.prototype.getObj.call(this);
+    return $.extend(obj, {
+        radius: this.radius
+    });
+};
 
 /**
  * An abstract class for targets.
  */
 var Target = function(props) {
     props = props || {};
+    props.type = 'target';
     GameObject.prototype.constructor.call(this, props);
     this.win = props.win || true;
 };
@@ -332,6 +366,12 @@ Target.prototype.draw = function(ctx) {
     ctx.beginPath();
     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
     ctx.fill();
+};
+Target.prototype.getObj = function() {
+    var obj = GameObject.prototype.getObj.call(this);
+    return $.extend(obj, {
+        win: this.win
+    });
 };
 
 /**
@@ -349,6 +389,13 @@ ReachTarget.prototype.complete = function(player) {
                              Math.pow(player.pos.y - this.pos.y, 2));
     return distance < this.radius;
 };
+ReachTarget.prototype.getObj = function() {
+    var obj = Target.prototype.getObj.call(this);
+    return $.extend(obj, {
+        objective: 'reach',
+        radius: this.radius
+    });
+};
 
 /**
  * An abstract class for weapons.
@@ -361,8 +408,19 @@ var Weapon = function(props) {
     this.cooldown = props.cooldown || 0;
     this.cooldownTimer = 0;
 };
-Weapon.prototype.getBullet = function(dir, pos) { return null; }
-Weapon.prototype.update = function() { this.cooldownTimer--; }
+Weapon.prototype.getBullet = function(dir, pos) { return null; };
+Weapon.prototype.update = function() {
+    this.cooldownTimer = Math.max(this.cooldownTimer - 1, 0);
+};
+Weapon.prototype.getObj = function() {
+    return {
+        name: this.name,
+        damage: this.damage,
+        ammo: this.ammo,
+        cooldown: this.cooldown,
+        cooldownTimer: this.cooldownTimer
+    };
+};
 
 /**
  * A class for a basic laser weapon.
@@ -416,6 +474,7 @@ RocketWeapon.prototype.getBullet = function(dir, pos) {
  */
 var Bullet = function(props) {
     props = props || {};
+    props.type = 'bullet';
     // Get direction of bullet, if set
     var dir = props.dir || { x: 0, y: 0 };
     dir.x = dir.x || 0;
@@ -436,6 +495,7 @@ var Bullet = function(props) {
     }
     GameObject.prototype.constructor.call(this, props);
     this.damage = props.damage || 0;
+    this.weapon = props.weapon || '';
     this.lifespan = props.lifespan || 0;
 };
 Bullet.prototype = Object.create(GameObject.prototype);
@@ -454,6 +514,13 @@ Bullet.prototype.update = function() {
     // Call parent update function
     GameObject.prototype.update.call(this);
 };
+Bullet.prototype.getObj = function() {
+    var obj = GameObject.prototype.getObj.call(this);
+    return $.extend(obj, {
+        damage: this.damage,
+        weapon: this.weapon
+    });
+};
 
 /**
  * A class for a bullet fired from a LaserWeapon.
@@ -461,6 +528,7 @@ Bullet.prototype.update = function() {
 var LaserBullet = function(props) {
     props = props || {};
     props.speed = 5;
+    props.weapon = 'laser';
     props.lifespan = 180;
     Bullet.prototype.constructor.call(this, props);
     this.width = 2;
@@ -479,6 +547,7 @@ LaserBullet.prototype.draw = function(ctx) {
 var RocketBullet = function(props) {
     props = props || {};
     props.speed = 5;
+    props.weapon = 'rocket';
     props.lifespan = 180;
     Bullet.prototype.constructor.call(this, props);
     this.width = 8;
