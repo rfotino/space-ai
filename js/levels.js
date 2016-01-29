@@ -326,6 +326,59 @@ var Asteroid = function(props) {
     props.type = 'asteroid';
     GameObject.prototype.constructor.call(this, props);
     this.radius = props.radius || 50;
+    // Generate the polygons used for collision and drawing
+    this._outerBounds = [];
+    this._innerBounds = [];
+    // The number of points in both the inner and outer polygons, must be
+    // a minimum of 6
+    var numBoundPoints = Math.max(6, props.radius / 10);
+    // The maximum that a point in the outer polygon can vary from this.radius
+    // or a point in the inner polygon can vary from the outer radius at the
+    // same angle
+    var maxVariance = 50;
+    // The default factor to multiply by this.radius to get the outer variance,
+    // if the result is greater than maxVariance use maxVariance instead
+    var defOuterVarianceFact = 1 / 3;
+    // The maximum that a point can vary from the previous point in either
+    // the inner or outer polygons
+    var maxPointVariance = 20;
+    // The inner padding is the minimum difference between the outer and inner
+    // polygons at the same angle. The default is a factor to multiply by the
+    // value of the outer radius at the same angle
+    var maxInnerPadding = 75;
+    var defInnerPaddingFact = 0.75;
+    // The range of values that can be subtracted from this.radius to get
+    // the radius of a point in the outer polygon
+    var outerRange = Math.min(maxVariance, this.radius * defOuterVarianceFact);
+    // Used to determine the difference between the current and previous points
+    var prevOuterRadius = 0;
+    var prevInnerRadius = 0;
+    for (var i = 0; i < numBoundPoints; i++) {
+        var boundAngle = (Math.PI * 2) * (i / numBoundPoints);
+        var outerRadius;
+        do {
+            outerRadius = this.radius - (outerRange * Math.random());
+        } while (0 !== prevOuterRadius &&
+                 maxPointVariance < Math.abs(prevOuterRadius - outerRadius));
+        prevOuterRadius = outerRadius;
+        var innerRadiusMax = Math.max(outerRadius - maxInnerPadding,
+                                      outerRadius * defInnerPaddingFact);
+        var innerRange = Math.min(maxVariance, outerRadius / 3);
+        var innerRadius;
+        do {
+            innerRadius = innerRadiusMax - (innerRange * Math.random());
+        } while (0 !== prevInnerRadius &&
+                 maxPointVariance < Math.abs(prevInnerRadius - innerRadius));
+        prevInnerRadius = innerRadius;
+        this._outerBounds.push({
+            x: outerRadius * Math.cos(boundAngle),
+            y: outerRadius * Math.sin(boundAngle)
+        });
+        this._innerBounds.push({
+            x: innerRadius * Math.cos(boundAngle),
+            y: innerRadius * Math.sin(boundAngle)
+        });
+    }
 };
 Asteroid.prototype = Object.create(GameObject.prototype);
 Asteroid.prototype.constructor = Asteroid;
@@ -337,9 +390,21 @@ Asteroid.prototype.collide = function(other) {
     }
 };
 Asteroid.prototype.draw = function(ctx) {
-    ctx.fillStyle = 'blue';
+    // Draw outer bounds
+    ctx.fillStyle = 'saddlebrown';
     ctx.beginPath();
-    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+    for (var i = 0; i < this._outerBounds.length; i++) {
+        var boundPoint = this._outerBounds[i];
+        ctx.lineTo(boundPoint.x, boundPoint.y);
+    }
+    ctx.fill();
+    // Draw inner bounds
+    ctx.fillStyle = 'sienna';
+    ctx.beginPath();
+    for (var i = 0; i < this._innerBounds.length; i++) {
+        var boundPoint = this._innerBounds[i];
+        ctx.lineTo(boundPoint.x, boundPoint.y);
+    }
     ctx.fill();
 };
 Asteroid.prototype.getObj = function() {
