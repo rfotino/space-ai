@@ -37,11 +37,8 @@ $(document).ready(function() {
         // Get the right scale for the thumbnail
         var canvasWidth = 130;
         var canvasHeight = 100;
-        var scaleWidth = canvasWidth / levelBounds.width;
-        var scaleHeight = canvasHeight / levelBounds.height;
-        var scale = Math.min(scaleWidth, scaleHeight);
-        var thumbnail = $('<canvas width="' + (canvasWidth / scale) + '" ' +
-                                  'height="' + (canvasHeight / scale) + '" ' +
+        var thumbnail = $('<canvas width="' + canvasWidth + '" ' +
+                                  'height="' + canvasHeight + '" ' +
                                   'class="thumbnail" />');
         var name = $('<div class="name" />');
         name.text(level.name);
@@ -60,9 +57,7 @@ $(document).ready(function() {
         levelsDiv.append(div);
         // Draw the thumbnail
         var ctx = thumbnail[0].getContext('2d');
-        var transX = -(levelBounds.x + (levelBounds.width / 2));
-        var transY = -(levelBounds.y + (levelBounds.height / 2));
-        ctx.translate(transX, transY);
+        level.viewport.fixToBounds(levelBounds, canvasWidth, canvasHeight);
         level.draw(ctx);
     }
 

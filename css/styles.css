@@ -121,6 +121,7 @@ html, body {
     width: 130px;
     height: 100px;
     display: block;
+    background: #000;
 }
 #level-selector #levels .level .name {
     height: 30px;
@@ -170,7 +171,7 @@ html, body {
 /* Game canvas */
 #game-canvas {
     outline: none;
-    background: #ddd;
+    background: #000;
 }
 
 /* Code window */

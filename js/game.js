@@ -176,5 +176,6 @@ var game = {
     $(document).ready(function() {
         canvas = document.getElementById('game-canvas');
         ctx = canvas.getContext('2d');
+        game.load(new Level('Select Level', function() { return {}; }));
     });
 })();

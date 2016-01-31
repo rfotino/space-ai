@@ -22,6 +22,7 @@ function Level(name, image, initial) {
     default:
         throw 'Invalid number of arguments for Level().';
     }
+    this.viewport = new Viewport();
 }
 
 // Initialize the state to start the level
@@ -36,6 +37,11 @@ Level.prototype.init = function() {
     if (typeof this._state.objects === 'undefined') {
         this._state.objects = [];
     }
+    // Set up the star field
+    this._state.starField = new StarField();
+    // Reset the viewport and focus it on the player
+    this.viewport.reset();
+    this.viewport.focus(this._state.player);
 };
 
 // Update all game objects, do collision detection, and check win conditions
@@ -102,20 +108,24 @@ Level.prototype.update = function() {
 Level.prototype.draw = function(ctx) {
     var player = this._state.player;
     // Clear the canvas
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    // Update the graphics context transform for the viewport
+    this.viewport.update(ctx);
+    // Draw the stars
+    this._state.starField.draw(ctx, this.viewport);
     // Draw the game objects
     for (var i = 0; i < this._state.objects.length; i++) {
         var obj = this._state.objects[i];
         ctx.save();
-        ctx.translate(obj.pos.x - player.pos.x + (ctx.canvas.width / 2),
-                      obj.pos.y - player.pos.y + (ctx.canvas.height / 2));
+        ctx.translate(obj.pos.x, obj.pos.y);
         ctx.rotate(obj.pos.angular);
         obj.draw(ctx);
         ctx.restore();
     }
     // Draw the player
     ctx.save();
-    ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
+    ctx.translate(player.pos.x, player.pos.y);
     ctx.rotate(player.pos.angular);
     ctx.fillStyle = 'green';
     ctx.fillRect(-player.width / 2, -player.height / 2,
@@ -123,6 +133,7 @@ Level.prototype.draw = function(ctx) {
     ctx.restore();
     // Draw win/lose screen if necessary
     if (typeof this._state.gameOver !== 'undefined') {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.strokeStyle = '#000';
         ctx.lineWidth = 3;
         ctx.lineJoin = 'bevel';
@@ -191,6 +202,54 @@ Level.prototype.bounds = function() {
         y: minY - padding,
         width: maxX - minX + (padding * 2),
         height: maxY - minY + (padding * 2)
+    };
+};
+
+/**
+ * A class for doing viewport transformations, getting viewport bounds, etc.
+ */
+var Viewport = function() {
+    this.reset();
+};
+Viewport.prototype.scale = function(scale) {
+    this._scale *= scale;
+};
+Viewport.prototype.translate = function(x, y) {
+    this._translation.x += x;
+    this._translation.y += y;
+};
+Viewport.prototype.focus = function(gameObj) {
+    this._focusObj = gameObj;
+};
+Viewport.prototype.fixToBounds = function(bounds, viewWidth, viewHeight) {
+    this._focusObj = null;
+    var scaleX = viewWidth / bounds.width;
+    var scaleY = viewHeight / bounds.height;
+    var scale = Math.min(scaleX, scaleY);
+    this.scale(scale);
+    this.translate(-bounds.x + (((viewWidth / scale) - bounds.width) / 2),
+                   -bounds.y + (((viewHeight / scale) - bounds.height) / 2));
+};
+Viewport.prototype.reset = function() {
+    this._scale = 1;
+    this._translation = { x: 0, y: 0 };
+    this._focusObj = null;
+};
+Viewport.prototype.update = function(ctx) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (this._focusObj) {
+        this._translation.x = -this._focusObj.pos.x + (ctx.canvas.width / 2);
+        this._translation.y = -this._focusObj.pos.y + (ctx.canvas.height / 2);
+    }
+    ctx.scale(this._scale, this._scale);
+    ctx.translate(this._translation.x, this._translation.y);
+};
+Viewport.prototype.bounds = function(ctx) {
+    return {
+        x: -this._translation.x,
+        y: -this._translation.y,
+        width: ctx.canvas.width / this._scale,
+        height: ctx.canvas.height / this._scale
     };
 };
 
@@ -316,6 +375,85 @@ Player.prototype.getObj = function() {
         turnPower: this.turnPower,
         fired: this.fired
     });
+};
+
+/**
+ * A class for creating, keeping track of, and drawing the field of
+ * stars in the background.
+ */
+var StarField = function(density) {
+    this._density = density || 0.005;
+    this._bounds = { x: 0, y: 0, width: 0, height: 0 };
+    this._stars = [];
+    this._color = '#bbf';
+    this._minRadius = 0.25;
+    this._maxRadius = 1.5;
+};
+StarField.prototype._addStars = function(x, y, width, height) {
+    var numStars = width * height * this._density;
+    for (var i = 0; i < numStars; i++) {
+        this._stars.push({
+            x: x + (width * Math.random()),
+            y: y + (height * Math.random()),
+            radius: this._minRadius +
+                ((this._maxRadius - this._minRadius) * Math.pow(Math.random(), 3))
+        });
+    }
+};
+StarField.prototype.draw = function(ctx, viewport) {
+    // We need to make sure the star field's bounds include the viewport's
+    // bounds. If not, expand the star field's bounds by adding more stars
+    var viewBounds = viewport.bounds(ctx);
+    // Expand the star field to the left if necessary
+    if (viewBounds.x < this._bounds.x) {
+        this._addStars(viewBounds.x, this._bounds.y,
+                       this._bounds.x - viewBounds.x,
+                       this._bounds.height);
+        this._bounds.width += this._bounds.x - viewBounds.x;
+        this._bounds.x = viewBounds.x;
+    }
+    // Expand the star field up if necessary
+    if (viewBounds.y < this._bounds.y) {
+        this._addStars(this._bounds.x, viewBounds.y,
+                       this._bounds.width,
+                       this._bounds.y - viewBounds.y);
+        this._bounds.height += this._bounds.y - viewBounds.y;
+        this._bounds.y = viewBounds.y;
+    }
+    // Expand the star field to the right if necessary
+    var starBoundsRight = this._bounds.x + this._bounds.width;
+    var viewBoundsRight = viewBounds.x + viewBounds.width;
+    if (starBoundsRight < viewBoundsRight) {
+        this._addStars(starBoundsRight,
+                       this._bounds.y,
+                       viewBoundsRight - starBoundsRight,
+                       this._bounds.height);
+        this._bounds.width += viewBoundsRight - starBoundsRight;
+    }
+    // Expand the star field downward if necessary
+    var starBoundsBottom = this._bounds.y + this._bounds.height;
+    var viewBoundsBottom = viewBounds.y + viewBounds.height;
+    if (starBoundsBottom < viewBoundsBottom) {
+        this._addStars(this._bounds.x,
+                       starBoundsBottom,
+                       this._bounds.width,
+                       viewBoundsBottom - starBoundsBottom);
+        this._bounds.height += viewBoundsBottom - starBoundsBottom;
+    }
+    // Draw all the stars
+    ctx.fillStyle = this._color;
+    for (var i = 0; i < this._stars.length; i++) {
+        var star = this._stars[i];
+        // Check if star is in view before drawing
+        if (viewBounds.x <= star.x && star.x <= viewBoundsRight &&
+            viewBounds.y <= star.y && star.y <= viewBoundsBottom) {
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    ctx.strokeStyle = '#f00';
+    ctx.strokeRect(viewBounds.x, viewBounds.y, viewBounds.width, viewBounds.height);
 };
 
 /**
