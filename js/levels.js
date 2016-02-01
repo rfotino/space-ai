@@ -67,13 +67,14 @@ Level.prototype.update = function() {
     // the player
     for (var i = 0; i < this._state.objects.length; i++) {
         var objA = this._state.objects[i];
-        for (var j = 0; j < this._state.objects.length; j++) {
-            // Make sure we don't compare the object with itself
-            if (i === j) {
-                continue;
-            }
+        for (var j = i + 1; j < this._state.objects.length; j++) {
             var objB = this._state.objects[j];
-            objA.collide(objB);
+            // If the two objects intersect each other, call their collide
+            // functions on each other
+            if (Physics.testIntersection(objA, objB)) {
+                objA.collide(objB);
+                objB.collide(objA);
+            }
         }
     }
     // Remove the player from the beginning of the game object list
@@ -143,7 +144,7 @@ Level.prototype.draw = function(ctx) {
         var text = '';
         if ('win' === this._state.gameOver) {
             ctx.fillStyle = '#0f0';
-            text = 'YOU WIN';
+            text = 'YOU WIN!';
         } else if ('lose' === this._state.gameOver) {
             ctx.fillStyle = '#f00';
             text = 'GAME OVER';
@@ -300,6 +301,25 @@ GameObject.prototype.bounds = function() {
     }
     return { x: Infinity, y: Infinity, width: -Infinity, height: -Infinity };
 };
+GameObject.prototype.outline = function () {
+    if (this.radius) {
+        return {
+            x: this.pos.x,
+            y: this.pos.y,
+            radius: this.radius
+        };
+    } else if (this.width && this.height) {
+        var p1 = { x: -this.width / 2, y: -this.height / 2 };
+        var p2 = { x: this.width / 2, y: this.height / 2 };
+        var points = [ p1, { x: p2.x, y: p1.y }, p2, { x: p1.x, y: p2.y } ];
+        var transform = Physics.getRotate(this.pos.angular,
+                                          Physics.getTranslate(this.pos.x,
+                                                               this.pos.y));
+        return { points: points.map(transform) };
+    } else {
+        return null;
+    }
+};
 GameObject.prototype.getObj = function() {
     return {
         pos: $.extend({}, this.pos),
@@ -452,8 +472,6 @@ StarField.prototype.draw = function(ctx, viewport) {
             ctx.fill();
         }
     }
-    ctx.strokeStyle = '#f00';
-    ctx.strokeRect(viewBounds.x, viewBounds.y, viewBounds.width, viewBounds.height);
 };
 
 /**
@@ -521,9 +539,7 @@ var Asteroid = function(props) {
 Asteroid.prototype = Object.create(GameObject.prototype);
 Asteroid.prototype.constructor = Asteroid;
 Asteroid.prototype.collide = function(other) {
-    var distance = Math.sqrt(Math.pow(other.pos.x - this.pos.x, 2) +
-                             Math.pow(other.pos.y - this.pos.y, 2));
-    if (other instanceof Player && distance < this.radius) {
+    if (other instanceof Player) {
         other.health = 0;
     }
 };
@@ -545,6 +561,12 @@ Asteroid.prototype.draw = function(ctx) {
     }
     ctx.fill();
 };
+Asteroid.prototype.outline = function() {
+    var transform = Physics.getRotate(this.pos.angular,
+                                      Physics.getTranslate(this.pos.x,
+                                                           this.pos.y));
+    return { points: this._outerBounds.map(transform) };
+};
 Asteroid.prototype.getObj = function() {
     var obj = GameObject.prototype.getObj.call(this);
     return $.extend(obj, {
@@ -565,7 +587,7 @@ Target.prototype = Object.create(GameObject.prototype);
 Target.prototype.constructor = Target;
 Target.prototype.complete = function(player) { return false; }
 Target.prototype.draw = function(ctx) {
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = 'rgba(50, 50, 255, 0.6)';
     ctx.beginPath();
     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
     ctx.fill();
@@ -583,14 +605,12 @@ Target.prototype.getObj = function() {
 var ReachTarget = function(props) {
     props = props || {};
     Target.prototype.constructor.call(this, props);
-    this.radius = props.radius || 30;
+    this.radius = props.radius || 50;
 };
 ReachTarget.prototype = Object.create(Target.prototype);
 ReachTarget.prototype.constructor = ReachTarget;
 ReachTarget.prototype.complete = function(player) {
-    var distance = Math.sqrt(Math.pow(player.pos.x - this.pos.x, 2) +
-                             Math.pow(player.pos.y - this.pos.y, 2));
-    return distance < this.radius;
+    return Physics.testContainsCirclePoly(this.outline(), player.outline());
 };
 ReachTarget.prototype.getObj = function() {
     var obj = Target.prototype.getObj.call(this);
@@ -704,8 +724,10 @@ var Bullet = function(props) {
 Bullet.prototype = Object.create(GameObject.prototype);
 Bullet.prototype.constructor = Bullet;
 Bullet.prototype.collide = function(other) {
-    // TODO: if this collides with other and other.health exists,
-    // subtract this.damage from other.health
+    if (other.hasOwnProperty('health')) {
+        other.health -= this.damage;
+        this.alive = false;
+    }
 };
 Bullet.prototype.update = function() {
     // If this bullet has been in the scene for too many ticks,
@@ -774,7 +796,7 @@ var levels = [
     // A level with an asteroid straight ahead and a reach target to the left
     new Level('Level 2', 'images/level2.jpg', function() { return {
         objects: [
-            new Asteroid({ pos: { x: 0, y: -250 }, radius: 100 }),
+            new Asteroid({ pos: { x: 0, y: -250 }, radius: 150 }),
             new ReachTarget({ name: 'target1', win: true, pos: { x: -250, y: 0 } })
         ]
     }; }),
@@ -782,7 +804,7 @@ var levels = [
     new Level('Level 3', 'images/level3.jpg', function() { return {
         player: new Player({ pos: { angular: Math.PI / 2 } }),
         objects: [
-            new Asteroid({ pos: { x: 250, y: 0 }, radius: 75 }),
+            new Asteroid({ pos: { x: 250, y: 0 }, radius: 150 }),
             new ReachTarget({ name: 'target1', win: true, pos: { x: 500, y: 0 } })
         ]
     }; }),

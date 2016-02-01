@@ -54,6 +54,7 @@ $(document).ready(function() {
             };
         })(level, div);
         div.on('click', selectLevelHandler);
+        div.on('dblclick', function(e) { loadLevelBtn.trigger('click'); });
         levelsDiv.append(div);
         // Draw the thumbnail
         var ctx = thumbnail[0].getContext('2d');
