@@ -24,16 +24,21 @@ var ui = {
      */
     hideCode: function() { },
     /**
+     * isVisibleCode();
+     * Returns true if the code window is visible.
+     */
+    isVisibleCode: function() { },
+    /**
      * scrollConsole();
      * Scrolls down to the bottom of the console.
      */
     scrollConsole: function() { },
     /**
-     * writeConsole(line, color = 'black');
-     * Writes the given text to the console window, optionally with the
-     * given color.
+     * writeConsole(line, level = 'log');
+     * Writes the given text to the console window, optionally with a level
+     * of log, warn, or error.
      */
-    writeConsole: function(line, color) { },
+    writeConsole: function(line, level) { },
     /**
      * clearConsole();
      * Clears all text from the console window.
@@ -48,7 +53,12 @@ var ui = {
      * hideConsole();
      * Hides the console window.
      */
-    hideConsole: function() { }
+    hideConsole: function() { },
+    /**
+     * toggleConsole();
+     * Toggles the console window.
+     */
+    toggleConsole: function() { }
 };
 
 // Wrap local variables in a function so that we hide implementation
@@ -87,6 +97,9 @@ var ui = {
         $('#code-popout-btn').text('>');
         // Blur the coding area by focusing on something else
         $('#game-canvas').focus();
+    };
+    ui.isVisibleCode = function() {
+        return !codeHidden;
     };
     ui.scrollConsole = function() {
         consoleContent.scrollTop(consoleContent[0].scrollHeight);
@@ -138,6 +151,13 @@ var ui = {
         consoleWindow.addClass('hidden');
         consoleWindow.css('height', '');
         $('#console-popout-btn').text('^');
+    };
+    ui.toggleConsole = function() {
+        if (consoleHidden) {
+            ui.showConsole();
+        } else {
+            ui.hideConsole();
+        }
     };
 
     $(document).ready(function() {

@@ -17,14 +17,34 @@ var menu = {
      * hideLevels();
      * Hides the level selector.
      */
-    hideLevels: function() { }
+    hideLevels: function() { },
+    /**
+     * isVisibleLevels();
+     * Returns true if the level selector is visible.
+     */
+    isVisibleLevels: function() { },
+    /**
+     * selectPrevLevel();
+     * Changes the selected level to the previous one.
+     */
+    selectPrevLevel: function() { },
+    /**
+     * selectNextLevel();
+     * Changes the selected level to the next one.
+     */
+    selectNextLevel: function() { },
+    /**
+     * loadSelectedLevel();
+     * Loads the select level, or does nothing if no level selected.
+     */
+    loadSelectedLevel: function() { }
 };
 
 $(document).ready(function() {
     var state, selectedLevel = null,
         showLevelsBtn = $('#show-levels'), hideLevelsBtn = $('#hide-levels'),
         loadLevelBtn = $('#load-level'), installBtn = $('#install'),
-        runBtn = $('#run'), restartBtn = $('#restart');
+        runBtn = $('#run'), restartBtn = $('#restart'), levelDivsArr = [];
 
     // Set up level selector interface
     var levelsDiv = $('#levels');
@@ -60,6 +80,11 @@ $(document).ready(function() {
         var ctx = thumbnail[0].getContext('2d');
         level.viewport.fixToBounds(levelBounds, canvasWidth, canvasHeight);
         level.draw(ctx);
+        // Add to level divs array
+        levelDivsArr.push({
+            level: level,
+            div: div
+        });
     }
 
     // Define public menu functions
@@ -87,6 +112,47 @@ $(document).ready(function() {
     menu.hideLevels = function() {
         $('#level-selector').hide();
     };
+    menu.isVisibleLevels = function() {
+        return $('#level-selector').is(':visible');
+    };
+    menu.selectPrevLevel = function() {
+        if (null === selectedLevel) {
+            return;
+        }
+        for (var i = 1; i < levelDivsArr.length; i++) {
+            if (selectedLevel === levelDivsArr[i].level) {
+                var div = levelDivsArr[i - 1].div;
+                div.trigger('click');
+                levelsDiv.scrollTop(levelsDiv.scrollTop() +
+                                    div.position().top - 55);
+                break;
+            }
+        }
+    };
+    menu.selectNextLevel = function() {
+        if (null === selectedLevel) {
+            if (0 < levelDivsArr.length) {
+                var div = levelDivsArr[0].div;
+                div.trigger('click');
+                levelsDiv.scrollTop(levelsDiv.scrollTop() +
+                                    div.position().top - 55);
+            }
+            return;
+        }
+        for (var i = 0; i + 1 < levelDivsArr.length; i++) {
+            if (selectedLevel === levelDivsArr[i].level) {
+                var div = levelDivsArr[i + 1].div;
+                div.trigger('click');
+                levelsDiv.scrollTop(levelsDiv.scrollTop() +
+                                    div.position().top - 55);
+                break;
+            }
+        }
+    };
+    menu.loadSelectedLevel = function() {
+        loadLevelBtn.trigger('click');
+    };
+    // Set the initial state
     menu.setState('waiting');
     menu.hideLevels();
 

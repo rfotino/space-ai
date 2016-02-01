@@ -6,36 +6,83 @@
  * Adds keyboard shortcut listeners.
  */
 $(window).on('keydown', function(e) {
-    var preventDefault = true;
-    if (!e.altKey && !e.shiftKey && e.ctrlKey && 37 === e.keyCode) {
-        // ctrl + left arrow, hide code window
-        ui.hideCode();
-    } else if (!e.altKey && !e.shiftKey && e.ctrlKey && 39 === e.keyCode) {
-        // ctrl + right arrow, show code window
-        ui.showCode();
-    } else if (!e.altKey && !e.shiftKey && e.ctrlKey && 40 === e.keyCode) {
-        // ctrl + down arrow, hide console window
-        ui.hideConsole();
-    } else if (!e.altKey && !e.shiftKey && e.ctrlKey && 38 === e.keyCode) {
-        // ctrl + up arrow, show console window
-        ui.showConsole();
-    } else if (!e.altKey && !e.shiftKey && e.ctrlKey && 73 === e.keyCode) {
-        // ctrl + I, install code
-        $('#install').click();
-    } else if (!e.altKey && !e.shiftKey && e.ctrlKey && 32 === e.keyCode) {
-        // ctrl + Space, run/pause game
-        $('#run').click();
-    } else if (!e.altKey && !e.shiftKey && e.ctrlKey && 81 === e.keyCode) {
-        // ctrl + Q, restart game
-        $('#restart').click();
+    // Different modes have different shortcuts available. When we are
+    // selecting a level we are in 'levelselect' mode, when we have the code
+    // window open we are in 'insert' mode, and when we are doing neither we
+    // are in 'command' mode
+    var mode;
+    if (menu.isVisibleLevels()) {
+        mode = 'levelselect';
+    } else if (ui.isVisibleCode()) {
+        mode = 'insert';
     } else {
-        // No shortcut detected, do the default action
-        preventDefault = false;
+        mode = 'command';
     }
-    // If a shortcut was detected, prevent the default action
-    if (preventDefault) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
+    // Do nothing if any modifier keys are pressed
+    if (e.altKey || e.shiftKey || e.ctrlKey || e.metaKey) {
+        return;
     }
+    // Otherwise switch on the mode, then on the key pressed
+    switch (mode) {
+    case 'levelselect':
+        switch (e.keyCode) {
+        case 27: // escape
+            menu.hideLevels();
+            break;
+        case 13: // enter
+            menu.loadSelectedLevel();
+            break;
+        case 80: // p
+            menu.selectPrevLevel();
+            break;
+        case 78: // n
+            menu.selectNextLevel();
+            break;
+        default:
+            return;
+        }
+        break;
+    case 'insert':
+        // If escape is pressed
+        if (27 === e.keyCode) {
+            ui.hideCode();
+            mode = 'command';
+        } else {
+            return;
+        }
+        break;
+    case 'command':
+    default:
+        switch (e.keyCode) {
+        case 73: // i
+            ui.showCode();
+            mode = 'insert';
+            break;
+        case 67: // c
+            ui.toggleConsole();
+            break;
+        case 68: // d
+            window.open($('#docs').attr('href'), '_blank');
+            break;
+        case 83: // s
+            $('#show-levels').trigger('click');
+            break;
+        case 76: // l
+            $('#install').trigger('click');
+            break;
+        case 32: // space
+            $('#run').trigger('click');
+            break;
+        case 82: // r
+            $('#restart').trigger('click');
+            break;
+        default:
+            return;
+        }
+        break;
+    }
+    // Prevent the default action of the key pressed
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
 });
