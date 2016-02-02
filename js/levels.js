@@ -483,90 +483,86 @@ var Asteroid = function(props) {
     props.type = 'asteroid';
     GameObject.prototype.constructor.call(this, props);
     this.radius = props.radius || 50;
-    // Generate the polygons used for collision and drawing
-    this._outerBounds = [];
-    this._innerBounds = [];
-    // The number of points in both the inner and outer polygons, must be
-    // a minimum of 6
-    var numBoundPoints = Math.max(6, props.radius / 10);
-    // The maximum that a point in the outer polygon can vary from this.radius
-    // or a point in the inner polygon can vary from the outer radius at the
-    // same angle
-    var maxVariance = 50;
-    // The default factor to multiply by this.radius to get the outer variance,
-    // if the result is greater than maxVariance use maxVariance instead
-    var defOuterVarianceFact = 1 / 3;
-    // The maximum that a point can vary from the previous point in either
-    // the inner or outer polygons
-    var maxPointVariance = 20;
-    // The inner padding is the minimum difference between the outer and inner
-    // polygons at the same angle. The default is a factor to multiply by the
-    // value of the outer radius at the same angle
-    var maxInnerPadding = 75;
-    var defInnerPaddingFact = 0.75;
-    // The range of values that can be subtracted from this.radius to get
-    // the radius of a point in the outer polygon
-    var outerRange = Math.min(maxVariance, this.radius * defOuterVarianceFact);
-    // Used to determine the difference between the current and previous points
-    var prevOuterRadius = 0;
-    var prevInnerRadius = 0;
-    for (var i = 0; i < numBoundPoints; i++) {
-        var boundAngle = (Math.PI * 2) * (i / numBoundPoints);
-        var outerRadius;
-        do {
-            outerRadius = this.radius - (outerRange * Math.random());
-        } while (0 !== prevOuterRadius &&
-                 maxPointVariance < Math.abs(prevOuterRadius - outerRadius));
-        prevOuterRadius = outerRadius;
-        var innerRadiusMax = Math.max(outerRadius - maxInnerPadding,
-                                      outerRadius * defInnerPaddingFact);
-        var innerRange = Math.min(maxVariance, outerRadius / 3);
-        var innerRadius;
-        do {
-            innerRadius = innerRadiusMax - (innerRange * Math.random());
-        } while (0 !== prevInnerRadius &&
-                 maxPointVariance < Math.abs(prevInnerRadius - innerRadius));
-        prevInnerRadius = innerRadius;
-        this._outerBounds.push({
-            x: outerRadius * Math.cos(boundAngle),
-            y: outerRadius * Math.sin(boundAngle)
-        });
-        this._innerBounds.push({
-            x: innerRadius * Math.cos(boundAngle),
-            y: innerRadius * Math.sin(boundAngle)
-        });
-    }
+    // Procedurally create the asteroid's graphics
+    this._outline = { points: [] };
+    this._craters = [];
+    this._generateGeometry();
 };
 Asteroid.prototype = Object.create(GameObject.prototype);
 Asteroid.prototype.constructor = Asteroid;
+Asteroid.prototype._generateGeometry = function() {
+    // Create the outer polygon
+    var numOuterPoints = Math.max(6, Math.sqrt(this.radius) * 1.5);
+    var outerRange = Math.sqrt(this.radius) * 2;
+    for (var i = 0; i < numOuterPoints; i++) {
+        var pointAngle = (Math.PI * 2) * (i / numOuterPoints);
+        var pointRadius = this.radius - (outerRange * Math.random());
+        this._outline.points.push({
+            x: pointRadius * Math.cos(pointAngle),
+            y: pointRadius * Math.sin(pointAngle)
+        });
+    }
+    // Create some craters
+    var numCraters = (3 * Math.random()) + (0.25 * Math.sqrt(this.radius));
+    for (var i = 0; i < numCraters; i++) {
+        var crater = { points: [] };
+        var craterAngle = Math.random() * Math.PI * 2;
+        var craterDist = Math.random() * this.radius;
+        var craterX = craterDist * Math.cos(craterAngle);
+        var craterY = craterDist * Math.sin(craterAngle);
+        var craterMultiplier = (0.75 * Math.random()) + 0.25;
+        var craterRadius = 5 * Math.sqrt(this.radius) *
+            ((0.75 * Math.random()) + 0.25);
+        var numCraterPoints = Math.max(6, Math.sqrt(craterRadius) * 1.5);
+        var craterRange = Math.sqrt(craterRadius) * 2;
+        for (var j = 0; j < numCraterPoints; j++) {
+            var pointAngle = (Math.PI * 2) * (j / numCraterPoints);
+            var pointRadius = craterRadius - (craterRange * Math.random());
+            crater.points.push({
+                x: craterX + (pointRadius * Math.cos(pointAngle)),
+                y: craterY + (pointRadius * Math.sin(pointAngle))
+            });
+        }
+        crater.shadowOffset = {
+            angle: Math.random() * Math.PI * 2,
+            radius: 1 + (Math.sqrt(craterRadius) / 2)
+        };
+        this._craters.push(crater);
+    }
+};
 Asteroid.prototype.collide = function(other) {
     if (other instanceof Player) {
         other.health = 0;
     }
 };
 Asteroid.prototype.draw = function(ctx) {
-    // Draw outer bounds
-    ctx.fillStyle = 'saddlebrown';
-    ctx.beginPath();
-    for (var i = 0; i < this._outerBounds.length; i++) {
-        var boundPoint = this._outerBounds[i];
-        ctx.lineTo(boundPoint.x, boundPoint.y);
+    // Draw main polygon
+    Graphics.fillPoly(ctx, this._outline, '#553322');
+    // Save the non-clipped context and then clip it to the outer polygon
+    ctx.save();
+    ctx.clip();
+    // Draw craters, clipped to the outer polygon
+    for (var i = 0; i < this._craters.length; i++) {
+        var crater = this._craters[i];
+        // Shift context and draw shadow
+        ctx.save();
+        ctx.translate(crater.shadowOffset.radius
+                      * Math.cos(crater.shadowOffset.angle),
+                      crater.shadowOffset.radius
+                      * Math.sin(crater.shadowOffset.angle));
+        Graphics.fillPoly(ctx, crater, '#331700');
+        ctx.restore();
+        // Draw the crater
+        Graphics.fillPoly(ctx, crater, '#442211');
     }
-    ctx.fill();
-    // Draw inner bounds
-    ctx.fillStyle = 'sienna';
-    ctx.beginPath();
-    for (var i = 0; i < this._innerBounds.length; i++) {
-        var boundPoint = this._innerBounds[i];
-        ctx.lineTo(boundPoint.x, boundPoint.y);
-    }
-    ctx.fill();
+    // Restore the non-clipped context
+    ctx.restore();
 };
 Asteroid.prototype.outline = function() {
     var transform = Physics.getRotate(this.pos.angular,
                                       Physics.getTranslate(this.pos.x,
                                                            this.pos.y));
-    return { points: this._outerBounds.map(transform) };
+    return { points: this._outline.points.map(transform) };
 };
 Asteroid.prototype.getObj = function() {
     var obj = GameObject.prototype.getObj.call(this);
