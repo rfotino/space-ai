@@ -115,6 +115,9 @@ $(document).ready(function() {
     menu.isVisibleLevels = function() {
         return $('#level-selector').is(':visible');
     };
+    var scrollLevelsDivTo = function(div) {
+        levelsDiv.scrollTop(levelsDiv.scrollTop() + div.position().top - 55);
+    };
     menu.selectPrevLevel = function() {
         if (null === selectedLevel) {
             return;
@@ -123,8 +126,7 @@ $(document).ready(function() {
             if (selectedLevel === levelDivsArr[i].level) {
                 var div = levelDivsArr[i - 1].div;
                 div.trigger('click');
-                levelsDiv.scrollTop(levelsDiv.scrollTop() +
-                                    div.position().top - 55);
+                scrollLevelsDivTo(div);
                 break;
             }
         }
@@ -134,8 +136,7 @@ $(document).ready(function() {
             if (0 < levelDivsArr.length) {
                 var div = levelDivsArr[0].div;
                 div.trigger('click');
-                levelsDiv.scrollTop(levelsDiv.scrollTop() +
-                                    div.position().top - 55);
+                scrollLevelsDivTo(div);
             }
             return;
         }
@@ -143,8 +144,7 @@ $(document).ready(function() {
             if (selectedLevel === levelDivsArr[i].level) {
                 var div = levelDivsArr[i + 1].div;
                 div.trigger('click');
-                levelsDiv.scrollTop(levelsDiv.scrollTop() +
-                                    div.position().top - 55);
+                scrollLevelsDivTo(div);
                 break;
             }
         }

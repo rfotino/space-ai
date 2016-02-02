@@ -362,7 +362,8 @@ Player.prototype.update = function() {
             if (this.equipped === weapon.name) {
                 var bullet = weapon.getBullet(
                     { x: this.fired.x, y: this.fired.y },
-                    { x: this.pos.x, y: this.pos.y });
+                    { x: this.pos.x, y: this.pos.y },
+                    this);
                 if (Array.isArray(bullet)) {
                     this.newObjects.push.apply(this.newObjects, bullet);
                 } else if (null !== bullet) {
@@ -657,11 +658,11 @@ var LaserWeapon = function() {
 };
 LaserWeapon.prototype = Object.create(Weapon.prototype);
 LaserWeapon.prototype.constructor = LaserWeapon;
-LaserWeapon.prototype.getBullet = function(dir, pos) {
+LaserWeapon.prototype.getBullet = function(dir, pos, owner) {
     if (this.cooldownTimer <= 0) {
         if ({ x: 0, y: 0 } !== dir) {
             this.cooldownTimer = this.cooldown;
-            return new LaserBullet({ dir: dir, pos: pos });
+            return new LaserBullet({ dir: dir, pos: pos, owner: owner });
         }
     }
     return null;
@@ -681,12 +682,12 @@ var RocketWeapon = function(props) {
 };
 RocketWeapon.prototype = Object.create(Weapon.prototype);
 RocketWeapon.prototype.constructor = RocketWeapon;
-RocketWeapon.prototype.getBullet = function(dir, pos) {
+RocketWeapon.prototype.getBullet = function(dir, pos, owner) {
     if (this.cooldownTimer <= 0 && 0 < this.ammo) {
         if ({ x: 0, y: 0 } !== dir) {
             this.cooldownTimer = this.cooldown;
             this.ammo--;
-            return new RocketBullet({ dir: dir, pos: pos });
+            return new RocketBullet({ dir: dir, pos: pos, owner: owner });
         }
     }
     return null;
@@ -720,11 +721,12 @@ var Bullet = function(props) {
     this.damage = props.damage || 0;
     this.weapon = props.weapon || '';
     this.lifespan = props.lifespan || 0;
+    this.owner = props.owner || null;
 };
 Bullet.prototype = Object.create(GameObject.prototype);
 Bullet.prototype.constructor = Bullet;
 Bullet.prototype.collide = function(other) {
-    if (other.hasOwnProperty('health')) {
+    if (other !== this.owner && other.hasOwnProperty('health')) {
         other.health -= this.damage;
         this.alive = false;
     }
@@ -752,6 +754,7 @@ Bullet.prototype.getObj = function() {
  */
 var LaserBullet = function(props) {
     props = props || {};
+    props.damage = 10;
     props.speed = 5;
     props.weapon = 'laser';
     props.lifespan = 180;
@@ -771,6 +774,7 @@ LaserBullet.prototype.draw = function(ctx) {
  */
 var RocketBullet = function(props) {
     props = props || {};
+    props.damage = 100;
     props.speed = 5;
     props.weapon = 'rocket';
     props.lifespan = 180;
