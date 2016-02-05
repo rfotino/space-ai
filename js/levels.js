@@ -347,15 +347,14 @@ var Player = function(props) {
 Player.prototype = Object.create(GameObject.prototype);
 Player.prototype.constructor = Player;
 Player.prototype._generateGeometry = function() {
-    this._outline = { points: [
-        { x: 0, y: -50 },
-        { x: 15, y: 0 },
-        { x: 12, y: 7 },
-        { x: 12, y: 10 },
-        { x: -12, y: 10 },
-        { x: -12, y: 7 },
-        { x: -15, y: 0 }
-    ] };
+    var halfOutline = Graphics.getQuadTo({ x: 0, y: -50 },
+                                         { x: 13, y: -40 },
+                                         { x: 15, y: 0 },
+                                         10).concat([ { x: 12, y: 7 },
+                                                      { x: 12, y: 10 } ]);
+    var reflectYFunc = function(p) { return { x: -p.x, y: p.y }; };
+    var otherHalfOutline = halfOutline.map(reflectYFunc).reverse();
+    this._outline = { points: halfOutline.concat(otherHalfOutline) };
     this._drawPolys = [
         {
             color: '#aaa', // upper hull
@@ -371,23 +370,26 @@ Player.prototype._generateGeometry = function() {
             ]
         },
         {
-            color: '#eee', // exhaust port
+            color: '#ddd', // exhaust port
             points: [
                 { x: -12, y: 7 },
                 { x: 12, y: 7 },
                 { x: 12, y: 10 },
                 { x: -12, y: 10 }
             ]
-        },
-        {
-            color: '#0f9', // cockpit
-            points: [
-                { x: 0, y: -38 },
-                { x: 6, y: -14 },
-                { x: -6, y: -14 }
-            ]
         }
     ];
+    // Add the cockpit separately
+    var halfCockpit = Graphics.getQuadTo({ x: 0, y: -40 },
+                                         { x: 5, y: -35 },
+                                         { x: 6, y: -16 },
+                                         5);
+    var otherHalfCockpit = halfCockpit.map(reflectYFunc).reverse();
+    this._drawPolys.push({
+        color: '#0f9',
+        points: halfCockpit.concat(otherHalfCockpit)
+    });
+    // Set up geometry and constants for the thrust flame
     this._flamePoly = { points: [
         { x: -10, y: 0 },
         { x: 10, y: 0 },
