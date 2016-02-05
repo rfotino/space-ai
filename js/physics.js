@@ -139,6 +139,25 @@ Physics.getRotate = function(theta, transform) {
 };
 
 /**
+ * Gets a function for scaling a point.
+ *
+ * @param {Number|Point} scale Either a scalar or an x, y scale to apply.
+ * @param {Function} transform An additional function to apply to the point.
+ * @return {Function} A function that returns a transformed point.
+ */
+Physics.getScale = function(scale, transform) {
+    transform = transform || function(p) { return p; };
+    var scaleX = scale.x || scale;
+    var scaleY = scale.y || scale;
+    return function(p) {
+        return transform({
+            x: scaleX * p.x,
+            y: scaleY * p.y
+        });
+    };
+};
+
+/**
  * Gets the bounding box for the given polygon.
  *
  * @param {Polygon} poly

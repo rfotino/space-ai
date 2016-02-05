@@ -128,9 +128,7 @@ Level.prototype.draw = function(ctx) {
     ctx.save();
     ctx.translate(player.pos.x, player.pos.y);
     ctx.rotate(player.pos.angular);
-    ctx.fillStyle = 'green';
-    ctx.fillRect(-player.width / 2, -player.height / 2,
-                 player.width, player.height);
+    player.draw(ctx);
     ctx.restore();
     // Draw win/lose screen if necessary
     if (typeof this._state.gameOver !== 'undefined') {
@@ -344,11 +342,63 @@ var Player = function(props) {
     this.thrustPower = props.thrustPower || 0;
     this.turnPower = props.turnPower || 0;
     this.fired = props.fired || false;
-    this.width = 20;
-    this.height = 40;
+    this._generateGeometry();
 };
 Player.prototype = Object.create(GameObject.prototype);
 Player.prototype.constructor = Player;
+Player.prototype._generateGeometry = function() {
+    this._outline = { points: [
+        { x: 0, y: -50 },
+        { x: 15, y: 0 },
+        { x: 12, y: 7 },
+        { x: 12, y: 10 },
+        { x: -12, y: 10 },
+        { x: -12, y: 7 },
+        { x: -15, y: 0 }
+    ] };
+    this._drawPolys = [
+        {
+            color: '#aaa', // upper hull
+            points: this._outline.points
+        },
+        {
+            color: '#999', // lower hull
+            points: [
+                { x: -15, y: 0 },
+                { x: 15, y: 0 },
+                { x: 12, y: 7 },
+                { x: -12, y: 7 }
+            ]
+        },
+        {
+            color: '#eee', // exhaust port
+            points: [
+                { x: -12, y: 7 },
+                { x: 12, y: 7 },
+                { x: 12, y: 10 },
+                { x: -12, y: 10 }
+            ]
+        },
+        {
+            color: '#0f9', // cockpit
+            points: [
+                { x: 0, y: -38 },
+                { x: 6, y: -14 },
+                { x: -6, y: -14 }
+            ]
+        }
+    ];
+    this._flamePoly = { points: [
+        { x: -10, y: 0 },
+        { x: 10, y: 0 },
+        { x: 0, y: 15 }
+    ] };
+    var bounds = Physics.getPolyBounds(this._outline);
+    this._flamePosY = bounds.y + bounds.height;
+    this._flameFlicker = 0;
+    this._flameFlickerThreshold = 6;
+    this._flameFlickerMax = 8;
+};
 Player.prototype.update = function() {
     // Update the player's weapons
     for (var i = 0; i < this.weapons.length; i++) {
@@ -381,9 +431,32 @@ Player.prototype.update = function() {
     GameObject.prototype.update.call(this);
 };
 Player.prototype.draw = function(ctx) {
-    ctx.fillStyle = 'green';
-    ctx.fillRect(-this.width / 2, -this.height / 2,
-                 this.width, this.height);
+    // Draw the polygons
+    for (var i = 0; i < this._drawPolys.length; i++) {
+        var poly = this._drawPolys[i];
+        Graphics.fillPoly(ctx, poly, poly.color);
+    }
+    // Draw the exhaust
+    this._flameFlicker = (this._flameFlicker + 1) % this._flameFlickerMax;
+    if (this._flameFlicker < this._flameFlickerThreshold) {
+        var flameScale = {
+            x: 0.5 + (this.thrustPower / 2),
+            y: this.thrustPower
+        };
+        var translateTransform = Physics.getTranslate(0, this._flamePosY);
+        var transform = Physics.getScale(flameScale, translateTransform);
+        var flamePoly = { points: this._flamePoly.points.map(transform) };
+        Graphics.fillPoly(ctx, flamePoly, 'orange');
+    }
+};
+Player.prototype.bounds = function() {
+    return Physics.getPolyBounds(this.outline());
+};
+Player.prototype.outline = function() {
+    var transform = Physics.getRotate(this.pos.angular,
+                                      Physics.getTranslate(this.pos.x,
+                                                           this.pos.y));
+    return { points: this._outline.points.map(transform) };
 };
 Player.prototype.getObj = function() {
     var obj = GameObject.prototype.getObj.call(this);
@@ -394,7 +467,8 @@ Player.prototype.getObj = function() {
         thrust: this.thrust,
         thrustPower: this.thrustPower,
         turnPower: this.turnPower,
-        fired: this.fired
+        fired: this.fired,
+        bounds: this.bounds()
     });
 };
 
