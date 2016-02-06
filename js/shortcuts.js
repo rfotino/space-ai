@@ -67,9 +67,6 @@ $(window).on('keydown', function(e) {
         case 83: // s
             $('#show-levels').trigger('click');
             break;
-        case 76: // l
-            $('#install').trigger('click');
-            break;
         case 32: // space
             $('#run').trigger('click');
             break;

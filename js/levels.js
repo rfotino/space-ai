@@ -44,8 +44,13 @@ Level.prototype.init = function() {
     this.viewport.focus(this._state.player);
 };
 
-// Update all game objects, do collision detection, and check win conditions
+// Updates the game state every frame
 Level.prototype.update = function() {
+    this._updateGameObjects();
+    this._checkWinConditions();
+};
+// Update each game object and do collision detection
+Level.prototype._updateGameObjects = function() {
     var player = this._state.player;
     // Add the player to the beginning of the game object list
     this._state.objects.unshift(player);
@@ -79,25 +84,40 @@ Level.prototype.update = function() {
     }
     // Remove the player from the beginning of the game object list
     this._state.objects.shift();
-    // Check win conditions
+};
+// Check the game state to see if the player won, lost, or neither
+Level.prototype._checkWinConditions = function() {
+    var player = this._state.player;
     var gameWon = true, gameLost = false;
+    // Check if the player is dead
     if (player.health <= 0) {
         gameLost = true;
     }
-    for (var i = 0; i < this._state.objects.length; i++) {
-        var obj = this._state.objects[i];
-        if (obj instanceof Target) {
-            if (obj.complete(player)) {
-                if (obj.lose) {
-                    gameLost = true;
-                }
-            } else {
-                if (obj.win) {
-                    gameWon = false;
-                }
+    // Get all of the game objects that are "targets", which can
+    // be check for win conditions
+    var targets = this._state.objects.filter(function(obj) {
+        return obj instanceof Target;
+    });
+    // If there are no targets, the player should not win automatically
+    if (0 === targets.length) {
+        gameWon = false;
+    }
+    // Iterate over the targets, checking if they have been completed
+    // and whether that signifies a win or lose condition
+    for (var i = 0; i < targets.length; i++) {
+        var target = targets[i];
+        if (target.complete(player)) {
+            if (target.lose) {
+                gameLost = true;
+            }
+        } else {
+            if (target.win) {
+                gameWon = false;
             }
         }
     }
+    // If the player won or lost, update the gameOver variable to
+    // indicate this and show the game over screen
     if (gameLost) {
         this._state.gameOver = 'lose';
     } else if (gameWon) {

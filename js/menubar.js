@@ -43,8 +43,8 @@ var menu = {
 $(document).ready(function() {
     var state, selectedLevel = null,
         showLevelsBtn = $('#show-levels'), hideLevelsBtn = $('#hide-levels'),
-        loadLevelBtn = $('#load-level'), installBtn = $('#install'),
-        runBtn = $('#run'), restartBtn = $('#restart'), levelDivsArr = [];
+        loadLevelBtn = $('#load-level'), restartBtn = $('#restart'),
+        runBtn = $('#run'), levelDivsArr = [];
 
     // Set up level selector interface
     var levelsDiv = $('#levels');
@@ -175,11 +175,7 @@ $(document).ready(function() {
     });
     loadLevelBtn.addClass('disabled');
 
-    // Set up install/run/restart button listeners
-    installBtn.on('click', function(e) {
-        e.preventDefault();
-        game.install(ui.getCode());
-    });
+    // Set up restart/run button listeners
     runBtn.on('click', function(e) {
         e.preventDefault();
         switch (state) {
@@ -197,6 +193,7 @@ $(document).ready(function() {
     });
     restartBtn.on('click', function(e) {
         e.preventDefault();
+        game.install(ui.getCode());
         game.restart();
     });
 });
