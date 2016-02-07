@@ -46,8 +46,8 @@ Level.prototype.init = function() {
 
 // Updates the game state every frame
 Level.prototype.update = function() {
-    this._updateGameObjects();
     this._checkWinConditions();
+    this._updateGameObjects();
 };
 // Update each game object and do collision detection
 Level.prototype._updateGameObjects = function() {
@@ -175,7 +175,7 @@ Level.prototype.draw = function(ctx) {
 // Gets the state of the game world to pass to the worker thread
 Level.prototype.getWorld = function() {
     var getObj = function(obj) { return obj.getObj(); };
-    var isObj = function(obj) { return 'object' === typeof obj; };
+    var isObj = function(obj) { return obj && ('object' === typeof obj); };
     return {
         player: this._state.player.getObj(),
         objects: this._state.objects.map(getObj).filter(isObj)
@@ -685,12 +685,6 @@ var Target = function(props) {
 Target.prototype = Object.create(GameObject.prototype);
 Target.prototype.constructor = Target;
 Target.prototype.complete = function(player) { return false; }
-Target.prototype.draw = function(ctx) {
-    ctx.fillStyle = 'rgba(50, 50, 255, 0.6)';
-    ctx.beginPath();
-    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-    ctx.fill();
-};
 Target.prototype.getObj = function() {
     var obj = GameObject.prototype.getObj.call(this);
     return $.extend(obj, {
@@ -717,6 +711,47 @@ ReachTarget.prototype.getObj = function() {
         objective: 'reach',
         radius: this.radius
     });
+};
+ReachTarget.prototype.draw = function(ctx) {
+    ctx.fillStyle = 'rgba(50, 50, 255, 0.6)';
+    ctx.beginPath();
+    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+};
+
+/**
+ * A class for destructible targets.
+ */
+var DestroyTarget = function(props) {
+    props = props || {};
+    Target.prototype.constructor.call(this, props);
+    this.radius = props.radius || 50;
+    this.health = props.health || 100;
+};
+DestroyTarget.prototype = Object.create(Target.prototype);
+DestroyTarget.prototype.constructor = DestroyTarget;
+DestroyTarget.prototype.complete = function() {
+    return this.health <= 0;
+};
+DestroyTarget.prototype.getObj = function() {
+    if (this.complete()) {
+        return null;
+    } else {
+        var obj = Target.prototype.getObj.call(this);
+        return $.extend(obj, {
+            objective: 'destroy',
+            radius: this.radius,
+            health: this.health
+        });
+    }
+};
+DestroyTarget.prototype.draw = function(ctx) {
+    if (!this.complete()) {
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.6)';
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
 };
 
 /**
@@ -750,7 +785,6 @@ Weapon.prototype.getObj = function() {
 var LaserWeapon = function() {
     Weapon.prototype.constructor.call(this, {
         name: 'laser',
-        damage: 5,
         cooldown: 20
     });
 };
@@ -760,7 +794,7 @@ LaserWeapon.prototype.getBullet = function(dir, pos, owner) {
     if (this.cooldownTimer <= 0) {
         if ({ x: 0, y: 0 } !== dir) {
             this.cooldownTimer = this.cooldown;
-            return new LaserBullet({ dir: dir, pos: pos, owner: owner });
+            return new LaserBullet({ dir: dir, pos: pos, owner: owner  });
         }
     }
     return null;
@@ -773,7 +807,6 @@ var RocketWeapon = function(props) {
     props = props || {};
     Weapon.prototype.constructor.call(this, {
         name: 'rocket',
-        damage: 50,
         ammo: props.ammo || 0,
         cooldown: 60
     });
@@ -852,7 +885,7 @@ Bullet.prototype.getObj = function() {
  */
 var LaserBullet = function(props) {
     props = props || {};
-    props.damage = 10;
+    props.damage = 5;
     props.speed = 5;
     props.weapon = 'laser';
     props.lifespan = 180;
@@ -910,7 +943,18 @@ var levels = [
             new ReachTarget({ name: 'target1', win: true, pos: { x: 500, y: 0 } })
         ]
     }; }),
-    new Level('Level 4', function() { return {}; }),
+    new Level('Level 4', function() { return {
+        player: new Player({ weapons: [ new LaserWeapon() ] }),
+        objects: [
+            new DestroyTarget({
+                name: 'enemy1',
+                win: true,
+                pos: { x: 0, y: -250 },
+                health: 25,
+                radius: 25
+            })
+        ]
+    }; }),
     new Level('Level 5', function() { return {}; }),
     new Level('Level 6', function() { return {}; }),
     new Level('Level 7', function() { return {}; }),
