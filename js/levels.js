@@ -500,11 +500,13 @@ Player.prototype.getObj = function() {
  */
 var StarField = function(density) {
     this._density = density || 0.005;
-    this._bounds = { x: 0, y: 0, width: 0, height: 0 };
+    this._bounds = { x: 0, y: 0, width: screen.width, height: screen.height };
     this._stars = [];
     this._color = '#bbf';
     this._minRadius = 0.25;
     this._maxRadius = 1.5;
+    this._addStars(this._bounds.x, this._bounds.y,
+                   this._bounds.width, this._bounds.height);
 };
 StarField.prototype._addStars = function(x, y, width, height) {
     var numStars = width * height * this._density;
@@ -518,55 +520,59 @@ StarField.prototype._addStars = function(x, y, width, height) {
     }
 };
 StarField.prototype.draw = function(ctx, viewport) {
-    // We need to make sure the star field's bounds include the viewport's
-    // bounds. If not, expand the star field's bounds by adding more stars
+    // We need to make sure we cover the entire viewport bounds with stars
     var viewBounds = viewport.bounds(ctx);
-    // Expand the star field to the left if necessary
-    if (viewBounds.x < this._bounds.x) {
-        this._addStars(viewBounds.x, this._bounds.y,
-                       this._bounds.x - viewBounds.x,
-                       this._bounds.height);
-        this._bounds.width += this._bounds.x - viewBounds.x;
-        this._bounds.x = viewBounds.x;
-    }
-    // Expand the star field up if necessary
-    if (viewBounds.y < this._bounds.y) {
-        this._addStars(this._bounds.x, viewBounds.y,
-                       this._bounds.width,
-                       this._bounds.y - viewBounds.y);
-        this._bounds.height += this._bounds.y - viewBounds.y;
-        this._bounds.y = viewBounds.y;
-    }
-    // Expand the star field to the right if necessary
-    var starBoundsRight = this._bounds.x + this._bounds.width;
     var viewBoundsRight = viewBounds.x + viewBounds.width;
-    if (starBoundsRight < viewBoundsRight) {
-        this._addStars(starBoundsRight,
-                       this._bounds.y,
-                       viewBoundsRight - starBoundsRight,
-                       this._bounds.height);
-        this._bounds.width += viewBoundsRight - starBoundsRight;
-    }
-    // Expand the star field downward if necessary
-    var starBoundsBottom = this._bounds.y + this._bounds.height;
     var viewBoundsBottom = viewBounds.y + viewBounds.height;
-    if (starBoundsBottom < viewBoundsBottom) {
-        this._addStars(this._bounds.x,
-                       starBoundsBottom,
-                       this._bounds.width,
-                       viewBoundsBottom - starBoundsBottom);
-        this._bounds.height += viewBoundsBottom - starBoundsBottom;
-    }
-    // Draw all the stars
+    // Figure out the offset that we need to draw the first iteration of
+    // the starfield at
+    var minXIndex = Math.floor((viewBounds.x - this._bounds.x) /
+                               this._bounds.width);
+    var minYIndex = Math.floor((viewBounds.y - this._bounds.y) /
+                               this._bounds.height);
+    var minXCoord = this._bounds.x + (minXIndex * this._bounds.width);
+    var minYCoord = this._bounds.y + (minYIndex * this._bounds.height);
+    // Find out the offset for the last iteration of the starfield
+    var maxXIndex = minXIndex +
+        Math.ceil((viewBoundsRight - minXCoord) / this._bounds.width);
+    var maxYIndex = minYIndex +
+        Math.ceil((viewBoundsBottom - minYCoord) / this._bounds.height);
+    // We need a slight random offset for each star, depending on which
+    // star field indices are being used. Define a RNG getter here
+    var getRng = function(seed) {
+        return function() {
+            var x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        };
+    };
+    // Repeat the starfield from the minimum indices to the maximum indices,
+    // which should completely cover the viewport
     ctx.fillStyle = this._color;
-    for (var i = 0; i < this._stars.length; i++) {
-        var star = this._stars[i];
-        // Check if star is in view before drawing
-        if (viewBounds.x <= star.x && star.x <= viewBoundsRight &&
-            viewBounds.y <= star.y && star.y <= viewBoundsBottom) {
-            ctx.beginPath();
-            ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-            ctx.fill();
+    for (var i = minXIndex; i < maxXIndex; i++) {
+        for (var j = minYIndex; j < maxYIndex; j++) {
+            // Define a new random number generator for this iteration of
+            // the star field, seeded with a number dependent on the x and y
+            // indices of this particular star field
+            var rng = getRng(i + (j * 10000));
+            for (var k = 0; k < this._stars.length; k++) {
+                var star = this._stars[k];
+                // Get the adjusted x and y coordinates. These are the
+                // original coordinates plus the bounds coordinates plus
+                // the offset for the position of the bounding box plus a
+                // random offset between -25 and 25 depending on which bounds
+                // indices we are drawing
+                var adjX = star.x + this._bounds.x +
+                    (i * this._bounds.width) + ((rng() - 0.5) * 50);
+                var adjY = star.y + this._bounds.y +
+                    (j * this._bounds.height) + ((rng() - 0.5) * 50);
+                // Check if star is in view before drawing
+                if (viewBounds.x <= adjX && adjX <= viewBoundsRight &&
+                    viewBounds.y <= adjY && adjY <= viewBoundsBottom) {
+                    ctx.beginPath();
+                    ctx.arc(adjX, adjY, star.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
         }
     }
 };
