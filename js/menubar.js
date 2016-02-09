@@ -169,7 +169,7 @@ $(document).ready(function() {
         e.preventDefault();
         if (selectedLevel) {
             menu.hideLevels();
-            showLevelsBtn.text(selectedLevel.name);
+            showLevelsBtn.text('Level: ' + selectedLevel.name);
             game.load(selectedLevel);
         }
     });

@@ -84,8 +84,8 @@ Level.prototype._checkWinConditions = function() {
     var targets = this._state.objects.filter(function(obj) {
         return obj instanceof Target;
     });
-    // If there are no targets, the player should not win automatically
-    if (0 === targets.length) {
+    // If there are no win targets, the player should not win automatically
+    if (0 === (targets.filter(function(t) { return t.win; })).length) {
         gameWon = false;
     }
     // Iterate over the targets, checking if they have been completed
@@ -341,6 +341,7 @@ var Player = function(props) {
     props = props || {};
     props.type = 'player';
     GameObject.prototype.constructor.call(this, props);
+    this.owner = 'player';
     this.weapons = props.weapons || [];
     this.equipped = props.equipped || null;
     this.health = props.health || 100;
@@ -421,7 +422,7 @@ Player.prototype.update = function() {
                 var bullet = weapon.getBullet(
                     { x: this.fired.x, y: this.fired.y },
                     { x: this.pos.x, y: this.pos.y },
-                    this);
+                    'player');
                 if (Array.isArray(bullet)) {
                     this.newObjects.push.apply(this.newObjects, bullet);
                 } else if (null !== bullet) {
@@ -666,7 +667,10 @@ var Target = function(props) {
     props = props || {};
     props.type = 'target';
     GameObject.prototype.constructor.call(this, props);
-    this.win = props.win || true;
+    this.objective = props.objective || null;
+    this.radius = props.radius || 50;
+    this.win = typeof props.win === 'undefined' ? false : props.win;
+    this.lose = typeof props.lose === 'undefined' ? false : props.lose;
 };
 Target.prototype = Object.create(GameObject.prototype);
 Target.prototype.constructor = Target;
@@ -674,33 +678,15 @@ Target.prototype.complete = function(player) { return false; }
 Target.prototype.getObj = function() {
     var obj = GameObject.prototype.getObj.call(this);
     return $.extend(obj, {
-        win: this.win
+        objective: this.objective,
+        radius: this.radius,
+        win: this.win,
+        lose: this.lose
     });
 };
-
-/**
- * A class for reach targets.
- */
-var ReachTarget = function(props) {
-    props = props || {};
-    Target.prototype.constructor.call(this, props);
-    this.radius = props.radius || 50;
-};
-ReachTarget.prototype = Object.create(Target.prototype);
-ReachTarget.prototype.constructor = ReachTarget;
-ReachTarget.prototype.complete = function(player) {
-    return Physics.testContainsCirclePoly(this.outline(), player.outline());
-};
-ReachTarget.prototype.getObj = function() {
-    var obj = Target.prototype.getObj.call(this);
-    return $.extend(obj, {
-        objective: 'reach',
-        radius: this.radius
-    });
-};
-ReachTarget.prototype.draw = function(ctx) {
-    ctx.fillStyle = 'rgba(50, 50, 255, 0.6)';
-    ctx.strokeStyle = 'rgb(50, 50, 255)';
+Target.prototype.draw = function(ctx) {
+    ctx.fillStyle = this._fillStyle;
+    ctx.strokeStyle = this._strokeStyle;
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
@@ -709,46 +695,78 @@ ReachTarget.prototype.draw = function(ctx) {
 };
 
 /**
- * A class for destructible targets.
+ * A class for reach targets.
  */
-var DestroyTarget = function(props) {
+var ReachTarget = function(props) {
     props = props || {};
+    props.objective = 'reach';
     Target.prototype.constructor.call(this, props);
     this.radius = props.radius || 50;
+    this._fillStyle = 'rgba(50, 50, 255, 0.5)';
+    this._strokeStyle = 'rgb(50, 50, 255)';
+};
+ReachTarget.prototype = Object.create(Target.prototype);
+ReachTarget.prototype.constructor = ReachTarget;
+ReachTarget.prototype.complete = function(player) {
+    return Physics.testContainsCirclePoly(this.outline(), player.outline());
+};
+
+/**
+ * A class for destructible targets.
+ */
+var DestructibleTarget = function(props) {
+    props = props || {};
+    Target.prototype.constructor.call(this, props);
     this.health = props.health || 100;
 };
-DestroyTarget.prototype = Object.create(Target.prototype);
-DestroyTarget.prototype.constructor = DestroyTarget;
-DestroyTarget.prototype.complete = function() {
+DestructibleTarget.prototype = Object.create(Target.prototype);
+DestructibleTarget.prototype.constructor = DestructibleTarget;
+DestructibleTarget.prototype.complete = function() {
     return this.health <= 0;
 };
-DestroyTarget.prototype.getObj = function() {
-    if (this.complete()) {
+DestructibleTarget.prototype.getObj = function() {
+    if (this.health <= 0) {
         return null;
     } else {
         var obj = Target.prototype.getObj.call(this);
         return $.extend(obj, {
-            objective: 'destroy',
-            radius: this.radius,
             health: this.health
         });
     }
 };
-DestroyTarget.prototype.draw = function(ctx) {
-    if (!this.complete()) {
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.6)';
-        ctx.beginPath();
-        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
-        ctx.strokeStyle = 'rgb(255, 0, 0)';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
+DestructibleTarget.prototype.draw = function(ctx) {
+    if (0 < this.health) {
+        Target.prototype.draw.call(this, ctx);
     }
 };
+
+/**
+ * A class for enemy targets.
+ */
+var EnemyTarget = function(props) {
+    props = props || {};
+    props.objective = 'destroy';
+    DestructibleTarget.prototype.constructor.call(this, props);
+    this.owner = 'enemy';
+    this._fillStyle = 'rgba(255, 0, 0, 0.5)';
+    this._strokeStyle = 'rgb(255, 0, 0)';
+};
+EnemyTarget.prototype = Object.create(DestructibleTarget.prototype);
+EnemyTarget.prototype.constructor = EnemyTarget;
+
+/**
+ * A class for friendly targets.
+ */
+var FriendlyTarget = function(props) {
+    props = props || {};
+    props.objective = 'defend';
+    DestructibleTarget.prototype.constructor.call(this, props);
+    this.owner = 'player';
+    this._fillStyle = 'rgba(0, 255, 0, 0.5)';
+    this._strokeStyle = 'rgb(0, 255, 0)';
+};
+FriendlyTarget.prototype = Object.create(DestructibleTarget.prototype);
+FriendlyTarget.prototype.constructor = FriendlyTarget;
 
 /**
  * An abstract class for weapons.
@@ -853,7 +871,7 @@ var Bullet = function(props) {
 Bullet.prototype = Object.create(GameObject.prototype);
 Bullet.prototype.constructor = Bullet;
 Bullet.prototype.collide = function(other) {
-    if (other !== this.owner && other.hasOwnProperty('health')) {
+    if (other.owner !== this.owner && other.hasOwnProperty('health')) {
         other.health -= this.damage;
         this.alive = false;
     }
@@ -935,7 +953,7 @@ var levels = [
             equipped: 'laser'
         }),
         objects: [
-            new DestroyTarget({
+            new EnemyTarget({
                 name: 'enemy1',
                 win: true,
                 pos: { x: 0, y: -250 },
@@ -947,7 +965,7 @@ var levels = [
     new Level('Equip and Fire', function() { return {
         player: new Player({ weapons: [ new RocketWeapon({ ammo: 1 }) ] }),
         objects: [
-            new DestroyTarget({
+            new EnemyTarget({
                 name: 'enemy1',
                 win: true,
                 pos: { x: 0, y: -250 },
@@ -996,7 +1014,7 @@ var levels = [
                 equipped: 'laser'
             }),
             objects: [
-                new DestroyTarget({
+                new EnemyTarget({
                     name: 'enemy1',
                     win: true,
                     pos: {
