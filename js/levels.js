@@ -5,25 +5,11 @@
 /**
  * Creates a game level from some initial state.
  */
-function Level(name, image, initial) {
-    switch (arguments.length) {
-    case 3:
-        this.name = arguments[0];
-        this.image = arguments[1];
-        this._stateFunc = arguments[2];
-        break;
-    case 2:
-        this.name = arguments[0];
-        this._stateFunc = arguments[1];
-        break;
-    case 1:
-        this._stateFunc = arguments[0];
-        break;
-    default:
-        throw 'Invalid number of arguments for Level().';
-    }
+function Level(name, stateFunc) {
+    this.name = name;
+    this._stateFunc = stateFunc;
     this.viewport = new Viewport();
-}
+};
 
 // Initialize the state to start the level
 Level.prototype.init = function() {
@@ -714,9 +700,12 @@ ReachTarget.prototype.getObj = function() {
 };
 ReachTarget.prototype.draw = function(ctx) {
     ctx.fillStyle = 'rgba(50, 50, 255, 0.6)';
+    ctx.strokeStyle = 'rgb(50, 50, 255)';
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
     ctx.fill();
+    ctx.stroke();
 };
 
 /**
@@ -751,6 +740,13 @@ DestroyTarget.prototype.draw = function(ctx) {
         ctx.beginPath();
         ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
         ctx.fill();
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
+        ctx.strokeStyle = 'rgb(255, 0, 0)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
     }
 };
 
@@ -922,53 +918,109 @@ RocketBullet.prototype.draw = function(ctx) {
 
 // An array of levels that can be loaded from the level selector
 var levels = [
-    // A level with a reach target straight ahead
-    new Level('Level 1', 'images/level1.jpg', function() { return {
+    // A reach target straight ahead
+    new Level('Thrust', function() { return {
         objects: [
-            new ReachTarget({ name: 'target1', win: true, pos: { x: 0, y: -250 } })
+            new ReachTarget({
+                name: 'target1',
+                win: true,
+                pos: { x: 0, y: -250 }
+            })
         ]
     }; }),
-    // A level with an asteroid straight ahead and a reach target to the left
-    new Level('Level 2', 'images/level2.jpg', function() { return {
-        objects: [
-            new Asteroid({ pos: { x: 0, y: -250 }, radius: 150 }),
-            new ReachTarget({ name: 'target1', win: true, pos: { x: -250, y: 0 } })
-        ]
-    }; }),
-    // A level with an asteroid in between the player and a reach target
-    new Level('Level 3', 'images/level3.jpg', function() { return {
-        player: new Player({ pos: { angular: Math.PI / 2 } }),
-        objects: [
-            new Asteroid({ pos: { x: 250, y: 0 }, radius: 150 }),
-            new ReachTarget({ name: 'target1', win: true, pos: { x: 500, y: 0 } })
-        ]
-    }; }),
-    new Level('Level 4', function() { return {
-        player: new Player({ weapons: [ new LaserWeapon() ] }),
+    // A static destructible target straight ahead and equipped lasers
+    new Level('Fire', function() { return {
+        player: new Player({
+            weapons: [ new LaserWeapon() ],
+            equipped: 'laser'
+        }),
         objects: [
             new DestroyTarget({
                 name: 'enemy1',
                 win: true,
                 pos: { x: 0, y: -250 },
-                health: 25,
-                radius: 25
+                health: 25
             })
         ]
     }; }),
-    new Level('Level 5', function() { return {}; }),
-    new Level('Level 6', function() { return {}; }),
-    new Level('Level 7', function() { return {}; }),
-    new Level('Level 8', function() { return {}; }),
-    new Level('Level 9', function() { return {}; }),
-    new Level('Level 10', function() { return {}; }),
-    new Level('Level 11', function() { return {}; }),
-    new Level('Level 12', function() { return {}; }),
-    new Level('Level 13', function() { return {}; }),
-    new Level('Level 14', function() { return {}; }),
-    new Level('Level 15', function() { return {}; }),
-    new Level('Level 16', function() { return {}; }),
-    new Level('Level 17', function() { return {}; }),
-    new Level('Level 18', function() { return {}; }),
-    new Level('Level 19', function() { return {}; }),
-    new Level('Level 20', function() { return {}; })
+    // A static destructible target straight ahead and unequipped rockets
+    new Level('Equip and Fire', function() { return {
+        player: new Player({ weapons: [ new RocketWeapon({ ammo: 1 }) ] }),
+        objects: [
+            new DestroyTarget({
+                name: 'enemy1',
+                win: true,
+                pos: { x: 0, y: -250 },
+                health: 25
+            })
+        ]
+    }; }),
+    // An asteroid straight ahead and a reach target to the left
+    new Level('Turn', function() { return {
+        objects: [
+            new Asteroid({
+                pos: { x: 0, y: -250 },
+                radius: 150
+            }),
+            new ReachTarget({
+                name: 'target1',
+                win: true,
+                pos: { x: -250, y: 0 }
+            })
+        ]
+    }; }),
+    // A reach target is randomly positioned around the player
+    new Level('Turn Anywhere', function() {
+        var angle = Math.random() * Math.PI * 2;
+        var radius = 250;
+        return {
+            objects: [
+                new ReachTarget({
+                    name: 'target1',
+                    win: true,
+                    pos: {
+                        x: radius * Math.cos(angle),
+                        y: radius * Math.sin(angle)
+                    }
+                })
+            ]
+        };
+    }),
+    // A destructible target is randomly positioned around the player
+    new Level('Aim and Fire', function() {
+        var angle = Math.random() * Math.PI * 2;
+        var radius = 250;
+        return {
+            player: new Player({
+                weapons: [ new LaserWeapon() ],
+                equipped: 'laser'
+            }),
+            objects: [
+                new DestroyTarget({
+                    name: 'enemy1',
+                    win: true,
+                    pos: {
+                        x: radius * Math.cos(angle),
+                        y: radius * Math.sin(angle)
+                    },
+                    health: 25
+                })
+            ]
+        };
+    }),
+    // An asteroid in between the player and a reach target
+    new Level('Flight Path', function() { return {
+        player: new Player({ pos: { angular: Math.PI / 2 } }),
+        objects: [
+            new Asteroid({
+                pos: { x: 250, y: 0 },
+                radius: 150
+            }),
+            new ReachTarget({
+                name: 'target1',
+                win: true,
+                pos: { x: 500, y: 0 }
+            })
+        ]
+    }; })
 ];
