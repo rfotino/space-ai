@@ -1,51 +1,24 @@
 /**
  * Copyright (c) 2015 Robert Fotino.
+ *
+ * This defines a module for installing code, running/pausing code, loading
+ * levels, restarting, and drawing the game.
  */
 
-var game = {
-    /**
-     * install(code);
-     * Installs the new user code and runs it.
-     */
-    install: function(code) { },
-    /**
-     * run();
-     * Runs the currently installed user code, if it was paused.
-     */
-    run: function() { },
-    /**
-     * pause();
-     * Pauses the currently running user code.
-     */
-    pause: function() { },
-    /**
-     * load(level);
-     * Loads a game level from an object given in the required format.
-     */
-    load: function(level) { },
-    /**
-     * restart();
-     * Resets the game to the initial conditions for the currently
-     * loaded level.
-     */
-    restart: function() { },
-    /**
-     * draw();
-     * Redraws the game state on the canvas.
-     */
-    draw: function() { }
-};
+define(function(require, exports, module) {
+    var $ = require('jquery');
+    var ui = require('ui');
+    var menubar = require('menubar');
+    var Level = require('obj/Level');
 
-// Wrap local variables in a function so that we hide implementation
-// details and don't pollute the global scope.
-(function() {
+    // Declare variables for DOM elements and handling state
     var canvas, ctx, worker = null, running = false,
         frameComplete = true, timerComplete = true,
         level = null, installedCode = null;
 
     // Begins executing the user's code for the next frame, and sets a timer
     // for the minimum length of a frame. If the game is over, this does nothing
-    function execute() {
+    var execute = function() {
         if (null === level || level.complete()) {
             return;
         }
@@ -59,18 +32,23 @@ var game = {
         }, minFrameTime);
         worker.postMessage({ type: 'execute', world: level.getWorld() });
     }
+
     // Update the run/pause button in the menu to the correct state
-    function updateMenu() {
+    var updateMenu = function() {
         if (null === installedCode || null === level || level.complete()) {
-            menu.setState('waiting');
+            menubar.setState('waiting');
         } else if (running) {
-            menu.setState('running');
+            menubar.setState('running');
         } else {
-            menu.setState('paused');
+            menubar.setState('paused');
         }
     }
 
-    game.install = function(code) {
+    /**
+     * install(code);
+     * Installs the new user code and runs it.
+     */
+    exports.install = function(code) {
         // Make sure web workers are supported
         if (!window.Worker) {
             alert('Your browser must support web workers to play the game.');
@@ -132,7 +110,12 @@ var game = {
         installedCode = code;
         updateMenu();
     };
-    game.run = function() {
+
+    /**
+     * run();
+     * Runs the currently installed user code, if it was paused.
+     */
+    exports.run = function() {
         // Start the game worker's execution, if it exists
         if (null === worker || null === level || level.complete()) {
             return;
@@ -143,29 +126,50 @@ var game = {
             execute();
         }
     };
-    game.pause = function() {
+
+    /**
+     * pause();
+     * Pauses the currently running user code.
+     */
+    exports.pause = function() {
         // Pause the game worker's execution
         running = false;
         updateMenu();
     };
-    game.load = function(newLevel) {
+
+    /**
+     * load(level);
+     * Loads a game level from an object given in the required format.
+     */
+    exports.load = function(newLevel) {
         // Save the initial state and start the game
         level = newLevel;
-        game.restart();
+        exports.restart();
     };
-    game.restart = function() {
+
+    /**
+     * restart();
+     * Resets the game to the initial conditions for the currently
+     * loaded level.
+     */
+    exports.restart = function() {
         // Reset the game to the level's initial conditions and redraw
         if (null !== installedCode) {
-            game.install(installedCode);
+            exports.install(installedCode);
             running = false;
         }
         if (null !== level) {
             level.init();
-            game.draw();
+            exports.draw();
         }
         updateMenu();
     };
-    game.draw = function() {
+
+    /**
+     * draw();
+     * Redraws the game state on the canvas.
+     */
+    exports.draw = function() {
         // Redraws the game state on the canvas
         if (null === level) {
             return;
@@ -173,9 +177,15 @@ var game = {
         level.draw(ctx);
     };
 
-    $(document).ready(function() {
-        canvas = document.getElementById('game-canvas');
-        ctx = canvas.getContext('2d');
-        game.load(new Level('Select Level', function() { return {}; }));
-    });
-})();
+    /**
+     * init();
+     * Binds DOM elements to variables and loads a blank level via jQuery ready() function.
+     */
+    exports.init = function() {
+        $(document).ready(function() {
+            canvas = document.getElementById('game-canvas');
+            ctx = canvas.getContext('2d');
+            exports.load(new Level('Select Level', function() { return {}; }));
+        });
+    };
+});

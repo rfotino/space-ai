@@ -1,81 +1,45 @@
 /**
  * Copyright (c) 2015 Robert Fotino.
+ *
+ * This defines a module for getting/setting the contents of the code window
+ * and console.
  */
 
-var ui = {
-    /**
-     * setCode(code);
-     * Overwrites the contents of the code window.
-     */
-    setCode: function(code) { },
-    /**
-     * getCode();
-     * Returns the contents of the code window.
-     */
-    getCode: function() { },
-    /**
-     * showCode();
-     * Pops out the code window.
-     */
-    showCode: function() { },
-    /**
-     * hideCode();
-     * Hides the code window.
-     */
-    hideCode: function() { },
-    /**
-     * isVisibleCode();
-     * Returns true if the code window is visible.
-     */
-    isVisibleCode: function() { },
-    /**
-     * scrollConsole();
-     * Scrolls down to the bottom of the console.
-     */
-    scrollConsole: function() { },
-    /**
-     * writeConsole(line, level = 'log');
-     * Writes the given text to the console window, optionally with a level
-     * of log, warn, or error.
-     */
-    writeConsole: function(line, level) { },
-    /**
-     * clearConsole();
-     * Clears all text from the console window.
-     */
-    clearConsole: function() { },
-    /**
-     * showConsole();
-     * Pops out the console window.
-     */
-    showConsole: function() { },
-    /**
-     * hideConsole();
-     * Hides the console window.
-     */
-    hideConsole: function() { },
-    /**
-     * toggleConsole();
-     * Toggles the console window.
-     */
-    toggleConsole: function() { }
-};
+define(function(require, exports, module) {
+    var $ = require('jquery');
+    var game = require('game');
+    var CodeMirror = require('codemirror');
+    require('codemirror/mode/javascript/javascript');
+    require('codemirror/addon/edit/matchbrackets');
+    require('codemirror/addon/selection/active-line');
 
-// Wrap local variables in a function so that we hide implementation
-// details and don't pollute the global scope.
-(function () {
+    // Declare variables for DOM elements and handling state
     var codeWindow, consoleWindow, mainWindow,
         codeHidden = true, consoleHidden = true,
         codePosition, consolePosition,
         codeMirror, consoleContent;
 
-    ui.setCode = function(code) {
+    /**
+     * setCode(code);
+     * Overwrites the contents of the code window.
+     */
+    exports.setCode = function(code) {
         codeMirror.getDoc().setValue(code);
     };
-    ui.getCode = function() {
+
+    /**
+     * getCode();
+     * Returns the contents of the code window.
+     */
+    exports.getCode = function() {
         return codeMirror.getDoc().getValue();
     };
-    ui.showCode = function() {
+
+    /**
+     * showCode();
+     * Pops out the code window.
+     */
+    exports.showCode = function() {
         codeHidden = false;
         codeWindow.removeClass('hidden');
         codeWindow.css('width', codePosition);
@@ -88,7 +52,12 @@ var ui = {
         // Focus the coding area
         codeMirror.focus();
     };
-    ui.hideCode = function() {
+
+    /**
+     * hideCode();
+     * Hides the code window.
+     */
+    exports.hideCode = function() {
         codeHidden = true;
         codeWindow.addClass('hidden');
         codeWindow.css('width', '');
@@ -98,13 +67,29 @@ var ui = {
         // Blur the coding area by focusing on something else
         $('#game-canvas').focus();
     };
-    ui.isVisibleCode = function() {
+
+    /**
+     * isVisibleCode();
+     * Returns true if the code window is visible.
+     */
+    exports.isVisibleCode = function() {
         return !codeHidden;
     };
-    ui.scrollConsole = function() {
+
+    /**
+     * scrollConsole();
+     * Scrolls down to the bottom of the console.
+     */
+    exports.scrollConsole = function() {
         consoleContent.scrollTop(consoleContent[0].scrollHeight);
     };
-    ui.writeConsole = function(line, level) {
+
+    /**
+     * writeConsole(line, level = 'log');
+     * Writes the given text to the console window, optionally with a level
+     * of log, warn, or error.
+     */
+    exports.writeConsole = function(line, level) {
         if (undefined === level) {
             level = 'log';
         }
@@ -119,7 +104,7 @@ var ui = {
             break;
         case 'error':
             newContent += '<span style="color: red;">Error: </span>';
-            ui.showConsole();
+            exports.showConsole();
             shouldScroll = true;
             break;
         }
@@ -134,154 +119,180 @@ var ui = {
             consoleContent.children().first().remove();
         }
         if (shouldScroll) {
-            ui.scrollConsole();
+            exports.scrollConsole();
         }
     };
-    ui.clearConsole = function() {
+
+    /**
+     * clearConsole();
+     * Clears all text from the console window.
+     */
+    exports.clearConsole = function() {
         consoleContent.html('');
     };
-    ui.showConsole = function() {
+
+    /**
+     * showConsole();
+     * Pops out the console window.
+     */
+    exports.showConsole = function() {
         consoleHidden = false;
         consoleWindow.removeClass('hidden');
         consoleWindow.css('height', $(window).height() - consolePosition);
         $('#console-popout-btn').text('v');
     };
-    ui.hideConsole = function() {
+
+    /**
+     * hideConsole();
+     * Hides the console window.
+     */
+    exports.hideConsole = function() {
         consoleHidden = true;
         consoleWindow.addClass('hidden');
         consoleWindow.css('height', '');
         $('#console-popout-btn').text('^');
     };
-    ui.toggleConsole = function() {
+
+    /**
+     * toggleConsole();
+     * Toggles the console window.
+     */
+    exports.toggleConsole = function() {
         if (consoleHidden) {
-            ui.showConsole();
+            exports.showConsole();
         } else {
-            ui.hideConsole();
+            exports.hideConsole();
         }
     };
 
-    $(document).ready(function() {
-        codeWindow = $('#code-window');
-        consoleWindow = $('#console-window');
-        mainWindow = $('#main-window');
-        consoleContent = $('#console');
+    /**
+     * init();
+     * Adds UI listeners via jQuery ready() function.
+     */
+    exports.init = function() {
+        $(document).ready(function() {
+            codeWindow = $('#code-window');
+            consoleWindow = $('#console-window');
+            mainWindow = $('#main-window');
+            consoleContent = $('#console');
 
-        // Show/hide code and console windows when clicking their popout buttons
-        $('#code-popout-btn').on('click', function(e) {
-            e.preventDefault();
-            if (codeHidden) {
-                ui.showCode();
-            } else {
-                ui.hideCode();
-            }
-        });
-        $('#console-popout-btn').on('click', function(e) {
-            e.preventDefault();
-            if (consoleHidden) {
-                ui.showConsole();
-            } else {
-                ui.hideConsole();
-            }
-        });
+            // Show/hide code and console windows when clicking their popout buttons
+            $('#code-popout-btn').on('click', function(e) {
+                e.preventDefault();
+                if (codeHidden) {
+                    exports.showCode();
+                } else {
+                    exports.hideCode();
+                }
+            });
+            $('#console-popout-btn').on('click', function(e) {
+                e.preventDefault();
+                if (consoleHidden) {
+                    exports.showConsole();
+                } else {
+                    exports.hideConsole();
+                }
+            });
 
-        // Start repositioning code and console windows on mousedown on
-        // their resize bars
-        var codeDragging = false;
-        var consoleDragging = false;
-        $('#code-dragbar').on('mousedown', function(e) {
-            if (!codeHidden) {
-                codeDragging = true;
+            // Start repositioning code and console windows on mousedown on
+            // their resize bars
+            var codeDragging = false;
+            var consoleDragging = false;
+            $('#code-dragbar').on('mousedown', function(e) {
+                if (!codeHidden) {
+                    codeDragging = true;
+                    codeWindow.addClass('notransition');
+                    consoleWindow.addClass('notransition');
+                }
+            });
+            $('#console-dragbar').on('mousedown', function(e) {
+                if (!consoleHidden) {
+                    consoleDragging = true;
+                    consoleWindow.addClass('notransition');
+                }
+            });
+
+            // Reposition the code and console windows when dragging their resize bars
+            codePosition = Math.round($(window).width() * 0.5);
+            consolePosition = Math.round($(window).height() * 0.55);
+            $(document).on('mouseup', function(e) {
+                if (codeDragging) {
+                    codeDragging = false;
+                    codeWindow.removeClass('notransition');
+                    consoleWindow.removeClass('notransition');
+                }
+                if (consoleDragging) {
+                    consoleDragging = false;
+                    consoleWindow.removeClass('notransition');
+                }
+            });
+            $(document).on('mousemove', function(e) {
+                e.preventDefault();
+                if (codeDragging) {
+                    codePosition = e.pageX;
+                    exports.showCode();
+                }
+                if (consoleDragging) {
+                    consolePosition = e.pageY;
+                    exports.showConsole();
+                }
+            });
+
+            // Resize canvas, code window, and console window with the browser
+            var windowWidth = $(window).width();
+            var windowHeight = $(window).height();
+            var resizeCanvas = function() {
+                var width = $(window).width();
+                var height = $(window).height() - $('#menubar').height();
+                var canvas = document.getElementById('game-canvas');
+                mainWindow.css('width', width);
+                mainWindow.css('height', height);
+                canvas.width = width;
+                canvas.height = height;
+                game.draw();
+            }
+            resizeCanvas();
+            $(window).on('resize', function() {
+                codePosition = (codePosition / windowWidth) * $(window).width();
+                consolePosition = (consolePosition / windowHeight) * $(window).height();
+                windowWidth = $(window).width();
+                windowHeight = $(window).height();
+
                 codeWindow.addClass('notransition');
                 consoleWindow.addClass('notransition');
-            }
-        });
-        $('#console-dragbar').on('mousedown', function(e) {
-            if (!consoleHidden) {
-                consoleDragging = true;
-                consoleWindow.addClass('notransition');
-            }
-        });
 
-        // Reposition the code and console windows when dragging their resize bars
-        codePosition = Math.round($(window).width() * 0.5);
-        consolePosition = Math.round($(window).height() * 0.55);
-        $(document).on('mouseup', function(e) {
-            if (codeDragging) {
-                codeDragging = false;
+                resizeCanvas();
+
+                if (codeHidden) {
+                    exports.hideCode();
+                } else {
+                    exports.showCode();
+                }
+
+                if (consoleHidden) {
+                    exports.hideConsole();
+                } else {
+                    exports.showConsole();
+                }
+
+                codeWindow[0].offsetHeight; // Flush cached CSS changes
                 codeWindow.removeClass('notransition');
                 consoleWindow.removeClass('notransition');
-            }
-            if (consoleDragging) {
-                consoleDragging = false;
-                consoleWindow.removeClass('notransition');
-            }
+            });
+
+            // Set up CodeMirror in the coding window
+            var codeConfig = {
+                mode: 'javascript',
+                theme: 'elegant',
+                lineNumbers: true,
+                styleActiveLine: true,
+                matchBrackets: true
+            };
+            codeMirror = CodeMirror(function(elem) {
+                var textarea = document.getElementById('code');
+                textarea.parentNode.replaceChild(elem, textarea);
+                elem.id = 'code';
+            }, codeConfig);
         });
-        $(document).on('mousemove', function(e) {
-            e.preventDefault();
-            if (codeDragging) {
-                codePosition = e.pageX;
-                ui.showCode();
-            }
-            if (consoleDragging) {
-                consolePosition = e.pageY;
-                ui.showConsole();
-            }
-        });
-
-        // Resize canvas, code window, and console window with the browser
-        var windowWidth = $(window).width();
-        var windowHeight = $(window).height();
-        var resizeCanvas = function() {
-            var width = $(window).width();
-            var height = $(window).height() - $('#menubar').height();
-            var canvas = document.getElementById('game-canvas');
-            mainWindow.css('width', width);
-            mainWindow.css('height', height);
-            canvas.width = width;
-            canvas.height = height;
-            game.draw();
-        }
-        resizeCanvas();
-        $(window).on('resize', function() {
-            codePosition = (codePosition / windowWidth) * $(window).width();
-            consolePosition = (consolePosition / windowHeight) * $(window).height();
-            windowWidth = $(window).width();
-            windowHeight = $(window).height();
-
-            codeWindow.addClass('notransition');
-            consoleWindow.addClass('notransition');
-
-            resizeCanvas();
-
-            if (codeHidden) {
-                ui.hideCode();
-            } else {
-                ui.showCode();
-            }
-
-            if (consoleHidden) {
-                ui.hideConsole();
-            } else {
-                ui.showConsole();
-            }
-
-            codeWindow[0].offsetHeight; // Flush cached CSS changes
-            codeWindow.removeClass('notransition');
-            consoleWindow.removeClass('notransition');
-        });
-
-        // Set up CodeMirror in the coding window
-        var codeConfig = {
-            mode: 'javascript',
-            theme: 'elegant',
-            lineNumbers: true,
-            styleActiveLine: true,
-            matchBrackets: true
-        };
-        codeMirror = CodeMirror(function(elem) {
-            var textarea = document.getElementById('code');
-            textarea.parentNode.replaceChild(elem, textarea);
-            elem.id = 'code';
-        }, codeConfig);
-    });
-})();
+    };
+});
