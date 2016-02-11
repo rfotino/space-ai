@@ -60,7 +60,7 @@ define(function(require, exports, module) {
         var scale = Math.min(scaleX, scaleY);
         this.scale(scale);
         this.translate(-bounds.x + (((viewWidth / scale) - bounds.width) / 2),
-                       -bounds.y + (((viewHeight / scale) - bounds.height) / 2));
+                       bounds.y + (((viewHeight / scale) + bounds.height) / 2));
     };
 
     /**
@@ -83,10 +83,12 @@ define(function(require, exports, module) {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (this._focusObj) {
             this._translation.x = -this._focusObj.pos.x + (ctx.canvas.width / 2);
-            this._translation.y = -this._focusObj.pos.y + (ctx.canvas.height / 2);
+            this._translation.y = this._focusObj.pos.y + (ctx.canvas.height / 2);
         }
         ctx.scale(this._scale, this._scale);
         ctx.translate(this._translation.x, this._translation.y);
+        // Flip y-axis
+        ctx.scale(1, -1);
     };
 
     /**

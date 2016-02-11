@@ -23,7 +23,7 @@ define(function(require, exports, module) {
                 new ReachTarget({
                     name: 'target1',
                     win: true,
-                    pos: { x: 0, y: -250 }
+                    pos: { x: 0, y: 250 }
                 })
             ]
         }; }),
@@ -37,7 +37,7 @@ define(function(require, exports, module) {
                 new EnemyTarget({
                     name: 'enemy1',
                     win: true,
-                    pos: { x: 0, y: -250 },
+                    pos: { x: 0, y: 250 },
                     health: 25
                 })
             ]
@@ -49,7 +49,7 @@ define(function(require, exports, module) {
                 new EnemyTarget({
                     name: 'enemy1',
                     win: true,
-                    pos: { x: 0, y: -250 },
+                    pos: { x: 0, y: 250 },
                     health: 25
                 })
             ]
@@ -58,7 +58,7 @@ define(function(require, exports, module) {
         new Level('Turn', function() { return {
             objects: [
                 new Asteroid({
-                    pos: { x: 0, y: -250 },
+                    pos: { x: 0, y: 250 },
                     radius: 150
                 }),
                 new ReachTarget({
@@ -109,7 +109,7 @@ define(function(require, exports, module) {
         }),
         // An asteroid in between the player and a reach target
         new Level('Flight Path', function() { return {
-            player: new Player({ pos: { angular: Math.PI / 2 } }),
+            player: new Player({ pos: { angular: 0 } }),
             objects: [
                 new Asteroid({
                     pos: { x: 250, y: 0 },

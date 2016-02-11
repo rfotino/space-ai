@@ -15,6 +15,11 @@ define(function(require, exports, module) {
     var Player = function(props) {
         props = props || {};
         props.type = 'player';
+        // If no pos.angular set, the default is PI/2 for aesthetics
+        props.pos = props.pos || {};
+        if (undefined === props.pos.angular) {
+            props.pos.angular = Math.PI / 2;
+        }
         GameObject.prototype.constructor.call(this, props);
         this.owner = 'player';
         this.weapons = props.weapons || [];
@@ -36,13 +41,13 @@ define(function(require, exports, module) {
      * detection. Should only be called by the constructor.
      */
     Player.prototype._generateGeometry = function() {
-        var halfOutline = graphics.getQuadTo({ x: 0, y: -50 },
-                                             { x: 13, y: -40 },
-                                             { x: 15, y: 0 },
-                                             10).concat([ { x: 12, y: 7 },
-                                                          { x: 12, y: 10 } ]);
-        var reflectYFunc = function(p) { return { x: -p.x, y: p.y }; };
-        var otherHalfOutline = halfOutline.map(reflectYFunc).reverse();
+        var halfOutline = graphics.getQuadTo({ x: 50, y: 0 },
+                                             { x: 40, y: 13 },
+                                             { x: 0, y: 15 },
+                                             10).concat([ { x: -7, y: 12 },
+                                                          { x: -10, y: 12 } ]);
+        var reflectXFunc = function(p) { return { x: p.x, y: -p.y }; };
+        var otherHalfOutline = halfOutline.map(reflectXFunc).reverse();
         this._outline = { points: halfOutline.concat(otherHalfOutline) };
         this._drawPolys = [
             {
@@ -52,40 +57,40 @@ define(function(require, exports, module) {
             {
                 color: '#999', // lower hull
                 points: [
-                    { x: -15, y: 0 },
-                    { x: 15, y: 0 },
-                    { x: 12, y: 7 },
-                    { x: -12, y: 7 }
+                    { x: 0, y: -15 },
+                    { x: 0, y: 15 },
+                    { x: -7, y: 12 },
+                    { x: -7, y: -12 }
                 ]
             },
             {
                 color: '#ddd', // exhaust port
                 points: [
-                    { x: -12, y: 7 },
-                    { x: 12, y: 7 },
-                    { x: 12, y: 10 },
-                    { x: -12, y: 10 }
+                    { x: -7, y: -12 },
+                    { x: -7, y: 12 },
+                    { x: -10, y: 12 },
+                    { x: -10, y: -12 }
                 ]
             }
         ];
         // Add the cockpit separately
-        var halfCockpit = graphics.getQuadTo({ x: 0, y: -40 },
-                                             { x: 5, y: -35 },
-                                             { x: 6, y: -16 },
+        var halfCockpit = graphics.getQuadTo({ x: 40, y: 0 },
+                                             { x: 35, y: 5 },
+                                             { x: 16, y: 6 },
                                              5);
-        var otherHalfCockpit = halfCockpit.map(reflectYFunc).reverse();
+        var otherHalfCockpit = halfCockpit.map(reflectXFunc).reverse();
         this._drawPolys.push({
             color: '#0f9',
             points: halfCockpit.concat(otherHalfCockpit)
         });
         // Set up geometry and constants for the thrust flame
         this._flamePoly = { points: [
-            { x: -10, y: 0 },
-            { x: 10, y: 0 },
-            { x: 0, y: 15 }
+            { x: 0, y: -10 },
+            { x: 0, y: 10 },
+            { x: -15, y: 0 }
         ] };
         var bounds = physics.getPolyBounds(this._outline);
-        this._flamePosY = bounds.y + bounds.height;
+        this._flamePosX = bounds.x;
         this._flameFlicker = 0;
         this._flameFlickerThreshold = 6;
         this._flameFlickerMax = 8;
@@ -123,8 +128,8 @@ define(function(require, exports, module) {
         // Reset the player's fired flag
         this.fired = false;
         // Calculate the player's acceleration from thrust and rotation
-        this.accel.x = this.thrust * Math.sin(this.pos.angular);
-        this.accel.y = this.thrust * -Math.cos(this.pos.angular);
+        this.accel.x = this.thrust * Math.cos(this.pos.angular);
+        this.accel.y = this.thrust * Math.sin(this.pos.angular);
         // Update the game object
         GameObject.prototype.update.call(this);
     };
@@ -143,10 +148,10 @@ define(function(require, exports, module) {
         this._flameFlicker = (this._flameFlicker + 1) % this._flameFlickerMax;
         if (this._flameFlicker < this._flameFlickerThreshold) {
             var flameScale = {
-                x: 0.5 + (this.thrustPower / 2),
-                y: this.thrustPower
+                x: this.thrustPower,
+                y: 0.5 + (this.thrustPower / 2),
             };
-            var translateTransform = physics.getTranslate(0, this._flamePosY);
+            var translateTransform = physics.getTranslate(this._flamePosX, 0);
             var transform = physics.getScale(flameScale, translateTransform);
             var flamePoly = { points: this._flamePoly.points.map(transform) };
             graphics.fillPoly(ctx, flamePoly, 'orange');

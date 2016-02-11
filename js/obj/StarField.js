@@ -53,7 +53,7 @@ define(function(require, exports, module) {
         // We need to make sure we cover the entire viewport bounds with stars
         var viewBounds = viewport.bounds(ctx);
         var viewBoundsRight = viewBounds.x + viewBounds.width;
-        var viewBoundsBottom = viewBounds.y + viewBounds.height;
+        var viewBoundsTop = viewBounds.y + viewBounds.height;
         // Figure out the offset that we need to draw the first iteration of
         // the starfield at
         var minXIndex = Math.floor((viewBounds.x - this._bounds.x) /
@@ -66,7 +66,7 @@ define(function(require, exports, module) {
         var maxXIndex = minXIndex +
             Math.ceil((viewBoundsRight - minXCoord) / this._bounds.width);
         var maxYIndex = minYIndex +
-            Math.ceil((viewBoundsBottom - minYCoord) / this._bounds.height);
+            Math.ceil((viewBoundsTop - minYCoord) / this._bounds.height);
         // We need a slight random offset for each star, depending on which
         // star field indices are being used. Define a RNG getter here
         var getRng = function(seed) {
@@ -97,9 +97,10 @@ define(function(require, exports, module) {
                         (j * this._bounds.height) + ((rng() - 0.5) * 50);
                     // Check if star is in view before drawing
                     if (viewBounds.x <= adjX && adjX <= viewBoundsRight &&
-                        viewBounds.y <= adjY && adjY <= viewBoundsBottom) {
+                        viewBounds.y <= adjY && adjY <= viewBoundsTop) {
                         ctx.beginPath();
-                        ctx.arc(adjX, adjY, star.radius, 0, Math.PI * 2);
+                        // Use -adjY because y-axis is flipped in-game
+                        ctx.arc(adjX, -adjY, star.radius, 0, Math.PI * 2);
                         ctx.fill();
                     }
                 }
