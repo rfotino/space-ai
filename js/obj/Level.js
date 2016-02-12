@@ -37,6 +37,10 @@ define(function(require, exports, module) {
         if (typeof this._state.objects === 'undefined') {
             this._state.objects = [];
         }
+        // Grab all of the targets out of the game objects array
+        this._state.targets = this._state.objects.filter(function(obj) {
+            return obj instanceof Target;
+        });
         // Set up the star field
         this._state.starField = new StarField();
         // Reset the viewport and focus it on the player
@@ -48,8 +52,10 @@ define(function(require, exports, module) {
      * Updates the game state every frame
      */
     Level.prototype.update = function() {
-        this._checkWinConditions();
         this._updateGameObjects();
+        if (!this.complete()) {
+            this._checkWinConditions();
+        }
     };
 
     /**
@@ -58,33 +64,22 @@ define(function(require, exports, module) {
     Level.prototype._updateGameObjects = function() {
         var player = this._state.player;
         // Add the player to the beginning of the game object list
-        this._state.objects.unshift(player);
+        // if necessary
+        if (player.alive) {
+            this._state.objects.unshift(player);
+        }
         // Update all game objects
         for (var i = 0; i < this._state.objects.length; i++) {
             var obj = this._state.objects[i];
-            obj.update();
-        }
-        // Add generated game objects and remove dead ones
-        for (var i = this._state.objects.length - 1; 0 <= i; i--) {
-            var obj = this._state.objects[i];
-            this._state.objects.push.apply(this._state.objects, obj.newObjects);
-            obj.newObjects = [];
-            if (!obj.alive && !(obj instanceof Player)) {
-                this._state.objects.splice(i, 1);
+            if (!this.complete() || obj.updateOnGameOver) {
+                obj.update();
             }
         }
-        // Collision detection - compare every pair of objects, including
-        // the player
+        // Do collision detection between all game objects
         for (var i = 0; i < this._state.objects.length; i++) {
             var objA = this._state.objects[i];
-            if (!objA.alive) {
-                continue;
-            }
             for (var j = i + 1; j < this._state.objects.length; j++) {
                 var objB = this._state.objects[j];
-                if (!objB.alive) {
-                    continue;
-                }
                 // If the two objects intersect each other, call their collide
                 // functions on each other
                 if (physics.testIntersection(objA, objB)) {
@@ -93,8 +88,24 @@ define(function(require, exports, module) {
                 }
             }
         }
-        // Remove the player from the beginning of the game object list
-        this._state.objects.shift();
+        // Add generated game objects and remove dead ones
+        for (var i = this._state.objects.length - 1; 0 <= i; i--) {
+            var obj = this._state.objects[i];
+            var newTargets = obj.newObjects.filter(function(obj) {
+                return obj instanceof Target;
+            });
+            this._state.targets.push.apply(this._state.targets, newTargets);
+            this._state.objects.push.apply(this._state.objects, obj.newObjects);
+            obj.newObjects = [];
+            if (!obj.alive) {
+                this._state.objects.splice(i, 1);
+            }
+        }
+        // Remove the player from the beginning of the game object list,
+        // if it hasn't been removed already
+        if (player.alive) {
+            this._state.objects.shift();
+        }
     };
 
     /**
@@ -102,16 +113,12 @@ define(function(require, exports, module) {
      */
     Level.prototype._checkWinConditions = function() {
         var player = this._state.player;
+        var targets = this._state.targets;
         var gameWon = true, gameLost = false;
         // Check if the player is dead
         if (!player.alive) {
             gameLost = true;
         }
-        // Get all of the game objects that are "targets", which can
-        // be check for win conditions
-        var targets = this._state.objects.filter(function(obj) {
-            return obj instanceof Target;
-        });
         // If there are no win targets, the player should not win automatically
         if (0 === (targets.filter(function(t) { return t.win; })).length) {
             gameWon = false;
@@ -141,6 +148,8 @@ define(function(require, exports, module) {
 
     /**
      * Draw the game objects on screen.
+     *
+     * @param {CanvasRenderingContext2D} ctx
      */
     Level.prototype.draw = function(ctx) {
         var player = this._state.player;
@@ -160,12 +169,14 @@ define(function(require, exports, module) {
             obj.draw(ctx);
             ctx.restore();
         }
-        // Draw the player
-        ctx.save();
-        ctx.translate(player.pos.x, player.pos.y);
-        ctx.rotate(player.pos.angular);
-        player.draw(ctx);
-        ctx.restore();
+        // Draw the player if necessary
+        if (player.alive) {
+            ctx.save();
+            ctx.translate(player.pos.x, player.pos.y);
+            ctx.rotate(player.pos.angular);
+            player.draw(ctx);
+            ctx.restore();
+        }
         // Draw win/lose screen if necessary
         if (typeof this._state.gameOver !== 'undefined') {
             ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -190,6 +201,8 @@ define(function(require, exports, module) {
 
     /**
      * Gets the state of the game world to pass to the worker thread.
+     *
+     * @return {Object}
      */
     Level.prototype.getWorld = function() {
         var getObj = function(obj) { return obj.getObj(); };
@@ -201,7 +214,10 @@ define(function(require, exports, module) {
     };
 
     /**
-     * Updates the state of the game world due to changes made in the worker thread.
+     * Updates the state of the game world due to changes made in the worker
+     * thread.
+     *
+     * @param {Object} world
      */
     Level.prototype.updateWorld = function(world) {
         var player = this._state.player;
@@ -215,6 +231,8 @@ define(function(require, exports, module) {
 
     /**
      * Returns true if the game is over.
+     *
+     * @return {Boolean}
      */
     Level.prototype.complete = function() {
         return typeof this._state !== 'undefined' &&
@@ -222,7 +240,22 @@ define(function(require, exports, module) {
     };
 
     /**
+     * Returns true if the level is complete and nothing more is being
+     * animated.
+     *
+     * @return {Boolean}
+     */
+    Level.prototype.doneUpdating = function() {
+        return this.complete() &&
+            0 === this._state.objects.filter(function(obj) {
+                return obj.updateOnGameOver;
+            }).length;
+    };
+
+    /**
      * Returns a bounding box containing the level objects.
+     *
+     * @return {Rectangle}
      */
     Level.prototype.bounds = function() {
         var minX = Infinity,

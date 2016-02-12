@@ -7,6 +7,7 @@
 
 define(function(require, exports, module) {
     var Bullet = require('obj/Bullet');
+    var Explosion = require('obj/Explosion');
 
     /**
      * A constructor for a bullet fired from a RocketWeapon.
@@ -24,6 +25,24 @@ define(function(require, exports, module) {
     // Extend Bullet
     RocketBullet.prototype = Object.create(Bullet.prototype);
     RocketBullet.prototype.constructor = RocketBullet;
+
+    /**
+     * Explode on impact.
+     *
+     * @override {Bullet}
+     * @param {GameObject} other
+     */
+    RocketBullet.prototype.collide = function(other) {
+        Bullet.prototype.collide.call(this, other);
+        if (!this.alive) {
+            this.newObjects.push(new Explosion({
+                lifespan: 20,
+                blastRadius: 25,
+                pos: { x: this.pos.x, y: this.pos.y },
+                vel: { x: this.vel.x, y: this.vel.y }
+            }));
+        }
+    };
 
     /**
      * @override {GameObject}

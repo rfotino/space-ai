@@ -26,7 +26,7 @@ https://spaceship.codes.
 * [ ] Allow level to supply alternative win condition function
 * [ ] Replace pos(), vel(), accel() with one diagnostic function that includes
       more information
-* [ ] Explosion animations
+* [x] Explosion animations
 * [ ] Viewport interactions like pan/zoom/focus
 * [ ] Immobile enemy ships
 * [ ] Mobile enemy ships

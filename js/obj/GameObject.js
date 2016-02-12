@@ -20,6 +20,10 @@ define(function(require, exports, module) {
         // Every object gets a name and a type
         this.name = props.name || '';
         this.type = props.type || '';
+        // A flag that says whether this game object should continue to be
+        // updated after the game has completed. Used for explosions, etc
+        // that should continue to animate after completion
+        this.updateOnGameOver = props.updateOnGameOver || false;
         // If the alive flag is set to false, the object is removed from the
         // list of game objects
         this.alive = true;

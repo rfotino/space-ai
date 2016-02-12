@@ -106,16 +106,11 @@ define(function(require, exports, module) {
     Player.prototype.update = function() {
         // If the player has no more health, create an explosion
         if (this.health <= 0) {
-            this.accel.x = this.accel.y = 0;
-            if (undefined === this._explosion) {
-                this._explosion = new Explosion();
-            } else {
-                this._explosion.update();
-                this.alive = this._explosion.alive;
-                if (!this._explosion.alive) {
-                    this.alive = false;
-                }
-            }
+            this.newObjects.push(new Explosion({
+                pos: { x: this.pos.x, y: this.pos.y },
+                vel: { x: this.vel.x, y: this.vel.y }
+            }));
+            this.alive = false;
         } else {
             // Update the player's weapons
             for (var i = 0; i < this.weapons.length; i++) {
@@ -155,13 +150,6 @@ define(function(require, exports, module) {
      * @param {CanvasRenderingContext2D} ctx
      */
     Player.prototype.draw = function(ctx) {
-        // Maybe draw explosion instead of player
-        if (this._explosion) {
-            if (this._explosion.alive) {
-                this._explosion.draw(ctx);
-            }
-            return;
-        }
         // Draw the polygons
         for (var i = 0; i < this._drawPolys.length; i++) {
             var poly = this._drawPolys[i];

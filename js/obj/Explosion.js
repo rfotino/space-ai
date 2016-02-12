@@ -13,19 +13,21 @@ define(function(require, exports, module) {
      */
     var Explosion = function(props) {
         props = props || {};
+        props.updateOnGameOver = true;
         GameObject.prototype.constructor.call(this, props);
         this.numParticles = props.numParticles || 20;
         this.lifespan = props.lifespan || 20;
+        this.blastRadius = props.blastRadius || 75;
         this._lifespanRemaining = this.lifespan;
         this._maxRadius = 25;
-        this._maxVel = 5;
+        this._maxVel = (this.blastRadius / this.lifespan) / 0.75;
         this._particles = [];
         for (var i = 0; i < this.numParticles; i++) {
             var angle = Math.random() * Math.PI * 2;
             var vel = (0.5 + (0.5 * Math.random())) * this._maxVel;
             var radius = (0.5 + (0.5 * Math.random())) * this._maxRadius;
             this._particles.push({
-                pos: { x: this.pos.x, y: this.pos.y },
+                pos: { x: 0, y: 0 },
                 vel: { x: vel * Math.cos(angle), y: vel * Math.sin(angle) },
                 radius: radius
             });
@@ -56,6 +58,7 @@ define(function(require, exports, module) {
             particle.pos.x += particle.vel.x;
             particle.pos.y += particle.vel.y;
         }
+        GameObject.prototype.update.call(this);
         this._lifespanRemaining--;
         if (this._lifespanRemaining <= 0) {
             this.alive = false;

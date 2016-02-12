@@ -4,7 +4,6 @@
  * This defines a module for installing code, running/pausing code, loading
  * levels, restarting, and drawing the game.
  */
-
 define(function(require, exports, module) {
     var $ = require('jquery');
     var ui = require('ui');
@@ -19,23 +18,29 @@ define(function(require, exports, module) {
     // Begins executing the user's code for the next frame, and sets a timer
     // for the minimum length of a frame. If the game is over, this does nothing
     var execute = function() {
-        if (null === level || level.complete()) {
+        if (null === level || level.doneUpdating()) {
             return;
         }
         var minFrameTime = 15;
-        frameComplete = timerComplete = false;
+        frameComplete = level.complete();
+        timerComplete = false;
         setTimeout(function() {
             timerComplete = true;
             if (frameComplete && running) {
                 execute();
             }
         }, minFrameTime);
-        worker.postMessage({ type: 'execute', world: level.getWorld() });
+        if (frameComplete) {
+            level.update();
+            level.draw(ctx);
+        } else {
+            worker.postMessage({ type: 'execute', world: level.getWorld() });
+        }
     }
 
     // Update the run/pause button in the menu to the correct state
     var updateMenu = function() {
-        if (null === installedCode || null === level || level.complete()) {
+        if (null === installedCode || null === level || level.doneUpdating()) {
             menubar.setState('waiting');
         } else if (running) {
             menubar.setState('running');
@@ -45,8 +50,9 @@ define(function(require, exports, module) {
     }
 
     /**
-     * install(code);
      * Installs the new user code and runs it.
+     *
+     * @param {String} code
      */
     exports.install = function(code) {
         // Make sure web workers are supported
@@ -90,7 +96,7 @@ define(function(require, exports, module) {
                     level.updateWorld(message.world);
                     level.update();
                     level.draw(ctx);
-                    if (level.complete()) {
+                    if (level.doneUpdating()) {
                         running = false;
                         updateMenu();
                     }
@@ -112,12 +118,11 @@ define(function(require, exports, module) {
     };
 
     /**
-     * run();
      * Runs the currently installed user code, if it was paused.
      */
     exports.run = function() {
         // Start the game worker's execution, if it exists
-        if (null === worker || null === level || level.complete()) {
+        if (null === worker || null === level || level.doneUpdating()) {
             return;
         }
         running = true;
@@ -128,7 +133,6 @@ define(function(require, exports, module) {
     };
 
     /**
-     * pause();
      * Pauses the currently running user code.
      */
     exports.pause = function() {
@@ -138,8 +142,9 @@ define(function(require, exports, module) {
     };
 
     /**
-     * load(level);
      * Loads a game level from an object given in the required format.
+     *
+     * @param {Level} newLevel
      */
     exports.load = function(newLevel) {
         // Save the initial state and start the game
@@ -148,7 +153,6 @@ define(function(require, exports, module) {
     };
 
     /**
-     * restart();
      * Resets the game to the initial conditions for the currently
      * loaded level.
      */
@@ -166,7 +170,6 @@ define(function(require, exports, module) {
     };
 
     /**
-     * draw();
      * Redraws the game state on the canvas.
      */
     exports.draw = function() {
@@ -178,8 +181,8 @@ define(function(require, exports, module) {
     };
 
     /**
-     * init();
-     * Binds DOM elements to variables and loads a blank level via jQuery ready() function.
+     * Binds DOM elements to variables and loads a blank level via jQuery
+     * ready() function.
      */
     exports.init = function() {
         $(document).ready(function() {
