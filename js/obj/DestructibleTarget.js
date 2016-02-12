@@ -7,6 +7,7 @@
 
 define(function(require, exports, module) {
     var Target = require('obj/Target');
+    var Explosion = require('obj/Explosion');
 
     /**
      * A class for destructible targets.
@@ -15,6 +16,7 @@ define(function(require, exports, module) {
         props = props || {};
         Target.prototype.constructor.call(this, props);
         this.health = props.health || 100;
+        this._explosionComplete = false;
     };
 
     // Extend Target
@@ -22,13 +24,27 @@ define(function(require, exports, module) {
     DestructibleTarget.prototype.constructor = DestructibleTarget;
 
     /**
-     * Destructible targets are complete when they run out of health.
+     * Destructible targets can't collide with anything if they have no health.
+     *
+     * @override {Target}
+     * @return {Circle|Object}
+     */
+    DestructibleTarget.prototype.outline = function() {
+        if (this.health <= 0) {
+            return {};
+        } else {
+            return Target.prototype.outline.call(this);
+        }
+    };
+
+    /**
+     * Destructible targets are complete after they have finished exploding.
      *
      * @override {Target}
      * @return {Boolean}
      */
     DestructibleTarget.prototype.complete = function() {
-        return this.health <= 0;
+        return this._explosionComplete;
     };
 
     /**
@@ -55,6 +71,17 @@ define(function(require, exports, module) {
     DestructibleTarget.prototype.draw = function(ctx) {
         if (0 < this.health) {
             Target.prototype.draw.call(this, ctx);
+        } else if (!this._explosionComplete) {
+            if (undefined === this._explosion) {
+                this._explosion = new Explosion();
+            } else {
+                this._explosion.update();
+            }
+            if (this._explosion.alive) {
+                this._explosion.draw(ctx);
+            } else {
+                this._explosionComplete = true;
+            }
         }
     };
 

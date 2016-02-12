@@ -69,7 +69,7 @@ define(function(require, exports, module) {
             var obj = this._state.objects[i];
             this._state.objects.push.apply(this._state.objects, obj.newObjects);
             obj.newObjects = [];
-            if (!obj.alive) {
+            if (!obj.alive && !(obj instanceof Player)) {
                 this._state.objects.splice(i, 1);
             }
         }
@@ -77,8 +77,14 @@ define(function(require, exports, module) {
         // the player
         for (var i = 0; i < this._state.objects.length; i++) {
             var objA = this._state.objects[i];
+            if (!objA.alive) {
+                continue;
+            }
             for (var j = i + 1; j < this._state.objects.length; j++) {
                 var objB = this._state.objects[j];
+                if (!objB.alive) {
+                    continue;
+                }
                 // If the two objects intersect each other, call their collide
                 // functions on each other
                 if (physics.testIntersection(objA, objB)) {
@@ -98,7 +104,7 @@ define(function(require, exports, module) {
         var player = this._state.player;
         var gameWon = true, gameLost = false;
         // Check if the player is dead
-        if (player.health <= 0) {
+        if (!player.alive) {
             gameLost = true;
         }
         // Get all of the game objects that are "targets", which can

@@ -8,6 +8,7 @@ define(function(require, exports, module) {
     var physics = require('physics');
     var graphics = require('graphics');
     var GameObject = require('obj/GameObject');
+    var Explosion = require('obj/Explosion');
 
     /**
      * A constructor for the player.
@@ -103,33 +104,48 @@ define(function(require, exports, module) {
      * @override {GameObject}
      */
     Player.prototype.update = function() {
-        // Update the player's weapons
-        for (var i = 0; i < this.weapons.length; i++) {
-            var weapon = this.weapons[i];
-            weapon.update();
-        }
-        // Fire the player's weapon if it was fired and there is a weapon equipped
-        if (this.fired && this.equipped) {
+        // If the player has no more health, create an explosion
+        if (this.health <= 0) {
+            this.accel.x = this.accel.y = 0;
+            if (undefined === this._explosion) {
+                this._explosion = new Explosion();
+            } else {
+                this._explosion.update();
+                this.alive = this._explosion.alive;
+                if (!this._explosion.alive) {
+                    this.alive = false;
+                }
+            }
+        } else {
+            // Update the player's weapons
             for (var i = 0; i < this.weapons.length; i++) {
                 var weapon = this.weapons[i];
-                if (this.equipped === weapon.name) {
-                    var bullet = weapon.getBullet(
-                        { x: this.fired.x, y: this.fired.y },
-                        { x: this.pos.x, y: this.pos.y },
-                        'player');
-                    if (Array.isArray(bullet)) {
-                        this.newObjects.push.apply(this.newObjects, bullet);
-                    } else if (null !== bullet) {
-                        this.newObjects.push(bullet);
+                weapon.update();
+            }
+            // Fire the player's weapon if it was fired and there is a weapon
+            // equipped
+            if (this.fired && this.equipped) {
+                for (var i = 0; i < this.weapons.length; i++) {
+                    var weapon = this.weapons[i];
+                    if (this.equipped === weapon.name) {
+                        var bullet = weapon.getBullet(
+                            { x: this.fired.x, y: this.fired.y },
+                            { x: this.pos.x, y: this.pos.y },
+                            'player');
+                        if (Array.isArray(bullet)) {
+                            this.newObjects.push.apply(this.newObjects, bullet);
+                        } else if (null !== bullet) {
+                            this.newObjects.push(bullet);
+                        }
                     }
                 }
             }
+            // Reset the player's fired flag
+            this.fired = false;
+            // Calculate the player's acceleration from thrust and rotation
+            this.accel.x = this.thrust * Math.cos(this.pos.angular);
+            this.accel.y = this.thrust * Math.sin(this.pos.angular);
         }
-        // Reset the player's fired flag
-        this.fired = false;
-        // Calculate the player's acceleration from thrust and rotation
-        this.accel.x = this.thrust * Math.cos(this.pos.angular);
-        this.accel.y = this.thrust * Math.sin(this.pos.angular);
         // Update the game object
         GameObject.prototype.update.call(this);
     };
@@ -139,6 +155,13 @@ define(function(require, exports, module) {
      * @param {CanvasRenderingContext2D} ctx
      */
     Player.prototype.draw = function(ctx) {
+        // Maybe draw explosion instead of player
+        if (this._explosion) {
+            if (this._explosion.alive) {
+                this._explosion.draw(ctx);
+            }
+            return;
+        }
         // Draw the polygons
         for (var i = 0; i < this._drawPolys.length; i++) {
             var poly = this._drawPolys[i];
