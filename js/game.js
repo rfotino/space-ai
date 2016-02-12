@@ -15,6 +15,17 @@ define(function(require, exports, module) {
         frameComplete = true, timerComplete = true,
         level = null, installedCode = null;
 
+    // Update the run/pause button in the menu to the correct state
+    var updateMenu = function() {
+        if (null === installedCode || null === level || level.doneUpdating()) {
+            menubar.setState('waiting');
+        } else if (running) {
+            menubar.setState('running');
+        } else {
+            menubar.setState('paused');
+        }
+    }
+
     // Begins executing the user's code for the next frame, and sets a timer
     // for the minimum length of a frame. If the game is over, this does nothing
     var execute = function() {
@@ -33,19 +44,12 @@ define(function(require, exports, module) {
         if (frameComplete) {
             level.update();
             level.draw(ctx);
+            if (level.doneUpdating()) {
+                running = false;
+                updateMenu();
+            }
         } else {
             worker.postMessage({ type: 'execute', world: level.getWorld() });
-        }
-    }
-
-    // Update the run/pause button in the menu to the correct state
-    var updateMenu = function() {
-        if (null === installedCode || null === level || level.doneUpdating()) {
-            menubar.setState('waiting');
-        } else if (running) {
-            menubar.setState('running');
-        } else {
-            menubar.setState('paused');
         }
     }
 
