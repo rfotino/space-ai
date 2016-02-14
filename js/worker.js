@@ -8,11 +8,14 @@
     var userFunc = null;
     var world = null;
     var storage = {};
+    var hideFunc = function(funcToHide) {
+        var hiddenFunc = funcToHide;
+        return function() { return hiddenFunc.apply(null, arguments); };
+    };
     var locals = {
         // Don't allow sending/receiving of messages by user code
-        self: undefined,
-        onmessage: undefined,
-        postMessage: undefined,
+        onmessage: function() { },
+        postMessage: function() { },
         // Change console context in user code
         console: {
             log: function(message) {
@@ -26,14 +29,18 @@
             }
         },
         // API functions accessible from user code
+        // Diagnostic functions:
+        health: hideFunc(function() {
+            return world.player.health;
+        }),
         // Movement-related functions:
-        accel: function() {
+        accel: hideFunc(function() {
             return JSON.parse(JSON.stringify(world.player.accel));
-        },
-        pos: function() {
-            return JSON.parse(JSON.stringify(world.player.pos));
-        },
-        thrust: function(power) {
+        }),
+        bounds: hideFunc(function() {
+            return JSON.parse(JSON.stringify(world.player.bounds));
+        }),
+        thrust: hideFunc(function(power) {
             var player = world.player;
             if ('number' === typeof power) {
                 if (1 < power) {
@@ -47,8 +54,8 @@
                 player.thrust = maxThrust * player.thrustPower;
             }
             return player.thrustPower;
-        },
-        turn: function(power) {
+        }),
+        turn: hideFunc(function(power) {
             var player = world.player;
             if ('number' === typeof power) {
                 if (1 < power) {
@@ -61,12 +68,15 @@
                 player.accel.angular = maxAngularAccel * player.turnPower;
             }
             return player.turnPower;
-        },
-        vel: function() {
+        }),
+        pos: hideFunc(function() {
+            return JSON.parse(JSON.stringify(world.player.pos));
+        }),
+        vel: hideFunc(function() {
             return JSON.parse(JSON.stringify(world.player.vel));
-        },
+        }),
         // Radar-related functions
-        radar: function(filter) {
+        radar: hideFunc(function(filter) {
             switch (typeof filter) {
             case 'string':
                 // Filter by type
@@ -94,9 +104,9 @@
                 // No filter, return everything
                 return JSON.parse(JSON.stringify(world.objects));
             }
-        },
+        }),
         // Weapons-related functions
-        equip: function(weapon) {
+        equip: hideFunc(function(weapon) {
             if (!weapon) {
                 // Unequip weapon
                 world.player.equipped = null;
@@ -110,8 +120,8 @@
                     }
                 }
             }
-        },
-        equipped: function() {
+        }),
+        equipped: hideFunc(function() {
             // Return the currently equipped weapon (useful for getting
             // ammo or other information)
             for (var i = 0; i < world.player.weapons.length; i++) {
@@ -121,27 +131,27 @@
                 }
             }
             return null;
-        },
-        fire: function(x, y) {
+        }),
+        fire: hideFunc(function(x, y) {
             // Save the direction in which the weapon was fired for the
             // main thread to use
             world.player.fired = { x: x, y: y };
-        },
-        weapons: function() {
+        }),
+        weapons: hideFunc(function() {
             // Return a list of weapons available to equip
             return JSON.parse(JSON.stringify(world.player.weapons));
-        },
+        }),
         // Storage-relate dfunctions
-        load: function(key, defaultValue) {
+        load: hideFunc(function(key, defaultValue) {
             if (storage.hasOwnProperty(key)) {
                 return storage[key];
             } else {
                 return defaultValue;
             }
-        },
-        store: function(key, value) {
+        }),
+        store: hideFunc(function(key, value) {
             storage[key] = value;
-        }
+        })
     };
     // Create a sandbox for user code
     function install(userCode) {

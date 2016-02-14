@@ -75,7 +75,7 @@ define(function(require, exports, module) {
         worker = new Worker('js/worker.js');
         worker.onmessage = function(e) {
             message = e.data;
-            if (undefined === message.type) {
+            if ('undefined' === typeof message.type) {
                 return;
             }
             switch (message.type) {

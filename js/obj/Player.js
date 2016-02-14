@@ -18,7 +18,7 @@ define(function(require, exports, module) {
         props.type = 'player';
         // If no pos.angular set, the default is PI/2 for aesthetics
         props.pos = props.pos || {};
-        if (undefined === props.pos.angular) {
+        if ('undefined' === typeof props.pos.angular) {
             props.pos.angular = Math.PI / 2;
         }
         GameObject.prototype.constructor.call(this, props);

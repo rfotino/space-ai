@@ -11,6 +11,19 @@
   <body>
     <h1>API Reference</h1>
 
+    <h2 class="function-class">Diagnostics</h2>
+
+    <a name="health"></a>
+    <div class="function">
+      <div class="name">
+        <code>Number <strong>health</strong>()</code>
+      </div>
+      <p class="description">Gets the player's current health.</p>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;Number&gt;
+      </div>
+    </div>
+
     <h2 class="function-class">Movement</h2>
 
     <a name="accel"></a>
@@ -25,15 +38,15 @@
       </div>
     </div>
 
-    <a name="pos"></a>
+    <a name="bounds"></a>
     <div class="function">
       <div class="name">
-        <code>Object <strong>pos</strong>()</code>
+        <code>Object <strong>bounds</strong>()</code>
       </div>
-      <p class="description">Gets the x, y, and angular position of the player ship. The x and y position are given in pixels. The angular position, or rotation, is given in radians.</p>
+      <p class="description">Gets the player ship's current bounding box.</p>
       <div class="returns">
-        <strong>Returns:</strong> &lt;Object&gt;
-        <p>An object with numeric 'x', 'y', and 'angular' properties.</p>
+        <strong>Returns</strong> &lt;Object&gt;
+        <p>An object with numeric 'x', 'y', 'width', and 'height' properties.</p>
       </div>
     </div>
 
@@ -76,6 +89,18 @@
       <div class="returns">
         <strong>Returns:</strong> &lt;Number&gt;
         <p>The power setting of the player ship's turning engines.</p>
+      </div>
+    </div>
+
+    <a name="pos"></a>
+    <div class="function">
+      <div class="name">
+        <code>Object <strong>pos</strong>()</code>
+      </div>
+      <p class="description">Gets the x, y, and angular position of the player ship. The x and y position are given in pixels. The angular position, or rotation, is given in radians.</p>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;Object&gt;
+        <p>An object with numeric 'x', 'y', and 'angular' properties.</p>
       </div>
     </div>
 

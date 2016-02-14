@@ -90,7 +90,7 @@ define(function(require, exports, module) {
      * of log, warn, or error.
      */
     exports.writeConsole = function(line, level) {
-        if (undefined === level) {
+        if ('undefined' === typeof level) {
             level = 'log';
         }
         var maxLines = 300;

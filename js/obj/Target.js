@@ -20,8 +20,8 @@ define(function(require, exports, module) {
         GameObject.prototype.constructor.call(this, props);
         this.objective = props.objective || null;
         this.radius = props.radius || 50;
-        this.win = typeof props.win === 'undefined' ? false : props.win;
-        this.lose = typeof props.lose === 'undefined' ? false : props.lose;
+        this.win = 'undefined' === typeof props.win ? false : props.win;
+        this.lose = 'undefined' === typeof props.lose ? false : props.lose;
     };
 
     // Extend GameObject

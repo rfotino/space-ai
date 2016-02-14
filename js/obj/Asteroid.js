@@ -81,7 +81,7 @@ define(function(require, exports, module) {
      * @param {GameObject} other
      */
     Asteroid.prototype.collide = function(other) {
-        if (other instanceof Player) {
+        if ('player' === other.type) {
             other.health = 0;
         }
     };

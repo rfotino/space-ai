@@ -31,15 +31,15 @@ define(function(require, exports, module) {
         this._state = this._stateFunc();
         // Make sure there are certain properties like a player,
         // object array, etc
-        if (typeof this._state.player === 'undefined') {
+        if ('undefined' === typeof this._state.player) {
             this._state.player = new Player();
         }
-        if (typeof this._state.objects === 'undefined') {
+        if ('undefined' === typeof this._state.objects) {
             this._state.objects = [];
         }
         // Grab all of the targets out of the game objects array
         this._state.targets = this._state.objects.filter(function(obj) {
-            return obj instanceof Target;
+            return 'target' === obj.type;
         });
         // Set up the star field
         this._state.starField = new StarField();
@@ -92,7 +92,7 @@ define(function(require, exports, module) {
         for (var i = this._state.objects.length - 1; 0 <= i; i--) {
             var obj = this._state.objects[i];
             var newTargets = obj.newObjects.filter(function(obj) {
-                return obj instanceof Target;
+                return 'target' === obj.type;
             });
             this._state.targets.push.apply(this._state.targets, newTargets);
             this._state.objects.push.apply(this._state.objects, obj.newObjects);
@@ -178,7 +178,7 @@ define(function(require, exports, module) {
             ctx.restore();
         }
         // Draw win/lose screen if necessary
-        if (typeof this._state.gameOver !== 'undefined') {
+        if ('undefined' !== typeof this._state.gameOver) {
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 3;
@@ -235,8 +235,8 @@ define(function(require, exports, module) {
      * @return {Boolean}
      */
     Level.prototype.complete = function() {
-        return typeof this._state !== 'undefined' &&
-            typeof this._state.gameOver !== 'undefined';
+        return 'undefined' !== typeof this._state &&
+            'undefined' !== typeof this._state.gameOver;
     };
 
     /**

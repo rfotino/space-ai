@@ -24,8 +24,7 @@ https://spaceship.codes.
 ## Todo
 
 * [ ] Allow level to supply alternative win condition function
-* [ ] Replace pos(), vel(), accel() with one diagnostic function that includes
-      more information
+* [x] Add health() and bounds() diagnostic functions for the user
 * [x] Explosion animations
 * [ ] Viewport interactions like pan/zoom/focus
 * [ ] Immobile enemy ships

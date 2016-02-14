@@ -13,6 +13,7 @@ define(function(require, exports, module) {
      */
     var Explosion = function(props) {
         props = props || {};
+        props.type = 'explosion';
         props.updateOnGameOver = true;
         GameObject.prototype.constructor.call(this, props);
         this.numParticles = props.numParticles || 20;
