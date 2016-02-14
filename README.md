@@ -38,7 +38,7 @@ https://spaceship.codes.
 
 ## Wishlist
 
-* [ ] Improved menu/button graphics
+* [x] Improved menu/button graphics
 * [ ] Minimap
 * [ ] Weapon drops, more weapon types
 * [ ] Powerups like shields, health

@@ -25,6 +25,52 @@ html, body {
 #main-window {
     position: relative;
 }
+.btn {
+    display: inline-block;
+    padding: 0 30px;
+    margin: 5px;
+    color: #555;
+    text-align: center;
+    font-size: 0.8em;
+    line-height: 35px;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-family: "Raleway", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    border-radius: 4px;
+    border: 1px solid #999;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+.btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+.btn:active {
+    background: rgba(0, 0, 0, 0.15);
+}
+.btn.disabled, .btn.disabled:hover, .btn.disabled:active {
+    color: #999;
+    background: transparent;
+    border-color: #bbb;
+}
+.btn-primary {
+    background: #33f;
+    border-color: #006;
+    color: #fff;
+}
+.btn-primary:hover {
+    background: #00c;
+    border-color: #005;
+}
+.btn-primary:active {
+    background: #00a;
+    border-color: #003;
+}
+.btn-primary.disabled, .btn-primary.disabled:hover, .btn-primary.disabled:active {
+    color: #bbb;
+    background: #66f;
+    border-color: #33f;
+}
 
 
 /* Menu bar */
@@ -32,24 +78,6 @@ html, body {
     background: #eee;
     padding: 0 30px;
     border-bottom: 1px solid #999;
-}
-#menubar a {
-    color: #333;
-    padding: 15px 15px;
-    text-decoration: none;
-    display: inline-block;
-}
-#menubar a:hover {
-    text-decoration: underline;
-    background: #ccc;
-}
-#menubar a.disabled {
-    color: #999;
-}
-#menubar a.disabled:hover {
-    text-decoration: none;
-    background: none;
-    cursor: default;
 }
 #menubar-left {
     float: left;
@@ -140,32 +168,6 @@ html, body {
     line-height: 50px;
     text-align: right;
     box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.25);
-}
-#level-selector #hide-levels, #level-selector #load-level {
-    text-decoration: none;
-    color: #333;
-    font-weight: bold;
-    font-size: 1.2em;
-    padding: 0 20px;
-    display: inline-block;
-}
-#level-selector #hide-levels:hover {
-    text-decoration: underline;
-}
-#level-selector #load-level {
-    border-left: 1px solid #999;
-}
-#level-selector #load-level.disabled {
-    color: #999;
-}
-#level-selector #load-level:hover {
-    text-decoration: underline;
-    background: #ddd;
-}
-#level-selector #load-level.disabled:hover {
-    text-decoration: none;
-    background: none;
-    cursor: default;
 }
 
 /* Game canvas */
