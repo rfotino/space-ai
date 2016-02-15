@@ -11,12 +11,12 @@ define(function(require, exports, module) {
      * A constructor for StarField objects.
      */
     var StarField = function(density) {
-        this._density = density || 0.005;
-        this._bounds = { x: 0, y: 0, width: screen.width, height: screen.height };
+        this._density = density || 0.0015;
+        this._bounds = { x: 0, y: 0, width: window.innerWidth / 2, height: window.innerHeight / 2 };
         this._stars = [];
         this._color = '#bbf';
-        this._minRadius = 0.25;
-        this._maxRadius = 1.5;
+        this._minRadius = 0.75;
+        this._maxRadius = 2;
         this._addStars(this._bounds.x, this._bounds.y,
                        this._bounds.width, this._bounds.height);
     };
