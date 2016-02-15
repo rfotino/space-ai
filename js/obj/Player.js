@@ -141,6 +141,8 @@ define(function(require, exports, module) {
             this.accel.x = this.thrust * Math.cos(this.pos.angular);
             this.accel.y = this.thrust * Math.sin(this.pos.angular);
         }
+        // Update the exhaust flicker counter
+        this._flameFlicker = (this._flameFlicker + 1) % this._flameFlickerMax;
         // Update the game object
         GameObject.prototype.update.call(this);
     };
@@ -156,7 +158,6 @@ define(function(require, exports, module) {
             graphics.fillPoly(ctx, poly, poly.color);
         }
         // Draw the exhaust
-        this._flameFlicker = (this._flameFlicker + 1) % this._flameFlickerMax;
         if (this._flameFlicker < this._flameFlickerThreshold) {
             var flameScale = {
                 x: this.thrustPower,

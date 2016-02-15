@@ -18,9 +18,26 @@ define(function(require, exports, module) {
      * relative to any already applied scale transformations.
      *
      * @param {Number} scale
+     * @param {Boolean} clamp If true, clamp scale to min/max values.
      */
-    Viewport.prototype.scale = function(scale) {
+    Viewport.prototype.scale = function(scale, clamp) {
         this._scale *= scale;
+        if (clamp) {
+            var minScale = 0.5;
+            var maxScale = 2.5;
+            if (this._scale < minScale) {
+                this._scale = minScale;
+            } else if (maxScale < this._scale) {
+                this._scale = maxScale;
+            }
+        }
+    };
+
+    /**
+     * @return {Number} The current scale factor.
+     */
+    Viewport.prototype.getScale = function() {
+        return this._scale;
     };
 
     /**
@@ -33,6 +50,13 @@ define(function(require, exports, module) {
     Viewport.prototype.translate = function(x, y) {
         this._translation.x += x;
         this._translation.y += y;
+    };
+
+    /**
+     * @return {Point} The current translation.
+     */
+    Viewport.prototype.getTranslation = function() {
+        return { x: this._translation.x, y: this._translation.y };
     };
 
     /**
@@ -52,13 +76,16 @@ define(function(require, exports, module) {
      * @param {Rectangle} bounds
      * @param {Number} viewWidth
      * @param {Number} viewHeight
+     * @param {Boolean} clamp If true, clamp the scale to min/max values.
      */
-    Viewport.prototype.fixToBounds = function(bounds, viewWidth, viewHeight) {
-        this._focusObj = null;
+    Viewport.prototype.fixToBounds = function(bounds, viewWidth, viewHeight,
+                                              clamp) {
+        this.reset();
         var scaleX = viewWidth / bounds.width;
         var scaleY = viewHeight / bounds.height;
         var scale = Math.min(scaleX, scaleY);
-        this.scale(scale);
+        this.scale(scale, clamp);
+        scale = this.getScale();
         this.translate(-bounds.x + (((viewWidth / scale) - bounds.width) / 2),
                        bounds.y + (((viewHeight / scale) + bounds.height) / 2));
     };
@@ -82,8 +109,10 @@ define(function(require, exports, module) {
     Viewport.prototype.update = function(ctx) {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (this._focusObj) {
-            this._translation.x = -this._focusObj.pos.x + (ctx.canvas.width / 2);
-            this._translation.y = this._focusObj.pos.y + (ctx.canvas.height / 2);
+            this._translation.x = -this._focusObj.pos.x +
+                ((ctx.canvas.width / 2) / this._scale);
+            this._translation.y = this._focusObj.pos.y +
+                ((ctx.canvas.height / 2) / this._scale);
         }
         ctx.scale(this._scale, this._scale);
         ctx.translate(this._translation.x, this._translation.y);
@@ -94,14 +123,15 @@ define(function(require, exports, module) {
     /**
      * Gets the in-game bounds that correspond to this viewport.
      *
-     * @param {CanvasRenderingContext2D} ctx
+     * @param {Number} viewWidth
+     * @param {Number} viewHeight
      */
-    Viewport.prototype.bounds = function(ctx) {
+    Viewport.prototype.bounds = function(viewWidth, viewHeight) {
         return {
             x: -this._translation.x,
             y: -this._translation.y,
-            width: ctx.canvas.width / this._scale,
-            height: ctx.canvas.height / this._scale
+            width: viewWidth / this._scale,
+            height: viewHeight / this._scale
         };
     };
 

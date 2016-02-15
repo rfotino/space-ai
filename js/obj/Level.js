@@ -43,9 +43,6 @@ define(function(require, exports, module) {
         });
         // Set up the star field
         this._state.starField = new StarField();
-        // Reset the viewport and focus it on the player
-        this.viewport.reset();
-        this.viewport.focus(this._state.player);
     };
 
     /**
@@ -279,6 +276,67 @@ define(function(require, exports, module) {
             width: maxX - minX + (padding * 2),
             height: maxY - minY + (padding * 2)
         };
+    };
+
+    /**
+     * Focuses the view on the player's ship.
+     */
+    Level.prototype.viewToPlayer = function() {
+        if (this._state) {
+            this.viewport.focus(this._state.player);
+        }
+    };
+
+   /**
+     * Sets the viewport to enclose the entire level within its bounds.
+     *
+     * @param {Number} viewWidth The width of the viewport, in pixels.
+     * @param {Number} viewHeight The height of the viewport, in pixels.
+     */
+    Level.prototype.viewToBounds = function(viewWidth, viewHeight) {
+        if (this._state) {
+            this.viewport.fixToBounds(this.bounds(), viewWidth, viewHeight,
+                                      true);
+        }
+    };
+
+    /**
+     * Translates the viewport by a given number of pixels (in viewport
+     * coordinates, not game coordinates).
+     *
+     * @param {Number} x
+     * @param {Number} y
+     */
+    Level.prototype.viewTranslate = function(x, y) {
+        if (this._state) {
+            var scale = this.viewport.getScale();
+            this.viewport.translate(x / scale, y / scale);
+        }
+    };
+
+    /**
+     * Scales the viewport by a given factor.
+     *
+     * @param {Number} factor
+     * @param {Number} viewWidth
+     * @param {Number} viewHeight
+     */
+    Level.prototype.viewScale = function(factor, viewWidth, viewHeight) {
+        if (this._state) {
+            var translation = this.viewport.getTranslation();
+            var viewBounds = this.viewport.bounds(viewWidth, viewHeight);
+            var center = {
+                x: translation.x + viewBounds.x + (viewBounds.width / 2),
+                y: translation.y + viewBounds.y + (viewBounds.height / 2)
+            };
+            this.viewport.translate(-center.x, -center.y);
+            var oldScale = this.viewport.getScale();
+            this.viewport.scale(factor, true);
+            var newScale = this.viewport.getScale();
+            var realFactor = newScale / oldScale;
+            this.viewport.translate(center.x / realFactor,
+                                    center.y / realFactor);
+        }
     };
 
     module.exports = Level;

@@ -43,9 +43,17 @@ define(function(require, exports, module) {
      * @override {GameObject}
      * @return {Rectangle}
      */
-    Explosion.bounds = function() {
+    Explosion.prototype.bounds = function() {
         return { x: this.pos.x, y: this.pos.y, width: 1, height: 1 };
     };
+
+    /**
+     * @override {GameObject}
+     * @return {Polygon}
+     */
+    Explosion.prototype.outline = function() {
+        return { points: [] };
+    }
 
     /**
      * Expands the explosion, setting alive to false if the animation has

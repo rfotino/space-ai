@@ -13,7 +13,7 @@ define(function(require, exports, module) {
     // Declare variables for DOM elements and handling state
     var canvas, ctx, worker = null, running = false,
         frameComplete = true, timerComplete = true,
-        level = null, installedCode = null;
+        level = null, installedCode = null, playerFocus = true;
 
     // Update the run/pause button in the menu to the correct state
     var updateMenu = function() {
@@ -152,7 +152,9 @@ define(function(require, exports, module) {
      */
     exports.load = function(newLevel) {
         // Save the initial state and start the game
+        playerFocus = true;
         level = newLevel;
+        level.viewport.reset();
         exports.restart();
     };
 
@@ -168,6 +170,9 @@ define(function(require, exports, module) {
         }
         if (null !== level) {
             level.init();
+            if (playerFocus) {
+                level.viewToPlayer();
+            }
             exports.draw();
         }
         updateMenu();
@@ -194,5 +199,55 @@ define(function(require, exports, module) {
             ctx = canvas.getContext('2d');
             exports.load(new Level('Select Level', function() { return {}; }));
         });
+    };
+
+    /**
+     * Focuses the viewport on the player's ship.
+     */
+    exports.viewToPlayer = function() {
+        if (level) {
+            playerFocus = true;
+            level.viewToPlayer();
+            exports.draw();
+        }
+    };
+
+    /**
+     * Sets the viewport to enclose the entire level within its bounds.
+     */
+    exports.viewToBounds = function() {
+        if (level) {
+            playerFocus = false;
+            level.viewToBounds(ctx.canvas.width, ctx.canvas.height);
+            exports.draw();
+        }
+    };
+
+    /**
+     * Translates the viewport by a given number of pixels (in viewport
+     * coordinates, not game coordinates).
+     *
+     * @param {Number} x
+     * @param {Number} y
+     */
+    exports.viewTranslate = function(x, y) {
+        if (level) {
+            playerFocus = false;
+            level.viewport.focus(null);
+            level.viewTranslate(x, y);
+            exports.draw();
+        }
+    };
+
+    /**
+     * Scales the viewport by a given factor.
+     *
+     * @param {Number} factor
+     */
+    exports.viewScale = function(factor) {
+        if (level) {
+            level.viewScale(factor, ctx.canvas.width, ctx.canvas.height);
+            exports.draw();
+        }
     };
 });

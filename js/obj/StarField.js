@@ -12,7 +12,12 @@ define(function(require, exports, module) {
      */
     var StarField = function(density) {
         this._density = density || 0.0015;
-        this._bounds = { x: 0, y: 0, width: window.innerWidth / 2, height: window.innerHeight / 2 };
+        this._bounds = {
+            x: 0,
+            y: 0,
+            width: window.innerWidth / 2,
+            height: window.innerHeight / 2
+        };
         this._stars = [];
         this._color = '#bbf';
         this._minRadius = 0.75;
@@ -51,7 +56,7 @@ define(function(require, exports, module) {
      */
     StarField.prototype.draw = function(ctx, viewport) {
         // We need to make sure we cover the entire viewport bounds with stars
-        var viewBounds = viewport.bounds(ctx);
+        var viewBounds = viewport.bounds(ctx.canvas.width, ctx.canvas.height);
         var viewBoundsRight = viewBounds.x + viewBounds.width;
         var viewBoundsTop = viewBounds.y + viewBounds.height;
         // Figure out the offset that we need to draw the first iteration of

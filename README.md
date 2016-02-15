@@ -26,7 +26,7 @@ https://spaceship.codes.
 * [ ] Allow level to supply alternative win condition function
 * [x] Add health() and bounds() diagnostic functions for the user
 * [x] Explosion animations
-* [ ] Viewport interactions like pan/zoom/focus
+* [x] Viewport interactions like pan/zoom/focus
 * [ ] Immobile enemy ships
 * [ ] Mobile enemy ships
 * [ ] Health bar, other status information
