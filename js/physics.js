@@ -292,7 +292,14 @@ define(function(require, exports, module) {
                     ((vec1.x * vec1.x) + (vec1.y * vec1.y));
                 var proj = { x: comp * vec1.x, y: comp * vec1.y };
                 var closestPoint = { x: p1.x + proj.x, y: p1.y + proj.y };
-                if (exports.pointInCircle(closestPoint, circle)) {
+                var segmentRect = {
+                    x: Math.min(p1.x, p2.x),
+                    y: Math.min(p1.y, p2.y),
+                    width: Math.abs(p2.x - p1.x),
+                    height: Math.abs(p2.y - p1.y)
+                };
+                if (exports.pointInCircle(closestPoint, circle) &&
+                    exports.pointInRect(closestPoint, segmentRect)) {
                     return true;
                 }
             }

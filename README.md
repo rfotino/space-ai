@@ -35,6 +35,7 @@ https://spaceship.codes.
 * [ ] Help dialog, with keyboard shortcuts
 * [ ] About page
 * [ ] Extend the documentation
+* [ ] Add unit tests for physics.js
 
 ## Wishlist
 
