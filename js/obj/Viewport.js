@@ -135,5 +135,18 @@ define(function(require, exports, module) {
         };
     };
 
+    /**
+     * Converts viewport coordinates to in-game coordinates.
+     *
+     * @param {Point} p
+     * @return {Point}
+     */
+    Viewport.prototype.getGameCoords = function(p) {
+        return {
+            x: (p.x / this._scale) - this._translation.x,
+            y: -(p.y / this._scale) + this._translation.y
+        };
+    };
+
     module.exports = Viewport;
 });

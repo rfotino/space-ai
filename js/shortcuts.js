@@ -161,5 +161,11 @@ define(function(require, exports, module) {
                 .on('mousemove', dragHandler)
                 .on('mouseup', mouseUpHandler);
         });
+
+        // Listen for mouse movements on the canvas, so that we can show info
+        // about game objects
+        $('#game-canvas').on('mousemove', function(e) {
+            game.changeMousePos({ x: e.offsetX, y: e.offsetY });
+        });
     };
 });

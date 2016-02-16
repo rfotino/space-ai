@@ -13,7 +13,8 @@ define(function(require, exports, module) {
     // Declare variables for DOM elements and handling state
     var canvas, ctx, worker = null, running = false,
         frameComplete = true, timerComplete = true,
-        level = null, installedCode = null, playerFocus = true;
+        level = null, installedCode = null, playerFocus = true,
+        mousePos = null;
 
     // Update the run/pause button in the menu to the correct state
     var updateMenu = function() {
@@ -155,6 +156,9 @@ define(function(require, exports, module) {
         playerFocus = true;
         level = newLevel;
         level.viewport.reset();
+        if (mousePos) {
+            level.highlightObjAt(mousePos);
+        }
         exports.restart();
     };
 
@@ -248,6 +252,19 @@ define(function(require, exports, module) {
         if (level) {
             level.viewScale(factor, ctx.canvas.width, ctx.canvas.height);
             exports.draw();
+        }
+    };
+
+    /**
+     * Changes the mouse's current coordinates. Used for highlighting
+     * hovered-over game objects.
+     *
+     * @param {Point} newMousePos
+     */
+    exports.changeMousePos = function(newMousePos) {
+        mousePos = { x: newMousePos.x, y: newMousePos.y };
+        if (level) {
+            level.highlightObjAt(mousePos, ctx);
         }
     };
 });

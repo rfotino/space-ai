@@ -56,12 +56,16 @@ define(function(require, exports, module) {
      * @param {CanvasRenderingContext2D} ctx
      */
     Target.prototype.draw = function(ctx) {
+        // Draw the fill
         ctx.fillStyle = this._fillStyle;
-        ctx.strokeStyle = this._strokeStyle;
-        ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
         ctx.fill();
+        // Draw the outline
+        ctx.strokeStyle = this._strokeStyle;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius - (ctx.lineWidth / 2), 0, Math.PI * 2);
         ctx.stroke();
     };
 

@@ -92,7 +92,9 @@ define(function(require, exports, module) {
      */
     Asteroid.prototype.draw = function(ctx) {
         // Draw main polygon
-        graphics.fillPoly(ctx, this._outline, '#553322');
+        ctx.fillStyle = '#553322';
+        graphics.drawShape(ctx, this._outline);
+        ctx.fill();
         // Save the non-clipped context and then clip it to the outer polygon
         ctx.save();
         ctx.clip();
@@ -105,10 +107,14 @@ define(function(require, exports, module) {
                           * Math.cos(crater.shadowOffset.angle),
                           crater.shadowOffset.radius
                           * Math.sin(crater.shadowOffset.angle));
-            graphics.fillPoly(ctx, crater, '#331700');
+            ctx.fillStyle = '#331700';
+            graphics.drawShape(ctx, crater);
+            ctx.fill();
             ctx.restore();
             // Draw the crater
-            graphics.fillPoly(ctx, crater, '#442211');
+            ctx.fillStyle = '#442211';
+            graphics.drawShape(ctx, crater);
+            ctx.fill();
         }
         // Restore the non-clipped context
         ctx.restore();

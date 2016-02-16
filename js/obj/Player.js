@@ -155,7 +155,9 @@ define(function(require, exports, module) {
         // Draw the polygons
         for (var i = 0; i < this._drawPolys.length; i++) {
             var poly = this._drawPolys[i];
-            graphics.fillPoly(ctx, poly, poly.color);
+            ctx.fillStyle = poly.color;
+            graphics.drawShape(ctx, poly);
+            ctx.fill();
         }
         // Draw the exhaust
         if (this._flameFlicker < this._flameFlickerThreshold) {
@@ -166,7 +168,9 @@ define(function(require, exports, module) {
             var translateTransform = physics.getTranslate(this._flamePosX, 0);
             var transform = physics.getScale(flameScale, translateTransform);
             var flamePoly = { points: this._flamePoly.points.map(transform) };
-            graphics.fillPoly(ctx, flamePoly, 'orange');
+            ctx.fillStyle = 'orange';
+            graphics.drawShape(ctx, flamePoly);
+            ctx.fill();
         }
     };
 

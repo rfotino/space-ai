@@ -29,7 +29,9 @@ https://spaceship.codes.
 * [x] Viewport interactions like pan/zoom/focus
 * [ ] Immobile enemy ships
 * [ ] Mobile enemy ships
-* [ ] Health bar, other status information
+* [x] Be able to hover over objects and see information about them
+* [ ] Togglable debug mode where you see a 100px grid, info on all game
+      objects, etc.
 * [ ] More and better levels
 * [ ] Packaging/minification of JavaScript files
 * [ ] Help dialog, with keyboard shortcuts

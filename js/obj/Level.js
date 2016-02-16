@@ -6,13 +6,15 @@
 
 define(function(require, exports, module) {
     var physics = require('physics');
+    var graphics = require('graphics');
     var Player = require('obj/Player');
     var Target = require('obj/Target');
     var Viewport = require('obj/Viewport');
     var StarField = require('obj/StarField');
 
     /**
-     * Creates a game level with a name and function for getting an initial state.
+     * Creates a game level with a name and function for getting an initial
+     * state.
      *
      * @param {String} name
      * @param {Function} stateFunc
@@ -20,6 +22,8 @@ define(function(require, exports, module) {
     function Level(name, stateFunc) {
         this.name = name;
         this._stateFunc = stateFunc;
+        this._mousePos = null;
+        this._highlightedObj = null;
         this.viewport = new Viewport();
     };
 
@@ -46,7 +50,7 @@ define(function(require, exports, module) {
     };
 
     /**
-     * Updates the game state every frame
+     * Updates the game state every frame.
      */
     Level.prototype.update = function() {
         this._updateGameObjects();
@@ -174,8 +178,12 @@ define(function(require, exports, module) {
             player.draw(ctx);
             ctx.restore();
         }
+        // Draw the highlighted object's outline and information, if necessary
+        this._updateHighlightedObj();
+        this._drawHighlightedObj(ctx);
         // Draw win/lose screen if necessary
         if ('undefined' !== typeof this._state.gameOver) {
+            ctx.save();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 3;
@@ -193,6 +201,7 @@ define(function(require, exports, module) {
             }
             ctx.strokeText(text, ctx.canvas.width / 2, ctx.canvas.height / 2);
             ctx.fillText(text, ctx.canvas.width / 2, ctx.canvas.height / 2);
+            ctx.restore();
         }
     };
 
@@ -336,6 +345,117 @@ define(function(require, exports, module) {
             var realFactor = newScale / oldScale;
             this.viewport.translate(center.x / realFactor,
                                     center.y / realFactor);
+        }
+    };
+
+    /**
+     * Usese the current mouse position to update which object is highlighted
+     * by being hovered over with the mouse.
+     */
+    Level.prototype._updateHighlightedObj = function() {
+        if (!this._state || !this._mousePos) {
+            return;
+        }
+        // Convert mouse position to in game coordinates
+        var gameCoords = this.viewport.getGameCoords(this._mousePos);
+        // Get the game object that is being hovered over, if any
+        this._highlightedObj = null;
+        this._state.objects.push(this._state.player);
+        for (var i = this._state.objects.length - 1; 0 <= i; i--) {
+            var obj = this._state.objects[i];
+            if (obj.alive && physics.pointInObj(gameCoords, obj)) {
+                this._highlightedObj = obj;
+                break;
+            }
+        }
+        this._state.objects.pop();
+    };
+
+    /**
+     * Outlines the highlighted object and shows the user extra information
+     * such as object type, position, health, etc.
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    Level.prototype._drawHighlightedObj = function(ctx) {
+        var obj = this._highlightedObj;
+        var scale = this.viewport.getScale();
+        if (!obj) {
+            return;
+        }
+        // Outline the object
+        ctx.save();
+        ctx.strokeStyle = 'rgb(150, 200, 255)';
+        ctx.lineWidth = 3 / scale;
+        graphics.drawShape(ctx, obj.outline());
+        ctx.stroke();
+        // Show info about it on screen
+        var infoArray = [];
+        infoArray.push('type: ' + obj.type);
+        if ('undefined' !== typeof obj.objective) {
+            infoArray.push('objective: ' + obj.objective);
+        }
+        if ('undefined' !== typeof obj.damage) {
+            infoArray.push('damage: ' + obj.damage);
+        }
+        if ('undefined' !== typeof obj.health) {
+            infoArray.push('health: ' + obj.health);
+        }
+        infoArray.push('position: (' + Math.round(obj.pos.x) + ', ' +
+                       Math.round(obj.pos.y) + ')');
+        var piMultiple = obj.pos.angular / Math.PI;
+        infoArray.push('rotation: ' +
+                       (Math.round(piMultiple * 100) / 100) + '\u03C0');
+        if (infoArray.length) {
+            var infoWidth = 0;
+            var fontSize = 16 / scale;
+            ctx.font = fontSize + 'px sans-serif';
+            for (var i = 0; i < infoArray.length; i++) {
+                infoWidth = Math.max(infoWidth,
+                                     ctx.measureText(infoArray[i]).width);
+            }
+            var lineHeight = 20 / scale;
+            var margin = 10 / scale;
+            var padding = 5 / scale;
+            var objBounds = obj.bounds();
+            var infoRect = {
+                x: objBounds.x + (objBounds.width / 2)
+                    - (infoWidth / 2) - padding,
+                y: objBounds.y + objBounds.height + margin,
+                width: infoWidth + (padding * 2),
+                height: (lineHeight * infoArray.length) + (padding * 2),
+            };
+            ctx.fillStyle = '#333';
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2 / scale;
+            graphics.drawRoundedRect(ctx, infoRect, padding);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#fff';
+            ctx.scale(1, -1);
+            for (var i = 0; i < infoArray.length; i++) {
+                var infoStr = infoArray[i];
+                var y = margin + infoRect.y
+                    + (lineHeight * (infoArray.length - i - 1));
+                ctx.fillText(infoStr, padding + infoRect.x, -y);
+            }
+        }
+        ctx.restore();
+    };
+
+    /**
+     * Changes the current mouse position, which possibly changes which
+     * game object is highlighted.
+     *
+     * @param {Point} mousePos
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    Level.prototype.highlightObjAt = function(mousePos, ctx) {
+        var prevHighlightedObj = this._highlightedObj;
+        this._mousePos = { x: mousePos.x, y: mousePos.y };
+        this._updateHighlightedObj();
+        if (ctx && this._highlightedObj !== prevHighlightedObj) {
+            this.draw(ctx);
         }
     };
 

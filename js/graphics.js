@@ -7,22 +7,60 @@
 
 define(function(require, exports, module) {
     /**
-     * Fills a polygon, optionally with a given color.
+     * Draws a shape to the graphics context so that the caller can stroke
+     * or fill as necessary.
      *
      * @param {CanvasRenderingContext2D} ctx
-     * @param {Polygon} poly
-     * @param {Color} color
+     * @param {Polygon|Circle} shape
      */
-    exports.fillPoly = function(ctx, poly, color) {
-        if (color) {
-            ctx.fillStyle = color;
-        }
+    exports.drawShape = function(ctx, shape) {
         ctx.beginPath();
-        for (var i = 0; i < poly.points.length; i++) {
-            var p = poly.points[i];
-            ctx.lineTo(p.x, p.y);
+        if (shape.radius) {
+            ctx.arc(shape.x, shape.y, shape.radius, 0, Math.PI * 2);
+        } else if (shape.points) {
+            for (var i = 0; i < shape.points.length; i++) {
+                var p = shape.points[i];
+                ctx.lineTo(p.x, p.y);
+            }
         }
-        ctx.fill();
+        ctx.closePath();
+    };
+
+    /**
+     * Draws a rounded rectangle that the caller can stroke or fill as
+     * necessary.
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {Rectangle} rect
+     * @param {Number} radius
+     */
+    exports.drawRoundedRect = function(ctx, rect, radius) {
+        // Radius can't be more than half the width or height
+        radius = Math.min(rect.width / 2, rect.height / 2, radius);
+        // Radius can't be less than zero
+        radius = Math.max(0, radius);
+        var midX = rect.x + (rect.width / 2);
+        var midY = rect.y + (rect.height / 2);
+        var straightWidth = (rect.width / 2) - radius;
+        var straightHeight = (rect.height / 2) - radius;
+        ctx.beginPath();
+        ctx.moveTo(rect.x, midY + straightHeight);
+        ctx.arcTo(rect.x, rect.y + rect.height,
+                  midX - straightWidth, rect.y + rect.height,
+                  radius);
+        ctx.lineTo(midX + straightWidth, rect.y + rect.height);
+        ctx.arcTo(rect.x + rect.width, rect.y + rect.height,
+                  rect.x + rect.width, midY + straightHeight,
+                  radius);
+        ctx.lineTo(rect.x + rect.width, midY - straightHeight);
+        ctx.arcTo(rect.x + rect.width, rect.y,
+                  midX + straightWidth, rect.y,
+                  radius);
+        ctx.lineTo(midX - straightWidth, rect.y);
+        ctx.arcTo(rect.x, rect.y,
+                  rect.x, midY - straightHeight,
+                  radius);
+        ctx.closePath();
     };
 
     /**
