@@ -379,10 +379,12 @@ define(function(require, exports, module) {
      */
     Level.prototype._drawHighlightedObj = function(ctx) {
         var obj = this._highlightedObj;
-        var scale = this.viewport.getScale();
         if (!obj) {
             return;
         }
+        var scale = this.viewport.getScale();
+        var viewBounds = this.viewport.bounds(ctx.canvas.width,
+                                              ctx.canvas.height);
         // Outline the object
         ctx.save();
         ctx.strokeStyle = 'rgb(150, 200, 255)';
@@ -418,6 +420,8 @@ define(function(require, exports, module) {
             var margin = 10 / scale;
             var padding = 5 / scale;
             var objBounds = obj.bounds();
+            // Get the ideal bounds of the tooltip (horizontally centered,
+            // above the highlighted object)
             var infoRect = {
                 x: objBounds.x + (objBounds.width / 2)
                     - (infoWidth / 2) - padding,
@@ -425,6 +429,15 @@ define(function(require, exports, module) {
                 width: infoWidth + (padding * 2),
                 height: (lineHeight * infoArray.length) + (padding * 2),
             };
+            // If the tooltip is outside the viewport bounds, shift it into
+            // the bounds
+            infoRect.x = Math.min(infoRect.x,
+                                  viewBounds.x + viewBounds.width
+                                  - infoRect.width - margin);
+            infoRect.x = Math.max(infoRect.x, viewBounds.x + margin);
+            infoRect.y = Math.min(infoRect.y,
+                                  -viewBounds.y - infoRect.height - margin);
+            // Draw tooltip
             ctx.fillStyle = '#333';
             ctx.strokeStyle = '#666';
             ctx.lineWidth = 2 / scale;
