@@ -136,15 +136,28 @@ define(function(require, exports, module) {
     };
 
     /**
-     * Converts viewport coordinates to in-game coordinates.
+     * Converts in-game coordinates to viewport coordinates.
      *
-     * @param {Point} p
+     * @param {Point} gameCoords
      * @return {Point}
      */
-    Viewport.prototype.getGameCoords = function(p) {
+    Viewport.prototype.getViewCoords = function(gameCoords) {
         return {
-            x: (p.x / this._scale) - this._translation.x,
-            y: -(p.y / this._scale) + this._translation.y
+            x: (gameCoords.x + this._translation.x) * this._scale,
+            y: (-gameCoords.y + this._translation.y) * this._scale
+        };
+    };
+
+    /**
+     * Converts viewport coordinates to in-game coordinates.
+     *
+     * @param {Point} viewCoords
+     * @return {Point}
+     */
+    Viewport.prototype.getGameCoords = function(viewCoords) {
+        return {
+            x: (viewCoords.x / this._scale) - this._translation.x,
+            y: -(viewCoords.y / this._scale) + this._translation.y
         };
     };
 

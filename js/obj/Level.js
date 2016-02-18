@@ -24,6 +24,7 @@ define(function(require, exports, module) {
         this._stateFunc = stateFunc;
         this._mousePos = null;
         this._highlightedObj = null;
+        this._debugMode = false;
         this.viewport = new Viewport();
     };
 
@@ -161,6 +162,10 @@ define(function(require, exports, module) {
         this.viewport.update(ctx);
         // Draw the stars
         this._state.starField.draw(ctx, this.viewport);
+        // Draw debug grid
+        if (this._debugMode) {
+            this._drawGrid(ctx);
+        }
         // Draw the game objects
         for (var i = 0; i < this._state.objects.length; i++) {
             var obj = this._state.objects[i];
@@ -178,9 +183,22 @@ define(function(require, exports, module) {
             player.draw(ctx);
             ctx.restore();
         }
-        // Draw the highlighted object's outline and information, if necessary
-        this._updateHighlightedObj();
-        this._drawHighlightedObj(ctx);
+        // Draw highlighted objects and tooltips
+        if (this._debugMode) {
+            this._state.objects.push(player);
+            for (var i = 0; i < this._state.objects.length; i++) {
+                var obj = this._state.objects[i];
+                if (obj.alive) {
+                    this._drawHighlightedObj(ctx, obj);
+                }
+            }
+            this._state.objects.pop();
+        } else {
+            this._updateHighlightedObj();
+            if (this._highlightedObj) {
+                this._drawHighlightedObj(ctx, this._highlightedObj);
+            }
+        }
         // Draw win/lose screen if necessary
         if ('undefined' !== typeof this._state.gameOver) {
             ctx.save();
@@ -372,23 +390,17 @@ define(function(require, exports, module) {
     };
 
     /**
-     * Outlines the highlighted object and shows the user extra information
+     * Outlines the given object and shows the user extra information
      * such as object type, position, health, etc.
      *
      * @param {CanvasRenderingContext2D} ctx
+     * @param {GameObject} obj
      */
-    Level.prototype._drawHighlightedObj = function(ctx) {
-        var obj = this._highlightedObj;
-        if (!obj) {
-            return;
-        }
-        var scale = this.viewport.getScale();
-        var viewBounds = this.viewport.bounds(ctx.canvas.width,
-                                              ctx.canvas.height);
+    Level.prototype._drawHighlightedObj = function(ctx, obj) {
         // Outline the object
         ctx.save();
         ctx.strokeStyle = 'rgb(150, 200, 255)';
-        ctx.lineWidth = 3 / scale;
+        ctx.lineWidth = 3 / this.viewport.getScale();
         graphics.drawShape(ctx, obj.outline());
         ctx.stroke();
         // Show info about it on screen
@@ -406,52 +418,93 @@ define(function(require, exports, module) {
         infoArray.push('position: (' + Math.round(obj.pos.x) + ', ' +
                        Math.round(obj.pos.y) + ')');
         var piMultiple = obj.pos.angular / Math.PI;
+        var piSymbol = '\u03C0';
         infoArray.push('rotation: ' +
-                       (Math.round(piMultiple * 100) / 100) + '\u03C0');
+                       (Math.round(piMultiple * 100) / 100) + piSymbol);
         if (infoArray.length) {
+            var lineHeight = 20;
+            var margin = 10;
+            var paddingLeft = 10;
+            var paddingTop = 5;
+            var infoHeight = lineHeight * infoArray.length;
             var infoWidth = 0;
-            var fontSize = 16 / scale;
+            var fontSize = 16;
             ctx.font = fontSize + 'px sans-serif';
             for (var i = 0; i < infoArray.length; i++) {
                 infoWidth = Math.max(infoWidth,
                                      ctx.measureText(infoArray[i]).width);
             }
-            var lineHeight = 20 / scale;
-            var margin = 10 / scale;
-            var padding = 5 / scale;
             var objBounds = obj.bounds();
+            var objGameCoords = {
+                x: objBounds.x + (objBounds.width / 2),
+                y: objBounds.y + objBounds.height
+            };
+            var objViewCoords = this.viewport.getViewCoords(objGameCoords);
             // Get the ideal bounds of the tooltip (horizontally centered,
             // above the highlighted object)
             var infoRect = {
-                x: objBounds.x + (objBounds.width / 2)
-                    - (infoWidth / 2) - padding,
-                y: objBounds.y + objBounds.height + margin,
-                width: infoWidth + (padding * 2),
-                height: (lineHeight * infoArray.length) + (padding * 2),
+                x: objViewCoords.x - (infoWidth / 2) - paddingLeft,
+                y: objViewCoords.y - infoHeight - (paddingTop * 2) - margin,
+                width: infoWidth + (paddingLeft * 2),
+                height: infoHeight + (paddingTop * 2)
             };
             // If the tooltip is outside the viewport bounds, shift it into
             // the bounds
             infoRect.x = Math.min(infoRect.x,
-                                  viewBounds.x + viewBounds.width
-                                  - infoRect.width - margin);
-            infoRect.x = Math.max(infoRect.x, viewBounds.x + margin);
+                                  ctx.canvas.width - infoRect.width - margin);
+            infoRect.x = Math.max(infoRect.x, margin);
             infoRect.y = Math.min(infoRect.y,
-                                  -viewBounds.y - infoRect.height - margin);
+                                  ctx.canvas.height - infoRect.height - margin);
+            infoRect.y = Math.max(infoRect.y, margin);
             // Draw tooltip
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.fillStyle = '#333';
             ctx.strokeStyle = '#666';
-            ctx.lineWidth = 2 / scale;
-            graphics.drawRoundedRect(ctx, infoRect, padding);
+            ctx.lineWidth = 2;
+            graphics.drawRoundedRect(ctx, infoRect,
+                                     Math.min(paddingLeft, paddingTop));
             ctx.fill();
             ctx.stroke();
             ctx.fillStyle = '#fff';
-            ctx.scale(1, -1);
+            ctx.textBaseline = 'top';
             for (var i = 0; i < infoArray.length; i++) {
                 var infoStr = infoArray[i];
-                var y = margin + infoRect.y
-                    + (lineHeight * (infoArray.length - i - 1));
-                ctx.fillText(infoStr, padding + infoRect.x, -y);
+                var y = paddingTop + infoRect.y + (i * lineHeight);
+                ctx.fillText(infoStr, paddingLeft + infoRect.x, y);
             }
+        }
+        ctx.restore();
+    };
+
+    /**
+     * Draws a grid of green lines, used in debug mode.
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    Level.prototype._drawGrid = function(ctx) {
+        ctx.save();
+        ctx.strokeStyle = 'green';
+        ctx.lineWidth = 2 / this.viewport.getScale();
+        var viewBounds = this.viewport.bounds(ctx.canvas.width,
+                                              ctx.canvas.height);
+        var interval = 100;
+        // Draw vertical lines
+        var startX = Math.floor(viewBounds.x / interval) * interval;
+        var endX = viewBounds.x + viewBounds.width;
+        for (var x = startX; x <= endX; x += interval) {
+            ctx.beginPath();
+            ctx.moveTo(x, -viewBounds.y);
+            ctx.lineTo(x, -viewBounds.y - viewBounds.height);
+            ctx.stroke();
+        }
+        // Draw horizontal lines
+        var startY = Math.floor(viewBounds.y / interval) * interval;
+        var endY = viewBounds.y + viewBounds.width;
+        for (var y = startY; y <= endY; y += interval) {
+            ctx.beginPath();
+            ctx.moveTo(viewBounds.x, -y);
+            ctx.lineTo(viewBounds.x + viewBounds.width, -y);
+            ctx.stroke();
         }
         ctx.restore();
     };
@@ -471,6 +524,13 @@ define(function(require, exports, module) {
             this.draw(ctx);
         }
     };
+
+    /**
+     * @param {Boolean} debugMode
+     */
+    Level.prototype.setDebugMode = function(debugMode) {
+        this._debugMode = debugMode;
+    }
 
     module.exports = Level;
 });

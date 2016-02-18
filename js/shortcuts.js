@@ -112,6 +112,9 @@ define(function(require, exports, module) {
                 case 187: // =
                     game.viewScale(zoomFactor);
                     break;
+                case 88: // x
+                    game.toggleDebugMode();
+                    break;
                 default:
                     return;
                 }

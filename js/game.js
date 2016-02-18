@@ -14,7 +14,7 @@ define(function(require, exports, module) {
     var canvas, ctx, worker = null, running = false,
         frameComplete = true, timerComplete = true,
         level = null, installedCode = null, playerFocus = true,
-        mousePos = null;
+        mousePos = null, debugMode = false;
 
     // Update the run/pause button in the menu to the correct state
     var updateMenu = function() {
@@ -159,6 +159,7 @@ define(function(require, exports, module) {
         if (mousePos) {
             level.highlightObjAt(mousePos);
         }
+        level.setDebugMode(debugMode);
         exports.restart();
     };
 
@@ -265,6 +266,17 @@ define(function(require, exports, module) {
         mousePos = { x: newMousePos.x, y: newMousePos.y };
         if (level) {
             level.highlightObjAt(mousePos, ctx);
+        }
+    };
+
+    /**
+     * Toggles debug mode and updates the level, possibly redrawing.
+     */
+    exports.toggleDebugMode = function() {
+        debugMode = !debugMode;
+        if (level) {
+            level.setDebugMode(debugMode);
+            exports.draw();
         }
     };
 });
