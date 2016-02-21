@@ -19,7 +19,39 @@
     <div id="menubar">
       <div id="menubar-left">
         <a class="btn" id="docs" href="docs.html" target="_blank">Docs</a><!--
-     --><a class="btn" id="show-levels" href="#">Select Level</a>
+     --><a class="btn" id="show-levels" href="#">Select Level</a><!--
+     --><span class="btn btn-dropdown" id="view-menu">
+          View <span class="icon">&#x25BC;</span>
+          <ul class="dropdown-menu">
+            <li class="dropdown-item" id="focus-player-btn">
+              Focus Player <span class="shortcut">(F)</span>
+            </li>
+            <li class="dropdown-item" id="focus-bounds-btn">
+              Focus Bounds <span class="shortcut">(B)</span>
+            </li>
+            <li class="dropdown-item" id="debug-mode-btn">
+              Debug Mode <span class="shortcut">(X)</span>
+            </li>
+            <li class="dropdown-item" id="zoom-in-btn">
+              Zoom In <span class="shortcut">(+)</span>
+            </li>
+            <li class="dropdown-item" id="zoom-out-btn">
+              Zoom Out <span class="shortcut">(-)</span>
+            </li>
+            <li class="dropdown-item" id="pan-left-btn">
+              Pan Left <span class="shortcut">(&larr;)</span>
+            </li>
+            <li class="dropdown-item" id="pan-up-btn">
+              Pan Up <span class="shortcut">(&uarr;)</span>
+            </li>
+            <li class="dropdown-item" id="pan-right-btn">
+              Pan Right <span class="shortcut">(&rarr;)</span>
+            </li>
+            <li class="dropdown-item" id="pan-down-btn">
+              Pan Down <span class="shortcut">(&darr;)</span>
+            </li>
+          </ul>
+        </span>
       </div>
       <div id="menubar-right">
         <a class="btn" id="run" href="#">Run</a><!--

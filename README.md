@@ -38,6 +38,8 @@ https://spaceship.codes.
 * [ ] About page
 * [ ] Extend the documentation
 * [ ] Add unit tests for physics.js
+* [x] Menu dropdown for changing the view
+* [ ] Loading/saving of user code using local storage
 
 ## Wishlist
 
@@ -46,7 +48,6 @@ https://spaceship.codes.
 * [ ] Weapon drops, more weapon types
 * [ ] Powerups like shields, health
 * [ ] Parallax movement of stars
-* [ ] Loading/saving of user code using local storage
 * [ ] Quad trees for efficient collision detection / scene rendering
 * [ ] Planets with gravity mechanics
 * [ ] Better styling for docs

@@ -89,31 +89,31 @@ define(function(require, exports, module) {
                     $('#restart').trigger('click');
                     break;
                 case 70: // f
-                    game.viewToPlayer();
+                    $('#focus-player-btn').trigger('click');
                     break;
                 case 66: // b
-                    game.viewToBounds();
+                    $('#focus-bounds-btn').trigger('click');
                     break;
                 case 37: // left arrow
-                    game.viewTranslate(arrowPanDist, 0);
+                    $('#pan-left-btn').trigger('click');
                     break;
                 case 38: // up arrow
-                    game.viewTranslate(0, arrowPanDist);
+                    $('#pan-up-btn').trigger('click');
                     break;
                 case 39: // right arrow
-                    game.viewTranslate(-arrowPanDist, 0);
+                    $('#pan-right-btn').trigger('click');
                     break;
                 case 40: // down arrow
-                    game.viewTranslate(0, -arrowPanDist);
+                    $('#pan-down-btn').trigger('click');
                     break;
                 case 189: // -
-                    game.viewScale(1 / zoomFactor);
+                    $('#zoom-out-btn').trigger('click');
                     break;
                 case 187: // =
-                    game.viewScale(zoomFactor);
+                    $('#zoom-in-btn').trigger('click');
                     break;
                 case 88: // x
-                    game.toggleDebugMode();
+                    $('#debug-mode-btn').trigger('click');
                     break;
                 default:
                     return;
@@ -141,6 +141,35 @@ define(function(require, exports, module) {
             e.preventDefault();
             e.stopPropagation();
             return false;
+        });
+
+        // Listen for clicks of view menu buttons
+        $('#focus-player-btn').on('click', function(e) {
+            game.viewToPlayer();
+        });
+        $('#focus-bounds-btn').on('click', function(e) {
+            game.viewToBounds();
+        });
+        $('#debug-mode-btn').on('click', function(e) {
+            game.toggleDebugMode();
+        });
+        $('#zoom-in-btn').on('click', function(e) {
+            game.viewScale(zoomFactor);
+        });
+        $('#zoom-out-btn').on('click', function(e) {
+            game.viewScale(1 / zoomFactor);
+        });
+        $('#pan-left-btn').on('click', function(e) {
+            game.viewTranslate(arrowPanDist, 0);
+        });
+        $('#pan-up-btn').on('click', function(e) {
+            game.viewTranslate(0, arrowPanDist);
+        });
+        $('#pan-right-btn').on('click', function(e) {
+            game.viewTranslate(-arrowPanDist, 0);
+        });
+        $('#pan-down-btn').on('click', function(e) {
+            game.viewTranslate(0, -arrowPanDist);
         });
 
         // Listen for mouse drag events on the canvas, and respond to them
