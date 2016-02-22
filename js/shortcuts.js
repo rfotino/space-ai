@@ -32,34 +32,43 @@ define(function(require, exports, module) {
             } else {
                 mode = 'command';
             }
-            // Do nothing if any modifier keys are pressed (besides shift,
-            // shift is okay)
-            if (e.altKey || e.ctrlKey || e.metaKey) {
-                return;
+            // Function "macro" to test for modifier keys. The default
+            // is optional shift, no alt, no ctrl, no meta
+            function modKeys(keys) {
+                if ('undefined' === typeof keys) {
+                    keys = { alt: false, ctrl: false, meta: false };
+                }
+                return ('undefined' === typeof keys.shift
+                        || e.shiftKey === keys.shift)
+                    && ('undefined' === typeof keys.alt
+                        || e.altKey === keys.alt)
+                    && ('undefined' === typeof keys.ctrl
+                        || e.ctrlKey === keys.ctrl)
+                    && ('undefined' === typeof keys.meta
+                        || e.metaKey === keys.meta);
             }
             // Otherwise switch on the mode, then on the key pressed
             switch (mode) {
             case 'levelselect':
-                switch (e.keyCode) {
-                case 27: // escape
+                if (27 === e.keyCode && modKeys()) {
+                    // escape
                     menubar.hideLevels();
-                    break;
-                case 13: // enter
+                } else if (13 === e.keyCode && modKeys()) {
+                    // enter
                     menubar.loadSelectedLevel();
-                    break;
-                case 80: // p
+                } else if (80 === e.keyCode && modKeys()) {
+                    // p
                     menubar.selectPrevLevel();
-                    break;
-                case 78: // n
+                } else if (78 === e.keyCode && modKeys()) {
+                    // n
                     menubar.selectNextLevel();
-                    break;
-                default:
+                } else {
                     return;
                 }
                 break;
             case 'insert':
-                // If escape is pressed
-                if (27 === e.keyCode) {
+                if (27 === e.keyCode && modKeys()) {
+                    // escape
                     ui.hideCode();
                     mode = 'command';
                 } else {
@@ -68,54 +77,63 @@ define(function(require, exports, module) {
                 break;
             case 'command':
             default:
-                switch (e.keyCode) {
-                case 73: // i
+                if (73 === e.keyCode && modKeys()) {
+                    // i
                     ui.showCode();
                     mode = 'insert';
-                    break;
-                case 67: // c
+                } else if (67 === e.keyCode && modKeys()) {
+                    // c
                     ui.toggleConsole();
-                    break;
-                case 68: // d
+                } else if (68 === e.keyCode && modKeys()) {
+                    // d
                     window.open($('#docs').attr('href'), '_blank');
-                    break;
-                case 83: // s
+                } else if (83 === e.keyCode
+                           && modKeys({ shift: false, alt: false,
+                                        ctrl: true, meta: false })) {
+                    // ctrl+s
+                    $('#file-save-btn').trigger('click');
+                } else if (83 === e.keyCode
+                           && modKeys({ shift: true, alt: false,
+                                        ctrl: true, meta: false })) {
+                    // shift+ctrl+s
+                    $('#file-save-as-btn').trigger('click');
+                } else if (83 === e.keyCode && modKeys()) {
+                    // s
                     $('#show-levels').trigger('click');
-                    break;
-                case 32: // space
+                } else if (32 === e.keyCode && modKeys()) {
+                    // space
                     $('#run').trigger('click');
-                    break;
-                case 82: // r
+                } else if (82 === e.keyCode && modKeys()) {
+                    // r
                     $('#restart').trigger('click');
-                    break;
-                case 70: // f
+                } else if (70 === e.keyCode && modKeys()) {
+                    // f
                     $('#focus-player-btn').trigger('click');
-                    break;
-                case 66: // b
+                } else if (66 === e.keyCode && modKeys()) {
+                    // b
                     $('#focus-bounds-btn').trigger('click');
-                    break;
-                case 37: // left arrow
-                    $('#pan-left-btn').trigger('click');
-                    break;
-                case 38: // up arrow
-                    $('#pan-up-btn').trigger('click');
-                    break;
-                case 39: // right arrow
-                    $('#pan-right-btn').trigger('click');
-                    break;
-                case 40: // down arrow
-                    $('#pan-down-btn').trigger('click');
-                    break;
-                case 189: // -
-                    $('#zoom-out-btn').trigger('click');
-                    break;
-                case 187: // =
-                    $('#zoom-in-btn').trigger('click');
-                    break;
-                case 88: // x
+                } else if (88 === e.keyCode && modKeys()) {
+                    // x
                     $('#debug-mode-btn').trigger('click');
-                    break;
-                default:
+                } else if (189 === e.keyCode && modKeys()) {
+                    // -
+                    $('#zoom-out-btn').trigger('click');
+                } else if (187 === e.keyCode && modKeys()) {
+                    // =
+                    $('#zoom-in-btn').trigger('click');
+                } else if (37 === e.keyCode && modKeys()) {
+                    // left arrow
+                    $('#pan-left-btn').trigger('click');
+                } else if (38 === e.keyCode && modKeys()) {
+                    // up arrow
+                    $('#pan-up-btn').trigger('click');
+                } else if (39 === e.keyCode && modKeys()) {
+                    // right arrow
+                    $('#pan-right-btn').trigger('click');
+                } else if (40 === e.keyCode && modKeys()) {
+                    // down arrow
+                    $('#pan-down-btn').trigger('click');
+                } else {
                     return;
                 }
                 break;
@@ -141,35 +159,6 @@ define(function(require, exports, module) {
             e.preventDefault();
             e.stopPropagation();
             return false;
-        });
-
-        // Listen for clicks of view menu buttons
-        $('#focus-player-btn').on('click', function(e) {
-            game.viewToPlayer();
-        });
-        $('#focus-bounds-btn').on('click', function(e) {
-            game.viewToBounds();
-        });
-        $('#debug-mode-btn').on('click', function(e) {
-            game.toggleDebugMode();
-        });
-        $('#zoom-in-btn').on('click', function(e) {
-            game.viewScale(zoomFactor);
-        });
-        $('#zoom-out-btn').on('click', function(e) {
-            game.viewScale(1 / zoomFactor);
-        });
-        $('#pan-left-btn').on('click', function(e) {
-            game.viewTranslate(arrowPanDist, 0);
-        });
-        $('#pan-up-btn').on('click', function(e) {
-            game.viewTranslate(0, arrowPanDist);
-        });
-        $('#pan-right-btn').on('click', function(e) {
-            game.viewTranslate(-arrowPanDist, 0);
-        });
-        $('#pan-down-btn').on('click', function(e) {
-            game.viewTranslate(0, -arrowPanDist);
         });
 
         // Listen for mouse drag events on the canvas, and respond to them

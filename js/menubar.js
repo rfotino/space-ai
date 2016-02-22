@@ -196,6 +196,115 @@ define(function(require, exports, module) {
             });
             loadLevelBtn.addClass('disabled');
 
+            // Listen for clicks of file menu buttons
+            var currentFileName = null;
+            var warnedAboutLocalStorage = false;
+            function checkForLocalStorage() {
+                try {
+                    localStorage.setItem('test', 'test');
+                    localStorage.removeItem('test');
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+            function updateFileMenuItems() {
+                // Update save/save-as/delete buttons
+                if (null === currentFileName) {
+                    $('#file-save-btn').addClass('disabled');
+                    $('#file-save-btn .item-label').text('Save');
+                    $('#file-delete-btn').addClass('disabled');
+                    $('#file-delete-btn .item-label').text('Delete');
+                } else {
+                    $('#file-save-btn').removeClass('disabled');
+                    $('#file-save-btn .item-label')
+                        .text('Save \'' + currentFileName + '\'');
+                    $('#file-delete-btn').removeClass('disabled');
+                    $('#file-delete-btn .item-label').
+                        text('Delete \'' + currentFileName + '\'');
+                }
+                // Update load buttons
+                $('.file-load-btn').remove();
+                for (var i = 0; i < localStorage.length; i++) {
+                    var fileName = localStorage.key(i);
+                    var loadBtn = $('<tr />')
+                        .addClass('dropdown-item file-load-btn')
+                        .data('name', fileName);
+                    var loadBtnLabel = $('<td />')
+                        .addClass('item-label')
+                        .text('Load \'' + fileName + '\'');
+                    var loadBtnShortcut = $('<td />');
+                    loadBtn.append(loadBtnLabel).append(loadBtnShortcut);
+                    loadBtn.on('click', (function(fileName) {
+                        return function(e) {
+                            currentFileName = fileName;
+                            ui.setCode(localStorage.getItem(currentFileName));
+                            updateFileMenuItems();
+                        };
+                    })(fileName));
+                    $('#file-menu .dropdown-menu').append(loadBtn);
+                }
+            }
+            $('#file-save-btn').on('click', function(e) {
+                if (null === currentFileName) {
+                    return;
+                }
+                if (!checkForLocalStorage()) {
+                    if (!warnedAboutLocalStorage) {
+                        alert('Local storage must be enabled for saving code.');
+                        warnedAboutLocalStorage = true;
+                    }
+                }
+                localStorage.setItem(currentFileName, ui.getCode());
+            });
+            $('#file-save-as-btn').on('click', function(e) {
+                var newFileName = prompt('New file name:');
+                if (null === newFileName) {
+                    return;
+                }
+                currentFileName = newFileName;
+                updateFileMenuItems();
+                $('#file-save-btn').trigger('click');
+            });
+            $('#file-delete-btn').on('click', function(e) {
+                if (null === currentFileName) {
+                    return;
+                }
+                localStorage.removeItem(currentFileName);
+                currentFileName = null;
+                updateFileMenuItems();
+            });
+            updateFileMenuItems();
+
+            // Listen for clicks of view menu buttons
+            $('#focus-player-btn').on('click', function(e) {
+                game.viewToPlayer();
+            });
+            $('#focus-bounds-btn').on('click', function(e) {
+                game.viewToBounds();
+            });
+            $('#debug-mode-btn').on('click', function(e) {
+                game.toggleDebugMode();
+            });
+            $('#zoom-in-btn').on('click', function(e) {
+                game.viewScale(zoomFactor);
+            });
+            $('#zoom-out-btn').on('click', function(e) {
+                game.viewScale(1 / zoomFactor);
+            });
+            $('#pan-left-btn').on('click', function(e) {
+                game.viewTranslate(arrowPanDist, 0);
+            });
+            $('#pan-up-btn').on('click', function(e) {
+                game.viewTranslate(0, arrowPanDist);
+            });
+            $('#pan-right-btn').on('click', function(e) {
+                game.viewTranslate(-arrowPanDist, 0);
+            });
+            $('#pan-down-btn').on('click', function(e) {
+                game.viewTranslate(0, -arrowPanDist);
+            });
+
             // Set up restart/run button listeners
             runBtn.on('click', function(e) {
                 e.preventDefault();

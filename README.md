@@ -39,7 +39,7 @@ https://spaceship.codes.
 * [ ] Extend the documentation
 * [ ] Add unit tests for physics.js
 * [x] Menu dropdown for changing the view
-* [ ] Loading/saving of user code using local storage
+* [x] Loading/saving of user code using local storage
 
 ## Wishlist
 

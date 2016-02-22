@@ -18,40 +18,66 @@
     <!-- Menu bar -->
     <div id="menubar">
       <div id="menubar-left">
-        <a class="btn" id="docs" href="docs.html" target="_blank">Docs</a><!--
-     --><a class="btn" id="show-levels" href="#">Select Level</a><!--
+        <span class="btn btn-dropdown" id="file-menu">
+          File <span class="icon">&#x25BC;</span>
+          <table class="dropdown-menu">
+            <tr class="dropdown-item" id="file-save-btn">
+              <td class="item-label">Save</td>
+              <td class="item-shortcut">Ctrl+S</td>
+            </tr>
+            <tr class="dropdown-item" id="file-save-as-btn">
+              <td class="item-label">Save As</td>
+              <td class="item-shortcut">Shift+Ctrl+S</td>
+            </tr>
+            <tr class="dropdown-item" id="file-delete-btn">
+              <td class="item-label">Delete</td>
+              <td class="item-shortcut"><!-- No shortcut for delete --></td>
+            </tr>
+          </table>
+        </span><!--
      --><span class="btn btn-dropdown" id="view-menu">
           View <span class="icon">&#x25BC;</span>
-          <ul class="dropdown-menu">
-            <li class="dropdown-item" id="focus-player-btn">
-              Focus Player <span class="shortcut">(F)</span>
-            </li>
-            <li class="dropdown-item" id="focus-bounds-btn">
-              Focus Bounds <span class="shortcut">(B)</span>
-            </li>
-            <li class="dropdown-item" id="debug-mode-btn">
-              Debug Mode <span class="shortcut">(X)</span>
-            </li>
-            <li class="dropdown-item" id="zoom-in-btn">
-              Zoom In <span class="shortcut">(+)</span>
-            </li>
-            <li class="dropdown-item" id="zoom-out-btn">
-              Zoom Out <span class="shortcut">(-)</span>
-            </li>
-            <li class="dropdown-item" id="pan-left-btn">
-              Pan Left <span class="shortcut">(&larr;)</span>
-            </li>
-            <li class="dropdown-item" id="pan-up-btn">
-              Pan Up <span class="shortcut">(&uarr;)</span>
-            </li>
-            <li class="dropdown-item" id="pan-right-btn">
-              Pan Right <span class="shortcut">(&rarr;)</span>
-            </li>
-            <li class="dropdown-item" id="pan-down-btn">
-              Pan Down <span class="shortcut">(&darr;)</span>
-            </li>
-          </ul>
-        </span>
+          <table class="dropdown-menu">
+            <tr class="dropdown-item" id="focus-player-btn">
+              <td class="item-label">Focus Player</td>
+              <td class="item-shortcut">F</td>
+            </tr>
+            <tr class="dropdown-item" id="focus-bounds-btn">
+              <td class="item-label">Focus Bounds</td>
+              <td class="item-shortcut">B</td>
+            </tr>
+            <tr class="dropdown-item" id="debug-mode-btn">
+              <td class="item-label">Debug Mode</td>
+              <td class="item-shortcut">X</td>
+            </tr>
+            <tr class="dropdown-item" id="zoom-in-btn">
+              <td class="item-label">Zoom In</td>
+              <td class="item-shortcut">+</td>
+            </tr>
+            <tr class="dropdown-item" id="zoom-out-btn">
+              <td class="item-label">Zoom Out</td>
+              <td class="item-shortcut">-</td>
+            </tr>
+            <tr class="dropdown-item" id="pan-left-btn">
+              <td class="item-label">Pan Left</td>
+              <td class="item-shortcut">&larr;</td>
+            </tr>
+            <tr class="dropdown-item" id="pan-up-btn">
+              <td class="item-label">Pan Up</td>
+              <td class="item-shortcut">&uarr;</td>
+            </tr>
+            <tr class="dropdown-item" id="pan-right-btn">
+              <td class="item-label">Pan Right</td>
+              <td class="item-shortcut">&rarr;</td>
+            </tr>
+            <tr class="dropdown-item" id="pan-down-btn">
+              <td class="item-label">Pan Down</td>
+              <td class="item-shortcut">&darr;</td>
+            </tr>
+          </table>
+        </span><!--
+     --><a class="btn" id="docs" href="docs.html" target="_blank">Docs</a><!--
+     --><a class="btn" id="show-levels" href="#">Select Level</a>
       </div>
       <div id="menubar-right">
         <a class="btn" id="run" href="#">Run</a><!--
