@@ -45,7 +45,7 @@ define(function(require, exports, module) {
         codeWindow.css('width', codePosition);
         consoleWindow.css('left', codePosition);
         consoleWindow.css('width', $(window).width() - codePosition);
-        $('#code-popout-btn').text('<');
+        $('#code-popout-btn').html('&#x25C2');
         // Make sure the CodeMirror instance repaints
         var i = setInterval(function() { codeMirror.refresh(); }, 25);
         setTimeout(function() { clearInterval(i); }, 125);
@@ -63,7 +63,7 @@ define(function(require, exports, module) {
         codeWindow.css('width', '');
         consoleWindow.css('left', 0);
         consoleWindow.css('width', $(window).width());
-        $('#code-popout-btn').text('>');
+        $('#code-popout-btn').html('&#x25B8');
         // Blur the coding area by focusing on something else
         $('#game-canvas').focus();
     };
@@ -139,7 +139,7 @@ define(function(require, exports, module) {
         consoleHidden = false;
         consoleWindow.removeClass('hidden');
         consoleWindow.css('height', $(window).height() - consolePosition);
-        $('#console-popout-btn').text('v');
+        $('#console-popout-btn').html('&#x25BC;');
     };
 
     /**
@@ -150,7 +150,7 @@ define(function(require, exports, module) {
         consoleHidden = true;
         consoleWindow.addClass('hidden');
         consoleWindow.css('height', '');
-        $('#console-popout-btn').text('^');
+        $('#console-popout-btn').html('&#x25B2');
     };
 
     /**

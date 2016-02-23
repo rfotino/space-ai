@@ -277,6 +277,8 @@ define(function(require, exports, module) {
             updateFileMenuItems();
 
             // Listen for clicks of view menu buttons
+            var arrowPanDist = 25;
+            var zoomFactor = 1.1;
             $('#focus-player-btn').on('click', function(e) {
                 game.viewToPlayer();
             });

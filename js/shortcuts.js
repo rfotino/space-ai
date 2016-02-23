@@ -10,10 +10,6 @@ define(function(require, exports, module) {
     var menubar = require('menubar');
     var game = require('game');
 
-    // Some constants for panning and zooming amounts
-    var arrowPanDist = 25;
-    var zoomFactor = 1.1;
-
     /**
      * init();
      * Adds keyboard and mouse shortcut listeners.
