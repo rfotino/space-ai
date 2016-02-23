@@ -271,37 +271,38 @@ define(function(require, exports, module) {
         if (0 === poly.points.length) {
             return false;
         }
-        // For intersection, either the circle's center is inside the polygon,
-        // all of the polygon's points are inside the circle, or at least one
-        // edge of the polygon is secant to the circle.
+        // Check if the circle's center is inside the polygon
         if (exports.pointInPoly(circle, poly)) {
             return true;
-        } else if (exports.pointInCircle(poly.points[0], circle)) {
-            return true;
-        } else {
-            // Check for secant lines by projecting the vector from p1 to the
-            // circle's center onto the vector from p1 to p2. Then p1 plus the
-            // projection is the closest point to the circle's center, so we
-            // can check if it is inside the circle
-            for (var i = 0; i < poly.points.length; i++) {
-                var p1 = poly.points[i];
-                var p2 = poly.points[(i + 1) % poly.points.length];
-                var vec1 = { x: p2.x - p1.x, y: p2.y - p1.y };
-                var vec2 = { x: circle.x - p1.x, y: circle.y - p1.y };
-                var comp = ((vec1.x * vec2.x) + (vec1.y * vec2.y)) /
-                    ((vec1.x * vec1.x) + (vec1.y * vec1.y));
-                var proj = { x: comp * vec1.x, y: comp * vec1.y };
-                var closestPoint = { x: p1.x + proj.x, y: p1.y + proj.y };
-                var segmentRect = {
-                    x: Math.min(p1.x, p2.x),
-                    y: Math.min(p1.y, p2.y),
-                    width: Math.abs(p2.x - p1.x),
-                    height: Math.abs(p2.y - p1.y)
-                };
-                if (exports.pointInCircle(closestPoint, circle) &&
-                    exports.pointInRect(closestPoint, segmentRect)) {
-                    return true;
-                }
+        }
+        // Check if a point in the polygon is inside the circle.
+        for (var i = 0; i < poly.points.length; i++) {
+            if (exports.pointInCircle(poly.points[i], circle)) {
+                return true;
+            }
+        }
+        // Check for secant lines by projecting the vector from p1 to the
+        // circle's center onto the vector from p1 to p2. Then p1 plus the
+        // projection is the closest point to the circle's center, so we
+        // can check if it is inside the circle
+        for (var i = 0; i < poly.points.length; i++) {
+            var p1 = poly.points[i];
+            var p2 = poly.points[(i + 1) % poly.points.length];
+            var vec1 = { x: p2.x - p1.x, y: p2.y - p1.y };
+            var vec2 = { x: circle.x - p1.x, y: circle.y - p1.y };
+            var comp = ((vec1.x * vec2.x) + (vec1.y * vec2.y)) /
+                ((vec1.x * vec1.x) + (vec1.y * vec1.y));
+            var proj = { x: comp * vec1.x, y: comp * vec1.y };
+            var closestPoint = { x: p1.x + proj.x, y: p1.y + proj.y };
+            var segmentRect = {
+                x: Math.min(p1.x, p2.x),
+                y: Math.min(p1.y, p2.y),
+                width: Math.abs(p2.x - p1.x),
+                height: Math.abs(p2.y - p1.y)
+            };
+            if (exports.pointInCircle(closestPoint, circle) &&
+                exports.pointInRect(closestPoint, segmentRect)) {
+                return true;
             }
         }
         return false;

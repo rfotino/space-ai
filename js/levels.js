@@ -14,6 +14,7 @@ define(function(require, exports, module) {
     var FriendlyTarget = require('obj/FriendlyTarget');
     var LaserWeapon = require('obj/LaserWeapon');
     var RocketWeapon = require('obj/RocketWeapon');
+    var SpaceMine = require('obj/SpaceMine');
 
     // An array of levels that can be loaded from the level selector
     module.exports = [
@@ -120,6 +121,15 @@ define(function(require, exports, module) {
                     win: true,
                     pos: { x: 500, y: 0 }
                 })
+            ]
+        }; }),
+        // Testing some new types of objects
+        new Level('Space Mines', function() { return {
+            objects: [
+                new SpaceMine({ pos: { x: 150, y: 0 } }),
+                new SpaceMine({ pos: { x: -150, y: 0 } }),
+                new SpaceMine({ pos: { x: -165, y: 100 } }),
+                new SpaceMine({ pos: { x: 165, y: 100 } })
             ]
         }; })
     ];

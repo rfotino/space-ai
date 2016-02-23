@@ -29,6 +29,8 @@ https://spaceship.codes.
 * [x] Viewport interactions like pan/zoom/focus
 * [ ] Immobile enemy ships
 * [ ] Mobile enemy ships
+* [x] Mines that follow the player if they are within a certain
+      proximity and explode on impact.
 * [x] Be able to hover over objects and see information about them
 * [x] Togglable debug mode where you see a 100px grid, info on all game
       objects, etc.

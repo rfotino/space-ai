@@ -70,11 +70,17 @@ define(function(require, exports, module) {
         if (player.alive) {
             this._state.objects.unshift(player);
         }
+        // Get a list of game objects that we can pass each individual
+        // object's update function
+        var prevObjList = [];
+        for (var i = 0; i < this._state.objects.length; i++) {
+            prevObjList.push(this._state.objects[i].getObj());
+        }
         // Update all game objects
         for (var i = 0; i < this._state.objects.length; i++) {
             var obj = this._state.objects[i];
             if (!this.complete() || obj.updateOnGameOver) {
-                obj.update();
+                obj.update(prevObjList);
             }
         }
         // Do collision detection between all game objects
@@ -186,17 +192,22 @@ define(function(require, exports, module) {
         // Draw highlighted objects and tooltips
         if (this._debugMode) {
             this._state.objects.push(player);
-            for (var i = 0; i < this._state.objects.length; i++) {
-                var obj = this._state.objects[i];
+            this._state.objects.forEach(function(obj) {
                 if (obj.alive) {
                     this._drawHighlightedObj(ctx, obj);
                 }
-            }
+            }, this);
+            this._state.objects.forEach(function(obj) {
+                if (obj.alive) {
+                    this._drawToolTip(ctx, obj);
+                }
+            }, this);
             this._state.objects.pop();
         } else {
             this._updateHighlightedObj();
             if (this._highlightedObj) {
                 this._drawHighlightedObj(ctx, this._highlightedObj);
+                this._drawToolTip(ctx, this._highlightedObj);
             }
         }
         // Draw win/lose screen if necessary
@@ -390,20 +401,31 @@ define(function(require, exports, module) {
     };
 
     /**
-     * Outlines the given object and shows the user extra information
-     * such as object type, position, health, etc.
+     * Strokes the given object using its outline() function.
      *
      * @param {CanvasRenderingContext2D} ctx
      * @param {GameObject} obj
      */
     Level.prototype._drawHighlightedObj = function(ctx, obj) {
-        // Outline the object
         ctx.save();
         ctx.strokeStyle = 'rgb(150, 200, 255)';
         ctx.lineWidth = 3 / this.viewport.getScale();
         graphics.drawShape(ctx, obj.outline());
         ctx.stroke();
-        // Show info about it on screen
+        ctx.restore();
+    };
+
+    /**
+     * Shows extra information on screen about the given object's type,
+     * health, position, radius, etc. This information goes above the
+     * object, if there is room, or else is moved to fit within the viewport's
+     * bounds.
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {GameObject} obj
+     */
+    Level.prototype._drawToolTip = function(ctx, obj) {
+        ctx.save();
         var infoArray = [];
         infoArray.push('type: ' + obj.type);
         if ('undefined' !== typeof obj.objective) {
@@ -414,6 +436,9 @@ define(function(require, exports, module) {
         }
         if ('undefined' !== typeof obj.health) {
             infoArray.push('health: ' + obj.health);
+        }
+        if ('undefined' !== typeof obj.radius) {
+            infoArray.push('radius: ' + obj.radius);
         }
         infoArray.push('position: (' + Math.round(obj.pos.x) + ', ' +
                        Math.round(obj.pos.y) + ')');

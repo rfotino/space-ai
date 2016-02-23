@@ -145,11 +145,11 @@ define(function(require, exports, module) {
         $('#game-canvas').on('mousewheel DOMMouseScroll', function(e) {
             if (0 < e.originalEvent.wheelDelta) {
                 for (var i = 0; i < e.originalEvent.wheelDelta / 120; i++) {
-                    game.viewScale(zoomFactor);
+                    $('#zoom-in-btn').trigger('click');
                 }
             } else {
                 for (var i = 0; i < -e.originalEvent.wheelDelta / 120; i++) {
-                    game.viewScale(1 / zoomFactor);
+                    $('#zoom-out-btn').trigger('click');
                 }
             }
             e.preventDefault();

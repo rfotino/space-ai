@@ -263,8 +263,8 @@ define(function(require, exports, module) {
                     return;
                 }
                 currentFileName = newFileName;
-                updateFileMenuItems();
                 $('#file-save-btn').trigger('click');
+                updateFileMenuItems();
             });
             $('#file-delete-btn').on('click', function(e) {
                 if (null === currentFileName) {
