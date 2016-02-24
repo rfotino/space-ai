@@ -17,7 +17,7 @@ define(function(require, exports, module) {
         this.pos = $.extend({ x: 0, y: 0, angular: 0 }, props.pos);
         this.vel = $.extend({ x: 0, y: 0, angular: 0 }, props.vel);
         this.accel = $.extend({ x: 0, y: 0, angular: 0 }, props.accel);
-        // Every object gets a name and a type
+        // Every object gets a type
         this.type = props.type || '';
         // A flag that says whether this game object should continue to be
         // updated after the game has completed. Used for explosions, etc
@@ -29,6 +29,8 @@ define(function(require, exports, module) {
         // A list of new game objects to add to the scene, usually generated
         // in this.update() or this.collide()
         this.newObjects = [];
+        // Every object gets a z-depth, used for determining drawing order
+        this.zDepth = 0;
     };
 
     /**

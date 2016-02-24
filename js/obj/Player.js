@@ -23,6 +23,7 @@ define(function(require, exports, module) {
         }
         GameObject.prototype.constructor.call(this, props);
         this.owner = 'player';
+        this.zDepth = 75;
         this.weapons = props.weapons || [];
         this.equipped = props.equipped || null;
         this.health = props.health || 100;

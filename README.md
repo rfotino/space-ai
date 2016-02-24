@@ -42,7 +42,7 @@ https://spaceship.codes.
 * [ ] Add unit tests for physics.js
 * [x] Menu dropdown for changing the view
 * [x] Loading/saving of user code using local storage
-* [ ] Z-index for controlling drawing order of game objects
+* [x] Z-index for controlling drawing order of game objects
 * [ ] Some way to give a level description via initial comments, or
       have some initial code the user has to modify.
 

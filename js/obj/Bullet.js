@@ -36,6 +36,7 @@ define(function(require, exports, module) {
         this.weapon = props.weapon || '';
         this.lifespan = props.lifespan || 0;
         this.owner = props.owner || null;
+        this.zDepth = 50;
     };
 
     // Extend GameObject

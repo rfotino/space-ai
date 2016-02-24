@@ -175,21 +175,20 @@ define(function(require, exports, module) {
         if (this._debugMode) {
             this._drawGrid(ctx);
         }
-        // Draw the game objects
-        for (var i = 0; i < this._state.objects.length; i++) {
-            var obj = this._state.objects[i];
+        // Draw the game objects, sorted by z-depth
+        var drawObjects = this._state.objects.slice();
+        if (player.alive) {
+            drawObjects.push(player);
+        }
+        drawObjects.sort(function(a, b) {
+            return a.zDepth - b.zDepth;
+        });
+        for (var i = 0; i < drawObjects.length; i++) {
+            var obj = drawObjects[i];
             ctx.save();
             ctx.translate(obj.pos.x, obj.pos.y);
             ctx.rotate(obj.pos.angular);
             obj.draw(ctx);
-            ctx.restore();
-        }
-        // Draw the player if necessary
-        if (player.alive) {
-            ctx.save();
-            ctx.translate(player.pos.x, player.pos.y);
-            ctx.rotate(player.pos.angular);
-            player.draw(ctx);
             ctx.restore();
         }
         // Draw highlighted objects and tooltips

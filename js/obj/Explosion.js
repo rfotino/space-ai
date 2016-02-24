@@ -19,6 +19,7 @@ define(function(require, exports, module) {
         this.numParticles = props.numParticles || 20;
         this.lifespan = props.lifespan || 20;
         this.blastRadius = props.blastRadius || 75;
+        this.zDepth = 100;
         this._lifespanRemaining = this.lifespan;
         this._maxRadius = 25;
         this._maxVel = (this.blastRadius / this.lifespan) / 0.75;

@@ -19,6 +19,7 @@ define(function(require, exports, module) {
         props.type = 'asteroid';
         GameObject.prototype.constructor.call(this, props);
         this.radius = props.radius || 50;
+        this.zDepth = 25;
         // Procedurally create the asteroid's graphics
         this._outline = { points: [] };
         this._craters = [];
