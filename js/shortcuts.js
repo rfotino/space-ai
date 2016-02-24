@@ -43,96 +43,99 @@ define(function(require, exports, module) {
                     && ('undefined' === typeof keys.meta
                         || e.metaKey === keys.meta);
             }
-            // Otherwise switch on the mode, then on the key pressed
-            switch (mode) {
-            case 'levelselect':
-                if (27 === e.keyCode && modKeys()) {
-                    // escape
-                    menubar.hideLevels();
-                } else if (13 === e.keyCode && modKeys()) {
-                    // enter
-                    menubar.loadSelectedLevel();
-                } else if (80 === e.keyCode && modKeys()) {
-                    // p
-                    menubar.selectPrevLevel();
-                } else if (78 === e.keyCode && modKeys()) {
-                    // n
-                    menubar.selectNextLevel();
-                } else {
-                    return;
+            // Check for file menu actions
+            if (83 === e.keyCode
+                && modKeys({ shift: false, alt: false,
+                             ctrl: true, meta: false })) {
+                // ctrl+s
+                $('#file-save-btn').trigger('click');
+            } else if (83 === e.keyCode
+                       && modKeys({ shift: true, alt: false,
+                                    ctrl: true, meta: false })) {
+                // shift+ctrl+s
+                $('#file-save-as-btn').trigger('click');
+            } else {
+                // Otherwise switch on the mode, then on the key pressed
+                switch (mode) {
+                case 'levelselect':
+                    if (27 === e.keyCode && modKeys()) {
+                        // escape
+                        menubar.hideLevels();
+                    } else if (13 === e.keyCode && modKeys()) {
+                        // enter
+                        menubar.loadSelectedLevel();
+                    } else if (80 === e.keyCode && modKeys()) {
+                        // p
+                        menubar.selectPrevLevel();
+                    } else if (78 === e.keyCode && modKeys()) {
+                        // n
+                        menubar.selectNextLevel();
+                    } else {
+                        return;
+                    }
+                    break;
+                case 'insert':
+                    if (27 === e.keyCode && modKeys()) {
+                        // escape
+                        ui.hideCode();
+                        mode = 'command';
+                    } else {
+                        return;
+                    }
+                    break;
+                case 'command':
+                default:
+                    if (73 === e.keyCode && modKeys()) {
+                        // i
+                        ui.showCode();
+                        mode = 'insert';
+                    } else if (67 === e.keyCode && modKeys()) {
+                        // c
+                        ui.toggleConsole();
+                    } else if (68 === e.keyCode && modKeys()) {
+                        // d
+                        window.open($('#docs').attr('href'), '_blank');
+                    } else if (83 === e.keyCode && modKeys()) {
+                        // s
+                        $('#show-levels').trigger('click');
+                    } else if (32 === e.keyCode && modKeys()) {
+                        // space
+                        $('#run').trigger('click');
+                    } else if (82 === e.keyCode && modKeys()) {
+                        // r
+                        $('#restart').trigger('click');
+                    } else if (70 === e.keyCode && modKeys()) {
+                        // f
+                        $('#focus-player-btn').trigger('click');
+                    } else if (66 === e.keyCode && modKeys()) {
+                        // b
+                        $('#focus-bounds-btn').trigger('click');
+                    } else if (88 === e.keyCode && modKeys()) {
+                        // x
+                        $('#debug-mode-btn').trigger('click');
+                    } else if (189 === e.keyCode && modKeys()) {
+                        // -
+                        $('#zoom-out-btn').trigger('click');
+                    } else if (187 === e.keyCode && modKeys()) {
+                        // =
+                        $('#zoom-in-btn').trigger('click');
+                    } else if (37 === e.keyCode && modKeys()) {
+                        // left arrow
+                        $('#pan-left-btn').trigger('click');
+                    } else if (38 === e.keyCode && modKeys()) {
+                        // up arrow
+                        $('#pan-up-btn').trigger('click');
+                    } else if (39 === e.keyCode && modKeys()) {
+                        // right arrow
+                        $('#pan-right-btn').trigger('click');
+                    } else if (40 === e.keyCode && modKeys()) {
+                        // down arrow
+                        $('#pan-down-btn').trigger('click');
+                    } else {
+                        return;
+                    }
+                    break;
                 }
-                break;
-            case 'insert':
-                if (27 === e.keyCode && modKeys()) {
-                    // escape
-                    ui.hideCode();
-                    mode = 'command';
-                } else {
-                    return;
-                }
-                break;
-            case 'command':
-            default:
-                if (73 === e.keyCode && modKeys()) {
-                    // i
-                    ui.showCode();
-                    mode = 'insert';
-                } else if (67 === e.keyCode && modKeys()) {
-                    // c
-                    ui.toggleConsole();
-                } else if (68 === e.keyCode && modKeys()) {
-                    // d
-                    window.open($('#docs').attr('href'), '_blank');
-                } else if (83 === e.keyCode
-                           && modKeys({ shift: false, alt: false,
-                                        ctrl: true, meta: false })) {
-                    // ctrl+s
-                    $('#file-save-btn').trigger('click');
-                } else if (83 === e.keyCode
-                           && modKeys({ shift: true, alt: false,
-                                        ctrl: true, meta: false })) {
-                    // shift+ctrl+s
-                    $('#file-save-as-btn').trigger('click');
-                } else if (83 === e.keyCode && modKeys()) {
-                    // s
-                    $('#show-levels').trigger('click');
-                } else if (32 === e.keyCode && modKeys()) {
-                    // space
-                    $('#run').trigger('click');
-                } else if (82 === e.keyCode && modKeys()) {
-                    // r
-                    $('#restart').trigger('click');
-                } else if (70 === e.keyCode && modKeys()) {
-                    // f
-                    $('#focus-player-btn').trigger('click');
-                } else if (66 === e.keyCode && modKeys()) {
-                    // b
-                    $('#focus-bounds-btn').trigger('click');
-                } else if (88 === e.keyCode && modKeys()) {
-                    // x
-                    $('#debug-mode-btn').trigger('click');
-                } else if (189 === e.keyCode && modKeys()) {
-                    // -
-                    $('#zoom-out-btn').trigger('click');
-                } else if (187 === e.keyCode && modKeys()) {
-                    // =
-                    $('#zoom-in-btn').trigger('click');
-                } else if (37 === e.keyCode && modKeys()) {
-                    // left arrow
-                    $('#pan-left-btn').trigger('click');
-                } else if (38 === e.keyCode && modKeys()) {
-                    // up arrow
-                    $('#pan-up-btn').trigger('click');
-                } else if (39 === e.keyCode && modKeys()) {
-                    // right arrow
-                    $('#pan-right-btn').trigger('click');
-                } else if (40 === e.keyCode && modKeys()) {
-                    // down arrow
-                    $('#pan-down-btn').trigger('click');
-                } else {
-                    return;
-                }
-                break;
             }
             // Prevent the default action of the key pressed
             e.preventDefault();

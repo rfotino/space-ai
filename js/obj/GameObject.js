@@ -18,7 +18,6 @@ define(function(require, exports, module) {
         this.vel = $.extend({ x: 0, y: 0, angular: 0 }, props.vel);
         this.accel = $.extend({ x: 0, y: 0, angular: 0 }, props.accel);
         // Every object gets a name and a type
-        this.name = props.name || '';
         this.type = props.type || '';
         // A flag that says whether this game object should continue to be
         // updated after the game has completed. Used for explosions, etc

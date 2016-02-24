@@ -8,7 +8,7 @@ location, accelerating, turning, firing, etc. Documentation is available
 to the player. The objective might be to get to a specified location, to
 destroy all enemy ships or outposts, to defend your own ships or outposts,
 etc. Each level can be specified as a JavaScript object in a simple format
-the initial conditions and win conditions, so it is easy to create new
+with initial conditions and win conditions, so it is easy to create new
 challenges.
 
 Originally the idea was to have two or more players write some AI-like

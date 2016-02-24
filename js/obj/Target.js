@@ -18,6 +18,7 @@ define(function(require, exports, module) {
         props = props || {};
         props.type = 'target';
         GameObject.prototype.constructor.call(this, props);
+        this.name = props.name || '';
         this.objective = props.objective || null;
         this.radius = props.radius || 50;
         this.win = 'undefined' === typeof props.win ? false : props.win;

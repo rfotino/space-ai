@@ -50,7 +50,7 @@ define(function(require, exports, module) {
      * @param {GameObject} other
      */
     Bullet.prototype.collide = function(other) {
-        if (other.owner !== this.owner && other.hasOwnProperty('health')) {
+        if (other.owner !== this.owner && 'undefined' !== typeof other.health) {
             other.health -= this.damage;
             this.alive = false;
         }

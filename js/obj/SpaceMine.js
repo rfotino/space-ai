@@ -16,11 +16,13 @@ define(function(require, exports, module) {
      * A constructor for space mines.
      */
     var SpaceMine = function(props) {
+        props = props || {};
         props.type = 'mine';
         GameObject.prototype.constructor.call(this, props);
         this.radius = props.radius || 20;
         this.damage = props.damage || 25;
         this.proximity = props.proximity || 200;
+        this._health = props.health || 1;
         this._blinkCounter = 0;
         this._blinkThreshold = 7;
         this._blinkCounterMax = 10 * this._blinkThreshold;
@@ -31,6 +33,24 @@ define(function(require, exports, module) {
     SpaceMine.prototype = Object.create(GameObject.prototype);
     SpaceMine.prototype.constructor = SpaceMine;
 
+    /**
+     * Explode when health drops to zero.
+     */
+    Object.defineProperty(SpaceMine.prototype, 'health', {
+        get: function health() {
+            return this._health;
+        },
+        set: function health(h) {
+            this._health = h;
+            if (this._health <= 0) {
+                this.newObjects.push(new Explosion({
+                    pos: { x: this.pos.x, y: this.pos.y },
+                    vel: { x: this.vel.x, y: this.vel.y }
+                }));
+                this.alive = false;
+            }
+        }
+    });
 
     /**
      * If they are near enough, space mines accelerate toward the player.
@@ -45,29 +65,28 @@ define(function(require, exports, module) {
                 player = obj;
             }
         });
-        if (null === player) {
-            return;
-        }
-        var dirVector = {
-            x: player.pos.x - this.pos.x,
-            y: player.pos.y - this.pos.y
-        };
-        var dist = Math.sqrt(Math.pow(dirVector.x, 2) +
-                             Math.pow(dirVector.y, 2));
-        if (0 === dist) {
-            return;
-        }
-        var unitDirVector = {
-            x: dirVector.x / dist,
-            y: dirVector.y / dist
-        };
-        if (dist < this.proximity) {
-            var speed = this.proximity / dist;
-            this.vel.x = unitDirVector.x * speed;
-            this.vel.y = unitDirVector.y * speed;
-            this._blinkCounterMax = 2 * this._blinkThreshold;
-        } else {
-            this._blinkCounterMax = 10 * this._blinkThreshold;
+        if (null !== player) {
+            var dirVector = {
+                x: player.pos.x - this.pos.x,
+                y: player.pos.y - this.pos.y
+            };
+            var dist = Math.sqrt(Math.pow(dirVector.x, 2) +
+                                 Math.pow(dirVector.y, 2));
+            if (0 === dist) {
+                return;
+            }
+            var unitDirVector = {
+                x: dirVector.x / dist,
+                y: dirVector.y / dist
+            };
+            if (dist < this.proximity) {
+                var speed = this.proximity / dist;
+                this.vel.x = unitDirVector.x * speed;
+                this.vel.y = unitDirVector.y * speed;
+                this._blinkCounterMax = 2 * this._blinkThreshold;
+            } else {
+                this._blinkCounterMax = 10 * this._blinkThreshold;
+            }
         }
         this._blinkCounter++;
         if (this._blinkCounterMax < this._blinkCounter) {
@@ -87,18 +106,10 @@ define(function(require, exports, module) {
         if ('player' === other.type ||
             'mine' === other.type ||
             'asteroid' === other.type ||
-            'bullet' === other.type ||
             'target' === other.type) {
-            this.newObjects.push(new Explosion({
-                pos: { x: this.pos.x, y: this.pos.y },
-                vel: { x: this.vel.x, y: this.vel.y }
-            }));
-            this.alive = false;
+            this.health = 0;
             if ('undefined' !== other.health) {
                 other.health -= this.damage;
-            }
-            if ('bullet' === other.type) {
-                other.alive = false;
             }
         }
     };
@@ -138,6 +149,20 @@ define(function(require, exports, module) {
             ctx.fill();
         }
         ctx.restore();
+    };
+
+    /**
+     * @override {GameObject}
+     * @return {Object}
+     */
+    SpaceMine.prototype.getObj = function() {
+        var obj = GameObject.prototype.getObj.call(this);
+        return $.extend(obj, {
+            radius: this.radius,
+            health: this.health,
+            damage: this.damage,
+            proximity: this.proximity
+        });
     };
 
     module.exports = SpaceMine;
