@@ -42,10 +42,15 @@ https://spaceship.codes.
 * [ ] Add unit tests for physics.js
 * [x] Menu dropdown for changing the view
 * [x] Loading/saving of user code using local storage
+* [ ] Z-index for controlling drawing order of game objects
+* [ ] Some way to give a level description via initial comments, or
+      have some initial code the user has to modify.
 
 ## Wishlist
 
 * [x] Improved menu/button graphics
+* [ ] Mobile support
+* [ ] Clicking on game objects pops up a dialog with more information
 * [ ] Minimap
 * [ ] Weapon drops, more weapon types
 * [ ] Powerups like shields, health

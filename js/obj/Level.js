@@ -74,7 +74,10 @@ define(function(require, exports, module) {
         // object's update function
         var prevObjList = [];
         for (var i = 0; i < this._state.objects.length; i++) {
-            prevObjList.push(this._state.objects[i].getObj());
+            var obj = this._state.objects[i].getObj();
+            if (obj && 'object' === typeof obj) {
+                prevObjList.push(obj);
+            }
         }
         // Update all game objects
         for (var i = 0; i < this._state.objects.length; i++) {

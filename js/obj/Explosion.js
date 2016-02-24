@@ -98,5 +98,14 @@ define(function(require, exports, module) {
         }
     };
 
+    /**
+     * The user doesn't need to see explosions on their radar.
+     *
+     * @override {GameObject}
+     */
+    Explosion.prototype.getObj = function() {
+        return null;
+    };
+
     module.exports = Explosion;
 });

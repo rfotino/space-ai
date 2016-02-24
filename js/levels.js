@@ -125,6 +125,10 @@ define(function(require, exports, module) {
         }; }),
         // Testing some new types of objects
         new Level('Space Mines', function() { return {
+            player: new Player({
+                weapons: [ new LaserWeapon() ],
+                equipped: 'laser'
+            }),
             objects: [
                 new SpaceMine({ pos: { x: 150, y: 0 } }),
                 new SpaceMine({ pos: { x: -150, y: 0 } }),

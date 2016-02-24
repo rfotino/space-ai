@@ -7,6 +7,8 @@
  */
 
 define(function(require, exports, module) {
+    var physics = require('physics');
+    var graphics = require('graphics');
     var GameObject = require('obj/GameObject');
     var Explosion = require('obj/Explosion');
 
@@ -19,6 +21,10 @@ define(function(require, exports, module) {
         this.radius = props.radius || 20;
         this.damage = props.damage || 25;
         this.proximity = props.proximity || 200;
+        this._blinkCounter = 0;
+        this._blinkThreshold = 7;
+        this._blinkCounterMax = 10 * this._blinkThreshold;
+        this._numSpikes = 20;
     };
 
     // Extend GameObject
@@ -59,6 +65,13 @@ define(function(require, exports, module) {
             var speed = this.proximity / dist;
             this.vel.x = unitDirVector.x * speed;
             this.vel.y = unitDirVector.y * speed;
+            this._blinkCounterMax = 2 * this._blinkThreshold;
+        } else {
+            this._blinkCounterMax = 10 * this._blinkThreshold;
+        }
+        this._blinkCounter++;
+        if (this._blinkCounterMax < this._blinkCounter) {
+            this._blinkCounter = 0;
         }
         // Call parent update function
         GameObject.prototype.update.call(this, objList);
@@ -72,7 +85,10 @@ define(function(require, exports, module) {
      */
     SpaceMine.prototype.collide = function(other) {
         if ('player' === other.type ||
-            'mine' === other.type) {
+            'mine' === other.type ||
+            'asteroid' === other.type ||
+            'bullet' === other.type ||
+            'target' === other.type) {
             this.newObjects.push(new Explosion({
                 pos: { x: this.pos.x, y: this.pos.y },
                 vel: { x: this.vel.x, y: this.vel.y }
@@ -80,6 +96,9 @@ define(function(require, exports, module) {
             this.alive = false;
             if ('undefined' !== other.health) {
                 other.health -= this.damage;
+            }
+            if ('bullet' === other.type) {
+                other.alive = false;
             }
         }
     };
@@ -90,6 +109,7 @@ define(function(require, exports, module) {
      */
     SpaceMine.prototype.draw = function(ctx) {
         ctx.save();
+        // Draw body
         ctx.fillStyle = '#666';
         ctx.strokeStyle = '#999';
         ctx.lineWidth = 2;
@@ -97,10 +117,26 @@ define(function(require, exports, module) {
         ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-        ctx.fillStyle = 'red';
-        ctx.beginPath();
-        ctx.arc(0, 0, this.radius / 2, 0, Math.PI * 2);
-        ctx.fill();
+        // Draw spikes
+        ctx.fillStyle = '#999';
+        var spikePoints = [
+            { x: this.radius, y: -2 },
+            { x: this.radius * 1.5, y: 0 },
+            { x: this.radius, y: 2 }
+        ];
+        for (var i = 0; i < this._numSpikes; i++) {
+            var angle = i * Math.PI * 2 / this._numSpikes;
+            var rotateFunc = physics.getRotate(angle);
+            graphics.drawShape(ctx, { points: spikePoints.map(rotateFunc) });
+            ctx.fill();
+        }
+        //Maybe draw blinker
+        if (this._blinkCounter < this._blinkThreshold) {
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(0, 0, this.radius / 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
         ctx.restore();
     };
 
