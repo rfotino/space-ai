@@ -2,7 +2,7 @@
  * Copyright (c) 2016 Robert Fotino.
  *
  * A module that defines a constructor for SpaceMine objects, which accelerate
- * toward the player after they get within a certain proximity. They explode
+ * toward the player after they get within a certain range. They explode
  * on contact, damaging the player.
  */
 
@@ -21,7 +21,7 @@ define(function(require, exports, module) {
         GameObject.prototype.constructor.call(this, props);
         this.radius = props.radius || 20;
         this.damage = props.damage || 25;
-        this.proximity = props.proximity || 200;
+        this.range = props.range || 200;
         this._health = props.health || 1;
         this._blinkCounter = 0;
         this._blinkThreshold = 7;
@@ -79,8 +79,8 @@ define(function(require, exports, module) {
                 x: dirVector.x / dist,
                 y: dirVector.y / dist
             };
-            if (dist < this.proximity) {
-                var speed = this.proximity / dist;
+            if (dist < this.range) {
+                var speed = this.range / dist;
                 this.vel.x = unitDirVector.x * speed;
                 this.vel.y = unitDirVector.y * speed;
                 this._blinkCounterMax = 2 * this._blinkThreshold;
@@ -161,7 +161,7 @@ define(function(require, exports, module) {
             radius: this.radius,
             health: this.health,
             damage: this.damage,
-            proximity: this.proximity
+            range: this.range
         });
     };
 

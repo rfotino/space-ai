@@ -17,6 +17,7 @@ define(function(require, exports, module) {
         Weapon.prototype.constructor.call(this, {
             name: 'rocket',
             ammo: props.ammo || 0,
+            bulletSpeed: 5,
             damage: 100,
             cooldown: 60
         });
@@ -45,7 +46,8 @@ define(function(require, exports, module) {
                     dir: dir,
                     pos: pos,
                     owner: owner,
-                    damage: this.damage
+                    damage: this.damage,
+                    speed: this.bulletSpeed
                 });
             }
         }

@@ -15,6 +15,7 @@ define(function(require, exports, module) {
     var LaserWeapon = require('obj/LaserWeapon');
     var RocketWeapon = require('obj/RocketWeapon');
     var SpaceMine = require('obj/SpaceMine');
+    var EnemyShip = require('obj/EnemyShip');
 
     // An array of levels that can be loaded from the level selector
     module.exports = [
@@ -134,6 +135,15 @@ define(function(require, exports, module) {
                 new SpaceMine({ pos: { x: -150, y: 0 } }),
                 new SpaceMine({ pos: { x: -165, y: 100 } }),
                 new SpaceMine({ pos: { x: 165, y: 100 } })
+            ]
+        }; }),
+        new Level('Enemy Ships', function() { return {
+            player: new Player({
+                weapons: [ new LaserWeapon(), new RocketWeapon({ ammo: 3 }) ],
+                equipped: 'laser'
+            }),
+            objects: [
+                new EnemyShip({ pos: { x: 150, y: 150 }, win: true })
             ]
         }; })
     ];

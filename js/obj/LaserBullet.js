@@ -13,7 +13,6 @@ define(function(require, exports, module) {
      */
     var LaserBullet = function(props) {
         props = props || {};
-        props.speed = 5;
         props.weapon = 'laser';
         props.lifespan = 180;
         Bullet.prototype.constructor.call(this, props);

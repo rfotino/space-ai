@@ -16,6 +16,7 @@ define(function(require, exports, module) {
         Weapon.prototype.constructor.call(this, {
             name: 'laser',
             damage: 5,
+            bulletSpeed: 5,
             cooldown: 20
         });
     };
@@ -42,7 +43,8 @@ define(function(require, exports, module) {
                     dir: dir,
                     pos: pos,
                     owner: owner,
-                    damage: this.damage
+                    damage: this.damage,
+                    speed: this.bulletSpeed
                 });
             }
         }

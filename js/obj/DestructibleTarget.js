@@ -15,12 +15,32 @@ define(function(require, exports, module) {
     var DestructibleTarget = function(props) {
         props = props || {};
         Target.prototype.constructor.call(this, props);
-        this.health = props.health || 100;
+        this._health = props.health || 100;
     };
 
     // Extend Target
     DestructibleTarget.prototype = Object.create(Target.prototype);
     DestructibleTarget.prototype.constructor = DestructibleTarget;
+
+    /**
+     * Explode when health drops to zero.
+     */
+    Object.defineProperty(DestructibleTarget.prototype, 'health', {
+        get: function health() {
+            return this._health;
+        },
+        set: function health(h) {
+            this._health = h;
+            if (this._health <= 0) {
+                this.newObjects.push(new Explosion({
+                    lifespan: 0.5 * this.radius,
+                    pos: { x: this.pos.x, y: this.pos.y },
+                    vel: { x: this.vel.x, y: this.vel.y }
+                }));
+                this.alive = false;
+            }
+        }
+    });
 
     /**
      * Destructible targets are complete after they have finished exploding.
@@ -41,22 +61,6 @@ define(function(require, exports, module) {
         return $.extend(obj, {
             health: this.health
         });
-    };
-
-    /**
-     * @override {Target}
-     */
-    DestructibleTarget.prototype.update = function() {
-        if (this.health <= 0) {
-            this.newObjects.push(new Explosion({
-                lifespan: 0.5 * this.radius,
-                pos: { x: this.pos.x, y: this.pos.y },
-                vel: { x: this.vel.x, y: this.vel.y }
-            }));
-            this.alive = false;
-        } else {
-            Target.prototype.update.call(this);
-        }
     };
 
     module.exports = DestructibleTarget;

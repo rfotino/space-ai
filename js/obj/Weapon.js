@@ -14,6 +14,7 @@ define(function(require, exports, module) {
         this.name = props.name || '';
         this.damage = props.damage || 0;
         this.ammo = props.ammo || null;
+        this.bulletSpeed = props.bulletSpeed || 0;
         this.cooldown = props.cooldown || 0;
         this.cooldownTimer = 0;
     };

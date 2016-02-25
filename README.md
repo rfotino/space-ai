@@ -27,7 +27,7 @@ https://spaceship.codes.
 * [x] Add health() and bounds() diagnostic functions for the user
 * [x] Explosion animations
 * [x] Viewport interactions like pan/zoom/focus
-* [ ] Immobile enemy ships
+* [x] Immobile enemy ships
 * [ ] Mobile enemy ships
 * [x] Mines that follow the player if they are within a certain
       proximity and explode on impact.
