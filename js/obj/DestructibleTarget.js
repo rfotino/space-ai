@@ -15,6 +15,7 @@ define(function(require, exports, module) {
     var DestructibleTarget = function(props) {
         props = props || {};
         Target.prototype.constructor.call(this, props);
+        this.explosionLifespan = props.explosionLifespan || 0.5 * this.radius;
         this._health = props.health || 100;
     };
 
@@ -33,7 +34,7 @@ define(function(require, exports, module) {
             this._health = h;
             if (this._health <= 0) {
                 this.newObjects.push(new Explosion({
-                    lifespan: 0.5 * this.radius,
+                    lifespan: this.explosionLifespan,
                     pos: { x: this.pos.x, y: this.pos.y },
                     vel: { x: this.vel.x, y: this.vel.y }
                 }));

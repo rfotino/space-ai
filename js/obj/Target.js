@@ -16,7 +16,8 @@ define(function(require, exports, module) {
      */
     var Target = function(props) {
         props = props || {};
-        props.type = 'target';
+        props.type = props.type || 'target';
+        props.isTarget = true;
         GameObject.prototype.constructor.call(this, props);
         this.name = props.name || '';
         this.objective = props.objective || null;

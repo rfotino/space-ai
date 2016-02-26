@@ -131,10 +131,10 @@ define(function(require, exports, module) {
                 equipped: 'laser'
             }),
             objects: [
-                new SpaceMine({ pos: { x: 150, y: 0 } }),
-                new SpaceMine({ pos: { x: -150, y: 0 } }),
-                new SpaceMine({ pos: { x: -165, y: 100 } }),
-                new SpaceMine({ pos: { x: 165, y: 100 } })
+                new SpaceMine({ pos: { x: 150, y: 0 }, win: true }),
+                new SpaceMine({ pos: { x: -150, y: 0 }, win: true }),
+                new SpaceMine({ pos: { x: -165, y: 100 }, win: true }),
+                new SpaceMine({ pos: { x: 165, y: 100 }, win: true })
             ]
         }; }),
         new Level('Enemy Ships', function() { return {

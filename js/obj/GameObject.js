@@ -31,6 +31,10 @@ define(function(require, exports, module) {
         this.newObjects = [];
         // Every object gets a z-depth, used for determining drawing order
         this.zDepth = 0;
+        // Each object can either be a target or not. If an object is a
+        // target, it must define a complete() function for checking to see
+        // if the objective has been completed.
+        this.isTarget = props.isTarget || false;
     };
 
     /**

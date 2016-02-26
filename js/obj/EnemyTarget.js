@@ -13,7 +13,7 @@ define(function(require, exports, module) {
      */
     var EnemyTarget = function(props) {
         props = props || {};
-        props.objective = 'destroy';
+        props.objective = props.objective || 'destroy';
         DestructibleTarget.prototype.constructor.call(this, props);
         this.owner = 'enemy';
         this._fillStyle = 'rgba(255, 0, 0, 0.5)';

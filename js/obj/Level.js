@@ -44,7 +44,7 @@ define(function(require, exports, module) {
         }
         // Grab all of the targets out of the game objects array
         this._state.targets = this._state.objects.filter(function(obj) {
-            return 'target' === obj.type;
+            return obj.isTarget;
         });
         // Set up the star field
         this._state.starField = new StarField();
@@ -103,7 +103,7 @@ define(function(require, exports, module) {
         for (var i = this._state.objects.length - 1; 0 <= i; i--) {
             var obj = this._state.objects[i];
             var newTargets = obj.newObjects.filter(function(obj) {
-                return 'target' === obj.type;
+                return obj.isTarget;
             });
             this._state.targets.push.apply(this._state.targets, newTargets);
             this._state.objects.push.apply(this._state.objects, obj.newObjects);

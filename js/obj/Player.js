@@ -26,7 +26,7 @@ define(function(require, exports, module) {
         this.zDepth = 75;
         this.weapons = props.weapons || [];
         this.equipped = props.equipped || null;
-        this.health = props.health || 100;
+        this._health = props.health || 100;
         this.thrust = props.thrust || 0;
         this.thrustPower = props.thrustPower || 0;
         this.turnPower = props.turnPower || 0;
@@ -36,7 +36,26 @@ define(function(require, exports, module) {
 
     // Extend GameObject
     Player.prototype = Object.create(GameObject.prototype);
-    Player.prototype.constructor = Player;
+    Player.prototype.constructor = Player
+
+    /**
+     * Explode when health drops to zero.
+     */
+    Object.defineProperty(Player.prototype, 'health', {
+        get: function health() {
+            return this._health;
+        },
+        set: function health(h) {
+            this._health = h;
+            if (this._health <= 0) {
+                this.newObjects.push(new Explosion({
+                    pos: { x: this.pos.x, y: this.pos.y },
+                    vel: { x: this.vel.x, y: this.vel.y }
+                }));
+                this.alive = false;
+            }
+        }
+    });
 
     /**
      * Generate the ship's geometry, used for rendering and collision
@@ -105,43 +124,34 @@ define(function(require, exports, module) {
      * @override {GameObject}
      */
     Player.prototype.update = function() {
-        // If the player has no more health, create an explosion
-        if (this.health <= 0) {
-            this.newObjects.push(new Explosion({
-                pos: { x: this.pos.x, y: this.pos.y },
-                vel: { x: this.vel.x, y: this.vel.y }
-            }));
-            this.alive = false;
-        } else {
-            // Update the player's weapons
+        // Update the player's weapons
+        for (var i = 0; i < this.weapons.length; i++) {
+            var weapon = this.weapons[i];
+            weapon.update();
+        }
+        // Fire the player's weapon if it was fired and there is a weapon
+        // equipped
+        if (this.fired && this.equipped) {
             for (var i = 0; i < this.weapons.length; i++) {
                 var weapon = this.weapons[i];
-                weapon.update();
-            }
-            // Fire the player's weapon if it was fired and there is a weapon
-            // equipped
-            if (this.fired && this.equipped) {
-                for (var i = 0; i < this.weapons.length; i++) {
-                    var weapon = this.weapons[i];
-                    if (this.equipped === weapon.name) {
-                        var bullet = weapon.getBullet(
-                            { x: this.fired.x, y: this.fired.y },
-                            { x: this.pos.x, y: this.pos.y },
-                            'player');
-                        if (Array.isArray(bullet)) {
-                            this.newObjects.push.apply(this.newObjects, bullet);
-                        } else if (null !== bullet) {
-                            this.newObjects.push(bullet);
-                        }
+                if (this.equipped === weapon.name) {
+                    var bullet = weapon.getBullet(
+                        { x: this.fired.x, y: this.fired.y },
+                        { x: this.pos.x, y: this.pos.y },
+                        'player');
+                    if (Array.isArray(bullet)) {
+                        this.newObjects.push.apply(this.newObjects, bullet);
+                    } else if (null !== bullet) {
+                        this.newObjects.push(bullet);
                     }
                 }
             }
-            // Reset the player's fired flag
-            this.fired = false;
-            // Calculate the player's acceleration from thrust and rotation
-            this.accel.x = this.thrust * Math.cos(this.pos.angular);
-            this.accel.y = this.thrust * Math.sin(this.pos.angular);
         }
+        // Reset the player's fired flag
+        this.fired = false;
+        // Calculate the player's acceleration from thrust and rotation
+        this.accel.x = this.thrust * Math.cos(this.pos.angular);
+        this.accel.y = this.thrust * Math.sin(this.pos.angular);
         // Update the exhaust flicker counter
         this._flameFlicker = (this._flameFlicker + 1) % this._flameFlickerMax;
         // Update the game object

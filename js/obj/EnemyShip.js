@@ -15,6 +15,7 @@ define(function(require, exports, module) {
      * A constructor for enemy ships.
      */
     var EnemyShip = function(props) {
+        props.type = 'ship';
         props = props || {};
         EnemyTarget.prototype.constructor.call(this, props);
         this.range = props.range || 500;

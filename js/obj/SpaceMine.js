@@ -9,7 +9,7 @@
 define(function(require, exports, module) {
     var physics = require('physics');
     var graphics = require('graphics');
-    var GameObject = require('obj/GameObject');
+    var DestructibleTarget = require('obj/DestructibleTarget');
     var Explosion = require('obj/Explosion');
 
     /**
@@ -18,44 +18,28 @@ define(function(require, exports, module) {
     var SpaceMine = function(props) {
         props = props || {};
         props.type = 'mine';
-        GameObject.prototype.constructor.call(this, props);
-        this.radius = props.radius || 20;
+        props.health = props.health || 1;
+        props.radius = props.radius || 20;
+        props.explosionLifespan = 20;
+        props.objective = 'evade';
+        DestructibleTarget.prototype.constructor.call(this, props);
         this.damage = props.damage || 25;
         this.range = props.range || 200;
-        this._health = props.health || 1;
+        // Variables/constants used for decoration
         this._blinkCounter = 0;
         this._blinkThreshold = 7;
         this._blinkCounterMax = 10 * this._blinkThreshold;
         this._numSpikes = 20;
     };
 
-    // Extend GameObject
-    SpaceMine.prototype = Object.create(GameObject.prototype);
+    // Extend DestructibleTarget
+    SpaceMine.prototype = Object.create(DestructibleTarget.prototype);
     SpaceMine.prototype.constructor = SpaceMine;
-
-    /**
-     * Explode when health drops to zero.
-     */
-    Object.defineProperty(SpaceMine.prototype, 'health', {
-        get: function health() {
-            return this._health;
-        },
-        set: function health(h) {
-            this._health = h;
-            if (this._health <= 0) {
-                this.newObjects.push(new Explosion({
-                    pos: { x: this.pos.x, y: this.pos.y },
-                    vel: { x: this.vel.x, y: this.vel.y }
-                }));
-                this.alive = false;
-            }
-        }
-    });
 
     /**
      * If they are near enough, space mines accelerate toward the player.
      *
-     * @override {GameObject}
+     * @override {DestructibleTarget}
      * @param {GameObject[]} objList
      */
     SpaceMine.prototype.update = function(objList) {
@@ -93,13 +77,13 @@ define(function(require, exports, module) {
             this._blinkCounter = 0;
         }
         // Call parent update function
-        GameObject.prototype.update.call(this, objList);
+        DestructibleTarget.prototype.update.call(this, objList);
     };
 
     /**
      * Space mines explode on contact with the player.
      *
-     * @override {GameObject}
+     * @override {DestructibleTarget}
      * @param {GameObject} other
      */
     SpaceMine.prototype.collide = function(other) {
@@ -115,7 +99,7 @@ define(function(require, exports, module) {
     };
 
     /**
-     * @override {GameObject}
+     * @override {DestructibleTarget}
      * @param {CanvasRenderingContext2D} ctx
      */
     SpaceMine.prototype.draw = function(ctx) {
@@ -152,14 +136,12 @@ define(function(require, exports, module) {
     };
 
     /**
-     * @override {GameObject}
+     * @override {DestructibleTarget}
      * @return {Object}
      */
     SpaceMine.prototype.getObj = function() {
-        var obj = GameObject.prototype.getObj.call(this);
+        var obj = DestructibleTarget.prototype.getObj.call(this);
         return $.extend(obj, {
-            radius: this.radius,
-            health: this.health,
             damage: this.damage,
             range: this.range
         });
