@@ -82,7 +82,8 @@ define(function(require, exports, module) {
         var obj = GameObject.prototype.getObj.call(this);
         return $.extend(obj, {
             damage: this.damage,
-            weapon: this.weapon
+            weapon: this.weapon,
+            owner: this.owner
         });
     };
 

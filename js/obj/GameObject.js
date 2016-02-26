@@ -7,6 +7,7 @@
 
 define(function(require, exports, module) {
     var physics = require('physics');
+    var objIdCounter = 0;
 
     /**
      * A constructor for a GameObject.
@@ -35,6 +36,9 @@ define(function(require, exports, module) {
         // target, it must define a complete() function for checking to see
         // if the objective has been completed.
         this.isTarget = props.isTarget || false;
+        // Give each object a unique ID, so that similar objects can be
+        // exclusively identified by the player across frames
+        this.id = ++objIdCounter;
     };
 
     /**
@@ -127,6 +131,7 @@ define(function(require, exports, module) {
      */
     GameObject.prototype.getObj = function() {
         return {
+            id: this.id,
             pos: $.extend({}, this.pos),
             vel: $.extend({}, this.vel),
             accel: $.extend({}, this.accel),
