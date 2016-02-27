@@ -35,7 +35,7 @@ https://spaceship.codes.
 * [x] Togglable debug mode where you see a 100px grid, info on all game
       objects, etc.
 * [ ] More and better levels
-* [ ] Packaging/minification of JavaScript files
+* [x] Packaging/minification of JavaScript files
 * [ ] Help dialog, with keyboard shortcuts
 * [ ] About page
 * [ ] Extend the documentation
