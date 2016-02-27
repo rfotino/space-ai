@@ -21,6 +21,32 @@ of single-player challenges to complete.
 A live demo of the latest version of the code is available at
 https://spaceship.codes.
 
+## Build
+
+Building the code requires Browserify and UglifyJS for bundling the source
+into one file and then compressing that file. You can install these
+dependencies with:
+
+```shell
+npm install -g browserify
+npm install -g uglify-js
+```
+
+Once you have these Browserify and UglifyJS installed, you can build the code
+by running `make` (requires CMake). Other build commands include:
+
+```shell
+make bundle  # Only runs Browserify
+make minify  # Only runs UglifyJS
+make clean   # Removes already built files
+```
+
+The built files are `build/space-ai.js` and `build/space-ai.min.js`, which
+are the bundled code and the bundled + minified code, respectively. There are
+two HTML files that can be viewed in the browser to run the game:
+`index-dev.html`, which uses the unminified version of the code; and
+`index.html`, which uses the minified version.
+
 ## Todo
 
 * [ ] Allow level to supply alternative win condition function
