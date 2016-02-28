@@ -18,6 +18,22 @@ var EnemyShip = function(props) {
     props = props || {};
     EnemyTarget.prototype.constructor.call(this, props);
     this.path = props.path || null;
+    this.orbit = props.orbit || null;
+    if (this.orbit) {
+        this.orbit.speed = 2 * Math.PI * this.orbit.radius
+            / this.orbit.duration;
+        this.orbit.accel = Math.pow(2 * Math.PI / this.orbit.duration, 2)
+            * this.orbit.radius;
+        if ('counterclockwise' === this.orbit.direction) {
+            this.orbit.speed *= -1;
+        }
+        this.pos.x = this.orbit.x
+            + (this.orbit.radius * Math.cos(this.orbit.startAngle));
+        this.pos.y = this.orbit.y
+            + (this.orbit.radius * Math.sin(this.orbit.startAngle));
+        this.vel.x = this.orbit.speed * Math.sin(this.orbit.startAngle);
+        this.vel.y = this.orbit.speed * -Math.cos(this.orbit.startAngle);
+    }
     this.range = props.range || 500;
     this.radius = props.radius || 50;
     this.weapon = props.weapon || new LaserWeapon();
@@ -50,7 +66,6 @@ EnemyShip.prototype.update = function(objList) {
         }
         var dest = this.path[this._pathDestIndex];
         if (0 === this._pathElapsedDuration) {
-            console.log(this.pos);
             var x = dest.x - this.pos.x;
             var y = dest.y - this.pos.y;
             var t = dest.duration / 2;
@@ -65,6 +80,18 @@ EnemyShip.prototype.update = function(objList) {
         if (dest.duration <= this._pathElapsedDuration) {
             this._pathDestIndex = (this._pathDestIndex + 1) % this.path.length;
             this._pathElapsedDuration = 0;
+        }
+    } else if (this.orbit && this.orbit.radius) {
+        // Handle movement in an orbit
+        var v = {
+            x: this.orbit.x - this.pos.x,
+            y: this.orbit.y - this.pos.y
+        };
+        var m = Math.sqrt((v.x * v.x) + (v.y * v.y));
+        if (m) {
+            var u = { x: v.x / m, y: v.y / m };
+            this.accel.x = u.x * this.orbit.accel;
+            this.accel.y = u.y * this.orbit.accel;
         }
     }
     // If the player is in range, shoot at them

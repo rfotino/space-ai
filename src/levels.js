@@ -135,7 +135,7 @@ module.exports = [
             new SpaceMine({ pos: { x: 165, y: 100 }, win: true })
         ]
     }; }),
-    new Level('Enemy Ships', function() { return {
+    new Level('Ship Path', function() { return {
         player: new Player({
             weapons: [ new LaserWeapon(), new RocketWeapon({ ammo: 3 }) ],
             equipped: 'laser'
@@ -149,6 +149,25 @@ module.exports = [
                     { x: -600, y: -250, duration: 180 },
                     { x: -600, y: 250, duration: 90 }
                 ],
+                win: true
+            })
+        ]
+    }; }),
+    new Level('Ship Orbit', function() { return {
+        player: new Player({
+            weapons: [ new LaserWeapon(), new RocketWeapon({ ammo: 3 }) ],
+            equipped: 'laser'
+        }),
+        objects: [
+            new EnemyShip({
+                orbit: {
+                    x: 0,
+                    y: 100,
+                    radius: 500,
+                    duration: 300,
+                    startAngle: 2 * Math.PI * Math.random(),
+                    direction: 'counterclockwise'
+                },
                 win: true
             })
         ]
