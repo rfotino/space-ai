@@ -17,6 +17,7 @@ var EnemyShip = function(props) {
     props.type = 'ship';
     props = props || {};
     EnemyTarget.prototype.constructor.call(this, props);
+    this.path = props.path || null;
     this.range = props.range || 500;
     this.radius = props.radius || 50;
     this.weapon = props.weapon || new LaserWeapon();
@@ -40,6 +41,31 @@ EnemyShip.prototype.update = function(objList) {
     // Update weapon, if equipped
     if (this.weapon) {
         this.weapon.update();
+    }
+    // Handle movement along a path
+    if (this.path && this.path.length) {
+        if ('undefined' === typeof this._pathDestIndex) {
+            this._pathDestIndex = 0;
+            this._pathElapsedDuration = 0;
+        }
+        var dest = this.path[this._pathDestIndex];
+        if (0 === this._pathElapsedDuration) {
+            console.log(this.pos);
+            var x = dest.x - this.pos.x;
+            var y = dest.y - this.pos.y;
+            var t = dest.duration / 2;
+            this.accel.x = x / Math.pow(t, 2);
+            this.accel.y = y / Math.pow(t, 2);
+        }
+        if (Math.floor(dest.duration / 2) === this._pathElapsedDuration) {
+            this.accel.x *= -1;
+            this.accel.y *= -1;
+        }
+        this._pathElapsedDuration++;
+        if (dest.duration <= this._pathElapsedDuration) {
+            this._pathDestIndex = (this._pathDestIndex + 1) % this.path.length;
+            this._pathElapsedDuration = 0;
+        }
     }
     // If the player is in range, shoot at them
     var player = null;

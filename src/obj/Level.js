@@ -301,6 +301,9 @@ Level.prototype.bounds = function() {
     this._state.objects.push(this._state.player);
     for (var i = 0; i < this._state.objects.length; i++) {
         var obj = this._state.objects[i];
+        if (!obj.alive) {
+            continue;
+        }
         var bounds = obj.bounds();
         minX = Math.min(minX, bounds.x);
         minY = Math.min(minY, bounds.y);

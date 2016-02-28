@@ -141,7 +141,16 @@ module.exports = [
             equipped: 'laser'
         }),
         objects: [
-            new EnemyShip({ pos: { x: 150, y: 150 }, win: true })
+            new EnemyShip({
+                pos: { x: -600, y: 250 },
+                path: [
+                    { x: 600, y: 250, duration: 180 },
+                    { x: 600, y: -250, duration: 90 },
+                    { x: -600, y: -250, duration: 180 },
+                    { x: -600, y: 250, duration: 90 }
+                ],
+                win: true
+            })
         ]
     }; })
 ];

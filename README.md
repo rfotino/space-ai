@@ -54,7 +54,7 @@ two HTML files that can be viewed in the browser to run the game:
 * [x] Explosion animations
 * [x] Viewport interactions like pan/zoom/focus
 * [x] Immobile enemy ships
-* [ ] Mobile enemy ships
+* [x] Mobile enemy ships
 * [x] Mines that follow the player if they are within a certain
       proximity and explode on impact.
 * [x] Be able to hover over objects and see information about them
