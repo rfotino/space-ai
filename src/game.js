@@ -161,6 +161,10 @@ exports.load = function(newLevel) {
     }
     level.setDebugMode(debugMode);
     exports.restart();
+    // Show the help dialog if this level has help text
+    if (newLevel.help) {
+        alert(newLevel.help);
+    }
 };
 
 /**
@@ -202,7 +206,10 @@ exports.init = function() {
     $(document).ready(function() {
         canvas = document.getElementById('game-canvas');
         ctx = canvas.getContext('2d');
-        exports.load(new Level('Select Level', function() { return {}; }));
+        exports.load(new Level({
+            name: 'Select Level',
+            stateFunc: function() { return {}; }
+        }));
     });
 };
 

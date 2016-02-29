@@ -13,9 +13,20 @@
         return function() { return hiddenFunc.apply(null, arguments); };
     };
     var locals = {
-        // Don't allow sending/receiving of messages by user code
-        onmessage: function() { },
-        postMessage: function() { },
+        // Don't allow sending/receiving of messages by user code, don't allow
+        // setting timeouts
+        onmessage: hideFunc(function() {
+            throw new Error('Using onmessage is not allowed', null, null);
+        }),
+        postMessage: hideFunc(function() {
+            throw new Error('Using postMessage is not allowed', null, null);
+        }),
+        setTimeout: hideFunc(function() {
+            throw new Error('Using setTimeout is not allowed', null, null);
+        }),
+        setInterval: hideFunc(function() {
+            throw new Error('Using setInterval is not allowed', null, null);
+        }),
         // Change console context in user code
         console: {
             log: function(message) {
@@ -170,7 +181,7 @@
             userFunc = Function.prototype.bind.apply(sandbox, context2);
         } catch (e) {
             postMessage({ type: 'error',
-                          value: e.message,
+                          value: e.message + '.',
                           lineNumber: e.lineNumber,
                           columnNumber: e.columnNumber });
         }
@@ -185,7 +196,7 @@
             userFunc();
         } catch (e) {
             postMessage({ type: 'error',
-                          value: e.message,
+                          value: e.message + '.',
                           lineNumber: e.lineNumber,
                           columnNumber: e.columnNumber });
         }

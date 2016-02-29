@@ -69,7 +69,7 @@ two HTML files that can be viewed in the browser to run the game:
 * [x] Menu dropdown for changing the view
 * [x] Loading/saving of user code using local storage
 * [x] Z-index for controlling drawing order of game objects
-* [ ] Some way to give a level description via initial comments, or
+* [x] Some way to give a level description via initial comments, or
       have some initial code the user has to modify.
 
 ## Wishlist

@@ -14,12 +14,20 @@ var StarField = require('./StarField.js');
  * Creates a game level with a name and function for getting an initial
  * state.
  *
- * @param {String} name
- * @param {Function} stateFunc
+ * @param {String} props.name
+ * @param {String} props.help Help text to go with this level.
+ * @param {Function} props.stateFunc A function that returns an initial state.
  */
-function Level(name, stateFunc) {
-    this.name = name;
-    this._stateFunc = stateFunc;
+function Level(props) {
+    props = props || {};
+    if (!props.name) {
+        throw 'No name found when initializing Level object.';
+    } else if (!props.stateFunc) {
+        throw 'No stateFunc found when initializing Level object.';
+    }
+    this.name = props.name;
+    this.help = props.help || null;
+    this._stateFunc = props.stateFunc;
     this._mousePos = null;
     this._highlightedObj = null;
     this._debugMode = false;
