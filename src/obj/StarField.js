@@ -10,7 +10,7 @@
  * A constructor for StarField objects.
  */
 var StarField = function(density) {
-    this._density = density || 0.0015;
+    this._density = density || 0.000125;
     this._bounds = {
         x: 0,
         y: 0,
@@ -19,8 +19,8 @@ var StarField = function(density) {
     };
     this._stars = [];
     this._color = '#bbf';
-    this._minRadius = 0.75;
-    this._maxRadius = 2;
+    this._starRadius = 2;
+    this._starOffset = 250;
     this._addStars(this._bounds.x, this._bounds.y,
                    this._bounds.width, this._bounds.height);
 };
@@ -39,9 +39,7 @@ StarField.prototype._addStars = function(x, y, width, height) {
     for (var i = 0; i < numStars; i++) {
         this._stars.push({
             x: x + (width * Math.random()),
-            y: y + (height * Math.random()),
-            radius: this._minRadius +
-                ((this._maxRadius - this._minRadius) * Math.pow(Math.random(), 3))
+            y: y + (height * Math.random())
         });
     }
 };
@@ -60,17 +58,21 @@ StarField.prototype.draw = function(ctx, viewport) {
     var viewBoundsTop = viewBounds.y + viewBounds.height;
     // Figure out the offset that we need to draw the first iteration of
     // the starfield at
-    var minXIndex = Math.floor((viewBounds.x - this._bounds.x) /
+    var minXIndex = Math.floor((viewBounds.x - this._bounds.x -
+                                (this._starOffset / 2)) /
                                this._bounds.width);
-    var minYIndex = Math.floor((viewBounds.y - this._bounds.y) /
+    var minYIndex = Math.floor((viewBounds.y - this._bounds.y -
+                                (this._starOffset / 2)) /
                                this._bounds.height);
     var minXCoord = this._bounds.x + (minXIndex * this._bounds.width);
     var minYCoord = this._bounds.y + (minYIndex * this._bounds.height);
     // Find out the offset for the last iteration of the starfield
     var maxXIndex = minXIndex +
-        Math.ceil((viewBoundsRight - minXCoord) / this._bounds.width);
+        Math.ceil((viewBoundsRight - minXCoord + (this._starOffset / 2))
+                  / this._bounds.width);
     var maxYIndex = minYIndex +
-        Math.ceil((viewBoundsTop - minYCoord) / this._bounds.height);
+        Math.ceil((viewBoundsTop - minYCoord + (this._starOffset / 2))
+                  / this._bounds.height);
     // We need a slight random offset for each star, depending on which
     // star field indices are being used. Define a RNG getter here
     var getRng = function(seed) {
@@ -93,18 +95,20 @@ StarField.prototype.draw = function(ctx, viewport) {
                 // Get the adjusted x and y coordinates. These are the
                 // original coordinates plus the bounds coordinates plus
                 // the offset for the position of the bounding box plus a
-                // random offset between -25 and 25 depending on which bounds
-                // indices we are drawing
+                // random offset depending on which bounds indices we are
+                // drawing
                 var adjX = star.x + this._bounds.x +
-                    (i * this._bounds.width) + ((rng() - 0.5) * 50);
+                    (i * this._bounds.width) +
+                    ((rng() - 0.5) * this._starOffset);
                 var adjY = star.y + this._bounds.y +
-                    (j * this._bounds.height) + ((rng() - 0.5) * 50);
+                    (j * this._bounds.height) +
+                    ((rng() - 0.5) * this._starOffset);
                 // Check if star is in view before drawing
                 if (viewBounds.x <= adjX && adjX <= viewBoundsRight &&
                     viewBounds.y <= adjY && adjY <= viewBoundsTop) {
                     ctx.beginPath();
                     // Use -adjY because y-axis is flipped in-game
-                    ctx.arc(adjX, -adjY, star.radius, 0, Math.PI * 2);
+                    ctx.arc(adjX, -adjY, this._starRadius, 0, Math.PI * 2);
                     ctx.fill();
                 }
             }
