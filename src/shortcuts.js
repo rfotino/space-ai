@@ -5,6 +5,7 @@
  */
 
 var $ = require('../lib/jquery/jquery.js');
+var modal = require('./modal.js');
 var ui = require('./ui.js');
 var menubar = require('./menubar.js');
 var game = require('./game.js');
@@ -16,7 +17,9 @@ var addKeyDownListener = function() {
         // code window open we are in 'insert' mode, and when we are doing
         // neither we are in 'command' mode
         var mode;
-        if (menubar.isVisibleLevels()) {
+        if (modal.isShown()) {
+            mode = 'modal';
+        } else if (menubar.isVisibleLevels()) {
             mode = 'levelselect';
         } else if (ui.isVisibleCode()) {
             mode = 'insert';
@@ -79,7 +82,6 @@ var addKeyDownListener = function() {
                 }
                 break;
             case 'command':
-            default:
                 if (73 === e.keyCode && modKeys()) {
                     // i
                     ui.showCode();
@@ -130,6 +132,13 @@ var addKeyDownListener = function() {
                     return;
                 }
                 break;
+            case 'modal':
+                if (27 === e.keyCode && modKeys()) {
+                    // Escape
+                    modal.hide();
+                }
+            default:
+                return;
             }
         }
         // Prevent the default action of the key pressed

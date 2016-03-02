@@ -8,6 +8,7 @@
 var $ = require('../lib/jquery/jquery.js');
 var ui = require('./ui.js');
 var menubar = require('./menubar.js');
+var modal = require('./modal.js');
 var Level = require('./obj/Level.js');
 
 // Declare variables for DOM elements and handling state
@@ -62,7 +63,7 @@ var execute = function() {
 exports.install = function(code) {
     // Make sure web workers are supported
     if (!window.Worker) {
-        alert('Your browser must support web workers to play the game.');
+        modal.show('Your browser must support web workers to play the game.');
         return;
     }
     // Clear the console
@@ -163,7 +164,7 @@ exports.load = function(newLevel) {
     exports.restart();
     // Show the help dialog if this level has help text
     if (newLevel.help) {
-        alert(newLevel.help);
+        modal.show(newLevel.help);
     }
 };
 
