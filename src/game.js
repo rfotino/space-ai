@@ -152,21 +152,36 @@ exports.pause = function() {
  *
  * @param {Level} newLevel
  */
-exports.load = function(newLevel) {
-    // Save the initial state and start the game
-    playerFocus = true;
-    level = newLevel;
-    level.viewport.reset();
-    if (mousePos) {
-        level.highlightObjAt(mousePos);
-    }
-    level.setDebugMode(debugMode);
-    exports.restart();
-    // Show the help dialog if this level has help text
-    if (newLevel.help) {
-        modal.show(newLevel.help);
-    }
-};
+exports.load = (function() {
+    var showHelp = true;
+    return function(newLevel) {
+        // Save the initial state and start the game
+        playerFocus = true;
+        level = newLevel;
+        level.viewport.reset();
+        if (mousePos) {
+            level.highlightObjAt(mousePos);
+        }
+        level.setDebugMode(debugMode);
+        exports.restart();
+        // Show the help dialog if this level has help text
+        if (newLevel.help && showHelp) {
+            var helpTag = $('<p />')
+                .text(newLevel.help)
+                .css('padding-bottom', '5px');
+            var divTag = $('<div />')
+                .css('text-align', 'right');
+            var labelTag = $('<label />');
+            var checkboxTag = $('<input tabIndex="999" type="checkbox" />')
+                .on('change', function() {
+                    showHelp = !$(this).is(':checked');
+                });
+            labelTag.append(checkboxTag, ' Prevent showing help dialogs.');
+            divTag.append(labelTag);
+            modal.show($('<div />').append(helpTag, divTag));
+        }
+    };
+})();
 
 /**
  * Resets the game to the initial conditions for the currently

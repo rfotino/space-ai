@@ -25,7 +25,7 @@ exports.show = function(content) {
         modalWindow = $('<div id="modal-window" />'),
         modalContent = $('<div id="modal-content" />'),
         buttonMenu = $('<div id="modal-button-menu" />'),
-        doneButton = $('<a tabindex="-1" class="btn btn-primary">Done</a>');
+        doneButton = $('<a tabindex="1000" class="btn btn-primary">Done</a>');
     buttonMenu.append(doneButton);
     modalWindow.append(modalContent, buttonMenu);
     modalShadow.append(modalWindow);
@@ -35,7 +35,6 @@ exports.show = function(content) {
         }
     });
     doneButton.on('click', exports.hide);
-    modalShadow.on('click', exports.hide);
     // Add content
     if ('string' === typeof content) {
         modalContent.text(content);
