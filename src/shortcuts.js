@@ -92,6 +92,9 @@ var addKeyDownListener = function() {
                 } else if (68 === e.keyCode && modKeys()) {
                     // d
                     window.open($('#docs').attr('href'), '_blank');
+                } else if (65 === e.keyCode && modKeys()) {
+                    // a
+                    $('#about-btn').trigger('click');
                 } else if (83 === e.keyCode && modKeys()) {
                     // s
                     $('#show-levels').trigger('click');

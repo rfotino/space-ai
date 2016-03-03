@@ -63,7 +63,7 @@ two HTML files that can be viewed in the browser to run the game:
 * [ ] More and better levels
 * [x] Packaging/minification of JavaScript files
 * [ ] Help dialog, with keyboard shortcuts
-* [ ] About page
+* [x] About dialog
 * [ ] Extend the documentation
 * [ ] Add unit tests for physics.js
 * [x] Menu dropdown for changing the view

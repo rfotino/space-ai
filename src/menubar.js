@@ -8,6 +8,7 @@
 var $ = require('../lib/jquery/jquery.js');
 var ui = require('./ui.js');
 var game = require('./game.js');
+var modal = require('./modal.js');
 var levels = require('./levels.js');
 
 // Declare variables for DOM elements and handling state
@@ -304,6 +305,31 @@ exports.init = function() {
         });
         $('#pan-down-btn').on('click', function(e) {
             game.viewTranslate(0, -arrowPanDist);
+        });
+
+        // Add listener for about button
+        $('#about-btn').on('click', function(e) {
+            modal.show($(
+                '<h2 style="padding-bottom: 5px">About</h2>' +
+                    '<p style="padding-bottom: 5px">' +
+                    'Space AI is a game for programmers. You control a ' +
+                    'spaceship by writing JavaScript code in order to ' +
+                    'complete a specific task. Each level is a challenge ' +
+                    'with its own objectives, which may include navigating ' +
+                    'your ship to a set of coordinates, eliminating enemy ' +
+                    'ships, and evading obstacles like space mines and ' +
+                    'asteroids, among other things. The drawer on the left ' +
+                    'slides out to reveal a coding window, and the drawer ' +
+                    'on the bottom is your console, which displays errors ' +
+                    'and messages that you send to it. Your code will be ' +
+                    'run once per frame (ideally 60 times per second). ' +
+                    'After you have written new code, click the Install & ' +
+                    'Restart button and then click the Run button. To ' +
+                    'discover the functions available to control the ship, ' +
+                    'visit the Docs.</p>' +
+                    '<p><em>Developed by Robert Fotino, 2016.</em></p>'));
+            e.preventDefault();
+            return false;
         });
 
         // Set up restart/run button listeners
