@@ -296,7 +296,7 @@ html, body {
     box-sizing: border-box;
     border-top: 2px solid #999;
     z-index: 8;
-
+    font-family: monospace;
     -webkit-transition: 0.25s;
     -moz-transition: 0.25s;
     -o-transition: 0.25s;

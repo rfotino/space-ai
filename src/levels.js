@@ -174,8 +174,6 @@ module.exports = [
                     pos: { x: -600, y: 250 },
                     path: [
                         { x: 600, y: 250, speed: 5 },
-                        { x: 600, y: -250, speed: 5 },
-                        { x: -600, y: -250, speed: 5 },
                         { x: -600, y: 250, speed: 5 }
                     ],
                     win: true
@@ -184,22 +182,19 @@ module.exports = [
         }; }
     }),
     new Level({
-        name: 'Ship Orbit',
+        name: 'More Ships',
         stateFunc: function() { return {
-            player: new Player({
-                weapons: [ new LaserWeapon(), new RocketWeapon({ ammo: 3 }) ],
-                equipped: 'laser'
-            }),
             objects: [
                 new EnemyShip({
-                    orbit: {
-                        x: 0,
-                        y: 100,
-                        radius: 500,
-                        duration: 500,
-                        startAngle: 2 * Math.PI * Math.random(),
-                        direction: 'counterclockwise'
-                    },
+                    pos: { x: -100, y: 500 },
+                    win: true
+                }),
+                new EnemyShip({
+                    pos: { x: 300, y: 300 },
+                    path: [
+                        { x: 300, y: -300 },
+                        { x: 300, y: 300 }
+                    ],
                     win: true
                 })
             ]

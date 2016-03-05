@@ -187,7 +187,11 @@ Level.prototype.draw = function(ctx) {
         drawObjects.push(player);
     }
     drawObjects.sort(function(a, b) {
-        return a.zDepth - b.zDepth;
+        if (a.zDepth === b.zDepth) {
+            return a.id - b.id;
+        } else {
+            return a.zDepth - b.zDepth;
+        }
     });
     for (var i = 0; i < drawObjects.length; i++) {
         var obj = drawObjects[i];

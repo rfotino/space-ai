@@ -6,6 +6,7 @@
  * at the player.
  */
 
+var physics = require('../physics.js');
 var GameObject = require('./GameObject.js');
 var EnemyTarget = require('./EnemyTarget.js');
 var LaserWeapon = require('./LaserWeapon.js');
@@ -17,29 +18,17 @@ var EnemyShip = function(props) {
     props.type = 'ship';
     props = props || {};
     EnemyTarget.prototype.constructor.call(this, props);
-    this.path = props.path || null;
-    this.orbit = props.orbit || null;
-    if (this.orbit) {
-        this.orbit.speed = 2 * Math.PI * this.orbit.radius
-            / this.orbit.duration;
-        this.orbit.accel = Math.pow(2 * Math.PI / this.orbit.duration, 2)
-            * this.orbit.radius;
-        if ('counterclockwise' === this.orbit.direction) {
-            this.orbit.speed *= -1;
-        }
-        this.pos.x = this.orbit.x
-            + (this.orbit.radius * Math.cos(this.orbit.startAngle));
-        this.pos.y = this.orbit.y
-            + (this.orbit.radius * Math.sin(this.orbit.startAngle));
-        this.vel.x = this.orbit.speed * Math.sin(this.orbit.startAngle);
-        this.vel.y = this.orbit.speed * -Math.cos(this.orbit.startAngle);
-    }
-    this.range = props.range || 500;
+    this.path = props.path || [ { x: this.pos.x, y: this.pos.y } ];
+    this.chaseRange = props.chaseRange || 750;
+    this.shootRange = props.shootRange || 500;
+    this.hoverRange = props.hoverRange || 200;
     this.radius = props.radius || 50;
     this.weapon = props.weapon || new LaserWeapon();
     this.mobile = 'undefined' !== props.mobile ? props.mobile : false;
     this.zDepth = 60;
-    this._maxAccel = 0.1;
+    this._maxAccel = 1;
+    this._accelList = [];
+    this._state = 'idle';
     // Used for spinning the ship's decorations
     this._spin = 0;
     this._spinVel = 0.02;
@@ -59,34 +48,35 @@ EnemyShip.prototype._updatePath = function() {
         this._pathElapsedDuration = 0;
     }
     var dest = this.path[this._pathDestIndex];
+    dest.speed = dest.speed || 5;
     if (0 === this._pathElapsedDuration) {
-        var dist = Math.sqrt(Math.pow(dest.x - this.pos.x, 2) +
-                             Math.pow(dest.y - this.pos.y, 2));
-        var dir = {
-            x: (dest.x - this.pos.x) / dist,
-            y: (dest.y - this.pos.y) / dist
-        };
-        var accelFrames = Math.ceil(dest.speed / this._maxAccel);
-        var accelDist = 0.5 * this._maxAccel * Math.pow(accelFrames, 2);
-        var coastFrames = Math.ceil((dist - (2 * accelDist)) / dest.speed);
-        if (coastFrames < 0) {
-            coastFrames = 0;
-            accelFrames = Math.sqrt(dist / this._maxAccel);
+        var dist = physics.dist(dest, this.pos);
+        if (0 === dist) {
+            this.accel.x = this.accel.y = 0;
+            this._endAccelFrame =
+                this._endCoastFrame =
+                this._endDecelFrame = 0;
+        } else {
+            var dir = physics.unit(physics.dif(dest, this.pos));
+            var accelFrames = Math.ceil(dest.speed / this._maxAccel);
+            var accelDist = 0.5 * this._maxAccel * Math.pow(accelFrames, 2);
+            var coastFrames = Math.ceil((dist - (2 * accelDist)) / dest.speed);
+            if (coastFrames < 0) {
+                coastFrames = 0;
+                accelFrames = Math.sqrt(dist / this._maxAccel);
+            }
+            this._endAccelFrame = accelFrames;
+            this._endCoastFrame = accelFrames + coastFrames;
+            this._endDecelFrame = (2 * accelFrames) + coastFrames;
+            this._pathAccel = physics.mul(this._maxAccel, dir);
         }
-        this._endAccelFrame = accelFrames;
-        this._endCoastFrame = accelFrames + coastFrames;
-        this._endDecelFrame = (2 * accelFrames) + coastFrames;
-        this._pathAccel = {
-            x: this._maxAccel * dir.x,
-            y: this._maxAccel * dir.y
-        };
     }
     if (this._pathElapsedDuration < this._endAccelFrame) {
         this.accel.x = this._pathAccel.x;
         this.accel.y = this._pathAccel.y;
     } else if (this._pathElapsedDuration < this._endCoastFrame) {
         this.accel.x = this.accel.y = 0;
-    } else {
+    } else if (this._pathElapsedDuration < this._endDecelFrame) {
         this.accel.x = -this._pathAccel.x;
         this.accel.y = -this._pathAccel.y;
     }
@@ -98,19 +88,73 @@ EnemyShip.prototype._updatePath = function() {
 };
 
 /**
- * Updates the ship's acceleration to move about a circular orbit.
+ * Shoot at the player.
+ *
+ * @param {Player} player
  */
-EnemyShip.prototype._updateOrbit = function() {
-    var v = {
-        x: this.orbit.x - this.pos.x,
-        y: this.orbit.y - this.pos.y
-    };
-    var m = Math.sqrt((v.x * v.x) + (v.y * v.y));
-    if (m) {
-        var u = { x: v.x / m, y: v.y / m };
-        this.accel.x = u.x * this.orbit.accel;
-        this.accel.y = u.y * this.orbit.accel;
+EnemyShip.prototype._shootPlayer = function(player) {
+    var dirVector = physics.dif(player.pos, this.pos);
+    var dist = physics.dist(dirVector);
+    dirVector.x += player.vel.x * dist / this.weapon.bulletSpeed;
+    dirVector.y += player.vel.y * dist / this.weapon.bulletSpeed;
+    if (0 === dirVector.x && 0 === dirVector.y) {
+        dirVector.x = 1;
     }
+    if (dist <= this.shootRange && this.weapon) {
+        var bullet = this.weapon.getBullet(
+            { x: dirVector.x, y: dirVector.y },
+            { x: this.pos.x, y: this.pos.y },
+            'enemy');
+        if (Array.isArray(bullet)) {
+            this.newObjects.push.apply(this.newObjects, bullet);
+        } else if (null !== bullet) {
+            this.newObjects.push(bullet);
+        }
+    }
+};
+
+/**
+ * Chase the player to get a better shot.
+ *
+ * @param {Player} player
+ */
+EnemyShip.prototype._chasePlayer = function(player) {
+    var dist = physics.dist(player.pos, this.pos);
+    if (dist <= this.chaseRange) {
+        // Project a vector from the player out toward the enemy ship at
+        // a distance of this.hoverRange from the player. This is the point
+        // at which we want to hover and fire.
+        var hoverPos =
+            physics.sum(
+                player.pos,
+                physics.mul(this.hoverRange,
+                            physics.unit(physics.dif(this.pos, player.pos))));
+        var dist = physics.dist(this.pos, hoverPos);
+        var speed = physics.dist(this.vel);
+        var decelDist = Math.pow(speed, 2) / this._maxAccel;
+        if (dist < decelDist) {
+            // We need to slow down!
+            this._slowDown();
+        } else {
+            // We need to speed up!
+            var prefVel = physics.dif(hoverPos, this.pos);
+            var prefAccel = physics.dif(prefVel, this.vel);
+            var prefAccelDir = physics.unit(prefAccel);
+            var accelMag = Math.min(this._maxAccel, physics.dist(prefAccel));
+            this.accel.x = accelMag * prefAccelDir.x;
+            this.accel.y = accelMag * prefAccelDir.y;
+        }
+    }
+};
+
+/**
+ * Attempts to bring the ship to a halt.
+ */
+EnemyShip.prototype._slowDown = function() {
+    var accelDir = physics.unit(physics.mul(-1, this.vel));
+    var accelMag = Math.min(this._maxAccel, physics.dist(this.vel));
+    this.accel.x = accelMag * accelDir.x;
+    this.accel.y = accelMag * accelDir.y;
 };
 
 /**
@@ -122,39 +166,44 @@ EnemyShip.prototype.update = function(objList) {
     if (this.weapon) {
         this.weapon.update();
     }
-    // Handle movement
-    if (this.path && this.path.length) {
-        this._updatePath();
-    } else if (this.orbit && this.orbit.radius) {
-        this._updateOrbit();
-    }
-    // If the player is in range, shoot at them
+    // Get the player from the list of objects
     var player = null;
     objList.forEach(function(obj) {
         if ('player' === obj.type) {
             player = obj;
         }
     });
-    if (null !== player) {
-        var dirVector = {
-            x: player.pos.x - this.pos.x,
-            y: player.pos.y - this.pos.y
-        };
-        var dist = Math.sqrt(Math.pow(dirVector.x, 2) +
-                             Math.pow(dirVector.y, 2));
-        dirVector.x += player.vel.x * dist / this.weapon.bulletSpeed;
-        dirVector.y += player.vel.y * dist / this.weapon.bulletSpeed;
-        if (dist <= this.range && this.weapon) {
-            var bullet = this.weapon.getBullet(
-                { x: dirVector.x, y: dirVector.y },
-                { x: this.pos.x, y: this.pos.y },
-                'enemy');
-            if (Array.isArray(bullet)) {
-                this.newObjects.push.apply(this.newObjects, bullet);
-            } else if (null !== bullet) {
-                this.newObjects.push(bullet);
-            }
+    // Decide what to do based on the state
+    var playerInRange =
+        null !== player &&
+        physics.dist(player.pos, this.pos) <= Math.max(this.shootRange, this.chaseRange);
+    switch (this._state) {
+    case 'idle':
+        if (playerInRange) {
+            this._state = 'attacking';
+        } else {
+            this._updatePath();
         }
+        break;
+    case 'attacking':
+        if (playerInRange) {
+            this._shootPlayer(player);
+            this._chasePlayer(player);
+        } else {
+            this._state = 'returning';
+        }
+        break;
+    case 'returning':
+        if (playerInRange) {
+            this._state = 'attacking';
+        } else if (0 === this.vel.x && 0 === this.vel.y) {
+            this._pathElapsedDuration = 0;
+            this.accel.x = this.accel.y = 0;
+            this._state = 'idle';
+        } else {
+            this._slowDown();
+        }
+        break;
     }
     // Spin the ship's decorations
     this._spin += this._spinVel;

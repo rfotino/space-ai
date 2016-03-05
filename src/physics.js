@@ -7,6 +7,80 @@
  */
 
 /**
+ * Returns the distance between two points, or a point and the origin
+ * if only one point is given.
+ *
+ * @param {Point} p1
+ * @param {Point} [p2] Defaults to (0, 0).
+ * @return {Number}
+ */
+exports.dist = function(p1, p2) {
+    if ('undefined' === typeof p2) {
+        p2 = { x: 0, y: 0 };
+    }
+    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+};
+
+/**
+ * Returns a unit vector derived from the given vector, or xbar if the
+ * given vector is <0, 0>.
+ *
+ * @param {Point} v
+ * @return {Point}
+ */
+exports.unit = function(v) {
+    var dist = exports.dist(v);
+    if (0 === dist) {
+        return { x: 1, y: 0 };
+    } else {
+        return { x: v.x / dist, y: v.y / dist };
+    }
+};
+
+/**
+ * Returns the sum of two or more vectors.
+ *
+ * @param {Point} u
+ * @param {Point} v
+ * @return {Point} u + v, or the sum of all arguments if more than 2.
+ */
+exports.sum = function(u, v) {
+    if (2 < arguments.length) {
+        var s = { x: 0, y: 0 };
+        for (var i = 0; i < arguments.length; i++) {
+            var w = arguments[i];
+            s.x += w.x;
+            s.y += w.y;
+        }
+        return s;
+    } else {
+        return { x: u.x + v.x, y: u.y + v.y };
+    }
+};
+
+/**
+ * Returns the difference of two vectors.
+ *
+ * @param {Point} u
+ * @param {Point} v
+ * @return {Point} u - v.
+ */
+exports.dif = function(u, v) {
+    return { x: u.x - v.x, y: u.y - v.y };
+};
+
+/**
+ * Returns the scalar multiple of a vector.
+ *
+ * @param {Number} scale
+ * @param {Point} v
+ * @return {Point} scale * v
+ */
+exports.mul = function(scale, v) {
+    return { x: scale * v.x, y: scale * v.y };
+};
+
+/**
  * Returns the slope of the line between two points.
  *
  * @param {Point} p1
