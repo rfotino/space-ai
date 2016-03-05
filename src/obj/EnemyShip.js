@@ -39,6 +39,7 @@ var EnemyShip = function(props) {
     this.weapon = props.weapon || new LaserWeapon();
     this.mobile = 'undefined' !== props.mobile ? props.mobile : false;
     this.zDepth = 60;
+    this._maxAccel = 0.1;
     // Used for spinning the ship's decorations
     this._spin = 0;
     this._spinVel = 0.02;
@@ -50,6 +51,69 @@ EnemyShip.prototype = Object.create(EnemyTarget.prototype);
 EnemyShip.prototype.constructor = EnemyShip;
 
 /**
+ * Updates the ship's acceleration to move along a path.
+ */
+EnemyShip.prototype._updatePath = function() {
+    if ('undefined' === typeof this._pathDestIndex) {
+        this._pathDestIndex = 0;
+        this._pathElapsedDuration = 0;
+    }
+    var dest = this.path[this._pathDestIndex];
+    if (0 === this._pathElapsedDuration) {
+        var dist = Math.sqrt(Math.pow(dest.x - this.pos.x, 2) +
+                             Math.pow(dest.y - this.pos.y, 2));
+        var dir = {
+            x: (dest.x - this.pos.x) / dist,
+            y: (dest.y - this.pos.y) / dist
+        };
+        var accelFrames = Math.ceil(dest.speed / this._maxAccel);
+        var accelDist = 0.5 * this._maxAccel * Math.pow(accelFrames, 2);
+        var coastFrames = Math.ceil((dist - (2 * accelDist)) / dest.speed);
+        if (coastFrames < 0) {
+            coastFrames = 0;
+            accelFrames = Math.sqrt(dist / this._maxAccel);
+        }
+        this._endAccelFrame = accelFrames;
+        this._endCoastFrame = accelFrames + coastFrames;
+        this._endDecelFrame = (2 * accelFrames) + coastFrames;
+        this._pathAccel = {
+            x: this._maxAccel * dir.x,
+            y: this._maxAccel * dir.y
+        };
+    }
+    if (this._pathElapsedDuration < this._endAccelFrame) {
+        this.accel.x = this._pathAccel.x;
+        this.accel.y = this._pathAccel.y;
+    } else if (this._pathElapsedDuration < this._endCoastFrame) {
+        this.accel.x = this.accel.y = 0;
+    } else {
+        this.accel.x = -this._pathAccel.x;
+        this.accel.y = -this._pathAccel.y;
+    }
+    this._pathElapsedDuration++;
+    if (this._endDecelFrame <= this._pathElapsedDuration) {
+        this._pathDestIndex = (this._pathDestIndex + 1) % this.path.length;
+        this._pathElapsedDuration = 0;
+    }
+};
+
+/**
+ * Updates the ship's acceleration to move about a circular orbit.
+ */
+EnemyShip.prototype._updateOrbit = function() {
+    var v = {
+        x: this.orbit.x - this.pos.x,
+        y: this.orbit.y - this.pos.y
+    };
+    var m = Math.sqrt((v.x * v.x) + (v.y * v.y));
+    if (m) {
+        var u = { x: v.x / m, y: v.y / m };
+        this.accel.x = u.x * this.orbit.accel;
+        this.accel.y = u.y * this.orbit.accel;
+    }
+};
+
+/**
  * @override {GameObject}
  * @param {Object[]} objList
  */
@@ -58,41 +122,11 @@ EnemyShip.prototype.update = function(objList) {
     if (this.weapon) {
         this.weapon.update();
     }
-    // Handle movement along a path
+    // Handle movement
     if (this.path && this.path.length) {
-        if ('undefined' === typeof this._pathDestIndex) {
-            this._pathDestIndex = 0;
-            this._pathElapsedDuration = 0;
-        }
-        var dest = this.path[this._pathDestIndex];
-        if (0 === this._pathElapsedDuration) {
-            var x = dest.x - this.pos.x;
-            var y = dest.y - this.pos.y;
-            var t = dest.duration / 2;
-            this.accel.x = x / Math.pow(t, 2);
-            this.accel.y = y / Math.pow(t, 2);
-        }
-        if (Math.floor(dest.duration / 2) === this._pathElapsedDuration) {
-            this.accel.x *= -1;
-            this.accel.y *= -1;
-        }
-        this._pathElapsedDuration++;
-        if (dest.duration <= this._pathElapsedDuration) {
-            this._pathDestIndex = (this._pathDestIndex + 1) % this.path.length;
-            this._pathElapsedDuration = 0;
-        }
+        this._updatePath();
     } else if (this.orbit && this.orbit.radius) {
-        // Handle movement in an orbit
-        var v = {
-            x: this.orbit.x - this.pos.x,
-            y: this.orbit.y - this.pos.y
-        };
-        var m = Math.sqrt((v.x * v.x) + (v.y * v.y));
-        if (m) {
-            var u = { x: v.x / m, y: v.y / m };
-            this.accel.x = u.x * this.orbit.accel;
-            this.accel.y = u.y * this.orbit.accel;
-        }
+        this._updateOrbit();
     }
     // If the player is in range, shoot at them
     var player = null;

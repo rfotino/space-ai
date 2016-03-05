@@ -173,10 +173,10 @@ module.exports = [
                 new EnemyShip({
                     pos: { x: -600, y: 250 },
                     path: [
-                        { x: 600, y: 250, duration: 180 },
-                        { x: 600, y: -250, duration: 90 },
-                        { x: -600, y: -250, duration: 180 },
-                        { x: -600, y: 250, duration: 90 }
+                        { x: 600, y: 250, speed: 5 },
+                        { x: 600, y: -250, speed: 5 },
+                        { x: -600, y: -250, speed: 5 },
+                        { x: -600, y: 250, speed: 5 }
                     ],
                     win: true
                 })
@@ -196,7 +196,7 @@ module.exports = [
                         x: 0,
                         y: 100,
                         radius: 500,
-                        duration: 300,
+                        duration: 500,
                         startAngle: 2 * Math.PI * Math.random(),
                         direction: 'counterclockwise'
                     },
