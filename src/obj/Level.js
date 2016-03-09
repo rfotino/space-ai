@@ -405,8 +405,16 @@ Level.prototype._updateHighlightedObj = function() {
     // Get the game object that is being hovered over, if any
     this._highlightedObj = null;
     this._state.objects.push(this._state.player);
-    for (var i = this._state.objects.length - 1; 0 <= i; i--) {
-        var obj = this._state.objects[i];
+    var sortedObjList = this._state.objects.slice();
+    sortedObjList.sort(function(a, b) {
+        if (a.zDepth === b.zDepth) {
+            return a.id - b.id;
+        } else {
+            return a.zDepth - b.zDepth;
+        }
+    });
+    for (var i = sortedObjList.length - 1; 0 <= i; i--) {
+        var obj = sortedObjList[i];
         if (obj.alive && physics.pointInObj(gameCoords, obj)) {
             this._highlightedObj = obj;
             break;

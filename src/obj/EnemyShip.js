@@ -15,8 +15,8 @@ var LaserWeapon = require('./LaserWeapon.js');
  * A constructor for enemy ships.
  */
 var EnemyShip = function(props) {
-    props.type = 'ship';
     props = props || {};
+    props.type = 'ship';
     EnemyTarget.prototype.constructor.call(this, props);
     this.path = props.path || [ { x: this.pos.x, y: this.pos.y } ];
     this.chaseRange = props.chaseRange || 750;
@@ -26,7 +26,9 @@ var EnemyShip = function(props) {
     this.weapon = props.weapon || new LaserWeapon();
     this.mobile = 'undefined' !== props.mobile ? props.mobile : false;
     this.zDepth = 60;
-    this._maxAccel = 1;
+    this._maxPathAccel = 0.1;
+    this._maxChaseAccel = 1;
+    this._maxAccel = this._maxPathAccel;
     this._accelList = [];
     this._state = 'idle';
     // Used for spinning the ship's decorations
@@ -35,7 +37,7 @@ var EnemyShip = function(props) {
     this._numDecorations = 12;
 };
 
-// Extend GameObject
+// Extend EnemyTarget
 EnemyShip.prototype = Object.create(EnemyTarget.prototype);
 EnemyShip.prototype.constructor = EnemyShip;
 
@@ -101,10 +103,7 @@ EnemyShip.prototype._shootPlayer = function(player) {
         dirVector.x = 1;
     }
     if (dist <= this.shootRange && this.weapon) {
-        var bullet = this.weapon.getBullet(
-            { x: dirVector.x, y: dirVector.y },
-            { x: this.pos.x, y: this.pos.y },
-            'enemy');
+        var bullet = this.weapon.getBullet(dirVector, this);
         if (Array.isArray(bullet)) {
             this.newObjects.push.apply(this.newObjects, bullet);
         } else if (null !== bullet) {
@@ -179,6 +178,7 @@ EnemyShip.prototype.update = function(objList) {
         physics.dist(player.pos, this.pos) <= Math.max(this.shootRange, this.chaseRange);
     switch (this._state) {
     case 'idle':
+        this._maxAccel = this._maxPathAccel;
         if (playerInRange) {
             this._state = 'attacking';
         } else {
@@ -186,6 +186,7 @@ EnemyShip.prototype.update = function(objList) {
         }
         break;
     case 'attacking':
+        this._maxAccel = this._maxChaseAccel;
         if (playerInRange) {
             this._shootPlayer(player);
             this._chasePlayer(player);
@@ -194,6 +195,7 @@ EnemyShip.prototype.update = function(objList) {
         }
         break;
     case 'returning':
+        this._maxAccel = this._maxChaseAccel;
         if (playerInRange) {
             this._state = 'attacking';
         } else if (0 === this.vel.x && 0 === this.vel.y) {

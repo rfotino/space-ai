@@ -33,21 +33,23 @@ RocketWeapon.prototype.constructor = RocketWeapon;
  *
  * @override {Weapon}
  * @param {Point} dir
- * @param {Point} pos
- * @param {String} owner
+ * @param {GameObject} obj
  */
-RocketWeapon.prototype.getBullet = function(dir, pos, owner) {
+RocketWeapon.prototype.getBullet = function(dir, obj) {
     if (this.cooldownTimer <= 0 && 0 < this.ammo) {
         if ({ x: 0, y: 0 } !== dir) {
             this.cooldownTimer = this.cooldown;
             this.ammo--;
-            return new RocketBullet({
+            var bullet =  new RocketBullet({
                 dir: dir,
-                pos: pos,
-                owner: owner,
+                pos: obj.pos,
+                owner: obj.owner,
                 damage: this.damage,
                 speed: this.bulletSpeed
             });
+            bullet.vel.x += obj.vel.x;
+            bullet.vel.y += obj.vel.y;
+            return bullet;
         }
     }
     return null;

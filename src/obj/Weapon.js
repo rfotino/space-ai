@@ -20,16 +20,14 @@ var Weapon = function(props) {
 
 /**
  * The default getBullet function, this should be overridden by subclasses
- * to provide a bullet in the given direction dir, starting at the given
- * position pos, with the given owner (the owner is used for preventing
- * friendly fire).
+ * to provide a bullet in the given direction dir, fired from the given object
+ * obj (used for position, velocity, preventing friendly fire, etc).
  *
  * @param {Point} dir
- * @param {Point} pos
- * @param {String} owner
+ * @param {GameObject} obj
  * @return {Bullet}
  */
-Weapon.prototype.getBullet = function(dir, pos, owner) { return null; };
+Weapon.prototype.getBullet = function(dir, obj) { return null; };
 
 /**
  * The update function called once per frame, by default this just

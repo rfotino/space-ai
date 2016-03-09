@@ -14,6 +14,7 @@ var LaserWeapon = require('./obj/LaserWeapon.js');
 var RocketWeapon = require('./obj/RocketWeapon.js');
 var SpaceMine = require('./obj/SpaceMine.js');
 var EnemyShip = require('./obj/EnemyShip.js');
+var HealthPowerup = require('./obj/HealthPowerup.js');
 
 // An array of levels that can be loaded from the level selector
 module.exports = [
@@ -197,6 +198,14 @@ module.exports = [
                     ],
                     win: true
                 })
+            ]
+        }; }
+    }),
+    new Level({
+        name: 'Health Drops',
+        stateFunc: function() { return {
+            objects: [
+                new HealthPowerup({ pos: { x: 0, y: 250 } })
             ]
         }; }
     })

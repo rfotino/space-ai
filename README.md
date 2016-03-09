@@ -79,7 +79,7 @@ two HTML files that can be viewed in the browser to run the game:
 * [ ] Clicking on game objects pops up a dialog with more information
 * [ ] Minimap
 * [ ] Weapon drops, more weapon types
-* [ ] Powerups like shields, health
+* [x] Powerups like shields, health
 * [ ] Parallax movement of stars
 * [ ] Quad trees for efficient collision detection / scene rendering
 * [ ] Planets with gravity mechanics

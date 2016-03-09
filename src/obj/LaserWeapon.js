@@ -31,20 +31,22 @@ LaserWeapon.prototype.constructor = LaserWeapon;
  *
  * @override {Weapon}
  * @param {Point} dir
- * @param {Point} pos
- * @param {String} owner
+ * @param {GameObject} obj
  */
-LaserWeapon.prototype.getBullet = function(dir, pos, owner) {
+LaserWeapon.prototype.getBullet = function(dir, obj) {
     if (this.cooldownTimer <= 0) {
         if ({ x: 0, y: 0 } !== dir) {
             this.cooldownTimer = this.cooldown;
-            return new LaserBullet({
+            var bullet = new LaserBullet({
                 dir: dir,
-                pos: pos,
-                owner: owner,
+                pos: obj.pos,
+                owner: obj.owner,
                 damage: this.damage,
                 speed: this.bulletSpeed
             });
+            bullet.vel.x += obj.vel.x;
+            bullet.vel.y += obj.vel.y;
+            return bullet;
         }
     }
     return null;
