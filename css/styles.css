@@ -79,7 +79,7 @@ html, body {
     border-bottom: 1px solid #999;
 }
 #menubar-left {
-    float: left;
+    display: inline;
 }
 #menubar-right {
     float: right;
@@ -153,7 +153,7 @@ html, body {
     right: 0;
     margin: 0 auto;
     width: 500px;
-    max-width: 70%;
+    max-width: 90%;
     top: 10%;
     height: 80%;
     padding-top: 40px;
@@ -367,4 +367,28 @@ html, body {
     text-align: right;
     padding-top: 5px;
     border-top: 1px solid #ccc;
+}
+
+/* Mobile styles */
+@media (max-width: 600px) {
+    #menubar-right {
+        float: none;
+        display: inline;
+    }
+    .btn {
+        padding: 0 15px;
+        line-height: 25px;
+    }
+    .btn-dropdown {
+        padding-right: 25px;
+    }
+    .btn-dropdown .icon {
+        right: 5px;
+    }
+    .btn-dropdown:hover .dropdown-menu {
+        top: 26px;
+    }
+    #level-selector #levels {
+        padding: 15px 5px;
+    }
 }

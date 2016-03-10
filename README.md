@@ -75,7 +75,7 @@ two HTML files that can be viewed in the browser to run the game:
 ## Wishlist
 
 * [x] Improved menu/button graphics
-* [ ] Mobile support
+* [x] Mobile support
 * [ ] Clicking on game objects pops up a dialog with more information
 * [ ] Minimap
 * [ ] Weapon drops, more weapon types

@@ -197,14 +197,14 @@ exports.init = function() {
         // their resize bars
         var codeDragging = false;
         var consoleDragging = false;
-        $('#code-dragbar').on('mousedown', function(e) {
+        $('#code-dragbar').on('mousedown touchstart', function(e) {
             if (!codeHidden) {
                 codeDragging = true;
                 codeWindow.addClass('notransition');
                 consoleWindow.addClass('notransition');
             }
         });
-        $('#console-dragbar').on('mousedown', function(e) {
+        $('#console-dragbar').on('mousedown touchstart', function(e) {
             if (!consoleHidden) {
                 consoleDragging = true;
                 consoleWindow.addClass('notransition');
@@ -214,7 +214,7 @@ exports.init = function() {
         // Reposition the code and console windows when dragging their resize bars
         codePosition = Math.round($(window).width() * 0.5);
         consolePosition = Math.round($(window).height() * 0.55);
-        $(document).on('mouseup', function(e) {
+        $(document).on('mouseup touchend touchcancel', function(e) {
             if (codeDragging) {
                 codeDragging = false;
                 codeWindow.removeClass('notransition');
@@ -225,8 +225,11 @@ exports.init = function() {
                 consoleWindow.removeClass('notransition');
             }
         });
-        $(document).on('mousemove', function(e) {
-            e.preventDefault();
+        $(document).on('mousemove touchmove', function(e) {
+            if (e.originalEvent.touches) {
+                e.pageX = e.originalEvent.touches[0].pageX;
+                e.pageY = e.originalEvent.touches[0].pageY;
+            }
             if (codeDragging) {
                 codePosition = e.pageX;
                 exports.showCode();

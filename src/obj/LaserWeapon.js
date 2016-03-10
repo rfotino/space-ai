@@ -39,7 +39,7 @@ LaserWeapon.prototype.getBullet = function(dir, obj) {
             this.cooldownTimer = this.cooldown;
             var bullet = new LaserBullet({
                 dir: dir,
-                pos: obj.pos,
+                pos: { x: obj.pos.x, y: obj.pos.y },
                 owner: obj.owner,
                 damage: this.damage,
                 speed: this.bulletSpeed

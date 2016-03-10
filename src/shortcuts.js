@@ -9,6 +9,7 @@ var modal = require('./modal.js');
 var ui = require('./ui.js');
 var menubar = require('./menubar.js');
 var game = require('./game.js');
+var physics = require('./physics.js');
 
 var addKeyDownListener = function() {
     $(window).on('keydown', function(e) {
@@ -170,34 +171,80 @@ var addMouseWheelListener = function() {
     });
 };
 
+// Listen to pinch events.also for zoom
+var addPinchToZoomListener = function() {
+    var pinching = false;
+    var prevPinchDist = 0;
+    $('#game-canvas').on('touchmove', function(e) {
+        if (2 !== e.originalEvent.touches.length) {
+            pinching = false;
+            return;
+        }
+        var pinchDist =  physics.dist({
+            x: e.originalEvent.touches[0].pageX,
+            y: e.originalEvent.touches[0].pageY
+        }, {
+            x: e.originalEvent.touches[1].pageX,
+            y: e.originalEvent.touches[1].pageY
+        });
+        if (pinching) {
+            var ratio = pinchDist / prevPinchDist;
+            game.viewScale(ratio);
+        } else {
+            pinching = true;
+        }
+        prevPinchDist = pinchDist;
+    });
+    $('#game-canvas').on('touchcancel touchend', function(e) {
+        pinching = false;
+    });
+};
+
 // Listen for mouse drag events on the canvas, and respond to them
 // by translating the viewport (panning)
 var addMouseDragListener = function() {
-    $('#game-canvas').on('mousedown', function(e) {
+    $('#game-canvas').on('mousedown touchstart', function(e) {
+        if (e.originalEvent.touches) {
+            e.screenX = e.originalEvent.touches[0].screenX;
+            e.screenY = e.originalEvent.touches[0].screenY;
+        }
         var prevX = e.screenX;
         var prevY = e.screenY;
         var dragHandler = function(e) {
+            if (e.originalEvent.touches) {
+                if (1 !== e.originalEvent.touches.length) {
+                    return;
+                }
+                e.screenX = e.originalEvent.touches[0].screenX;
+                e.screenY = e.originalEvent.touches[0].screenY;
+            }
             var dx = e.screenX - prevX;
             var dy = e.screenY - prevY;
             prevX = e.screenX;
             prevY = e.screenY;
             game.viewTranslate(dx, dy);
         };
-        var mouseUpHandler = function() {
+        var mouseUpHandler = function(e) {
             $(window)
-                .unbind('mousemove', dragHandler)
-                .unbind('mouseup', mouseUpHandler);
+                .unbind('mousemove touchmove', dragHandler)
+                .unbind('mouseup touchend touchcancel', mouseUpHandler);
         }
         $(window)
-            .on('mousemove', dragHandler)
-            .on('mouseup', mouseUpHandler);
+            .on('mousemove touchmove', dragHandler)
+            .on('mouseup touchend touchcancel', mouseUpHandler);
     });
 };
 
 // Listen for mouse movements on the canvas, so that we can show info
 // about game objects
 var addMouseMoveListener = function() {
-    $('#game-canvas').on('mousemove', function(e) {
+    $('#game-canvas').on('mousemove touchmove', function(e) {
+        if (e.originalEvent.touches) {
+            var touch = e.originalEvent.touches[0];
+            var offset = $(e.target).offset();
+            e.offsetX = touch.pageX - offset.left;
+            e.offsetY = touch.pageY - offset.top;
+        }
         game.changeMousePos({ x: e.offsetX, y: e.offsetY });
     });
 };
@@ -210,6 +257,7 @@ exports.init = function() {
     $(document).ready(function() {
         addKeyDownListener();
         addMouseWheelListener();
+        addPinchToZoomListener();
         addMouseDragListener();
         addMouseMoveListener();
     });

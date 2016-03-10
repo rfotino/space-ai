@@ -128,10 +128,10 @@ EnemyShip.prototype._chasePlayer = function(player) {
                 player.pos,
                 physics.mul(this.hoverRange,
                             physics.unit(physics.dif(this.pos, player.pos))));
-        var dist = physics.dist(this.pos, hoverPos);
+        var distToHover = physics.dist(this.pos, hoverPos);
         var speed = physics.dist(this.vel);
         var decelDist = Math.pow(speed, 2) / this._maxAccel;
-        if (dist < decelDist) {
+        if (distToHover < decelDist) {
             // We need to slow down!
             this._slowDown();
         } else {
@@ -210,7 +210,7 @@ EnemyShip.prototype.update = function(objList) {
     // Spin the ship's decorations
     this._spin += this._spinVel;
     // Call superclass's update function
-    GameObject.prototype.update.call(this, objList);
+    GameObject.prototype.update.call(this);
 };
 
 /**
