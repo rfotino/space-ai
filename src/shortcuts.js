@@ -211,6 +211,7 @@ var addMouseDragListener = function() {
         var prevX = e.screenX;
         var prevY = e.screenY;
         var dragHandler = function(e) {
+            e.preventDefault();
             if (e.originalEvent.touches) {
                 if (1 !== e.originalEvent.touches.length) {
                     return;
