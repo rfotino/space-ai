@@ -14,6 +14,7 @@ var Weapon = function(props) {
     this.damage = props.damage || 0;
     this.ammo = props.ammo || null;
     this.bulletSpeed = props.bulletSpeed || 0;
+    this.range = props.range || 0;
     this.cooldown = props.cooldown || 0;
     this.cooldownTimer = 0;
 };
@@ -49,6 +50,8 @@ Weapon.prototype.getObj = function() {
         name: this.name,
         damage: this.damage,
         ammo: this.ammo,
+        range: this.range,
+        speed: this.bulletSpeed,
         cooldown: this.cooldown,
         cooldownTimer: this.cooldownTimer
     };

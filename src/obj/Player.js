@@ -137,8 +137,7 @@ Player.prototype.update = function() {
             if (this.equipped === weapon.name) {
                 var bullet = weapon.getBullet(
                     { x: this.fired.x, y: this.fired.y },
-                    { x: this.pos.x, y: this.pos.y },
-                    'player');
+                    this);
                 if (Array.isArray(bullet)) {
                     this.newObjects.push.apply(this.newObjects, bullet);
                 } else if (null !== bullet) {

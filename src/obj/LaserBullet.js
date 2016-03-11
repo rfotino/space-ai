@@ -13,10 +13,9 @@ var Bullet = require('./Bullet.js');
 var LaserBullet = function(props) {
     props = props || {};
     props.weapon = 'laser';
-    props.lifespan = 180;
     Bullet.prototype.constructor.call(this, props);
     this.width = 2;
-    this.height = 10;
+    this.height = 20;
 };
 
 // Extend Bullet
