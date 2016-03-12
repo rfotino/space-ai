@@ -155,15 +155,11 @@ var addKeyDownListener = function() {
 // Listen for scroll wheel events on the canvas, and respond to them
 // by increasing or decreasing the viewport's zoom
 var addMouseWheelListener = function() {
-    $('#game-canvas').on('mousewheel DOMMouseScroll', function(e) {
-        if (0 < e.originalEvent.wheelDelta) {
-            for (var i = 0; i < e.originalEvent.wheelDelta / 120; i++) {
-                $('#zoom-in-btn').trigger('click');
-            }
+    $('#game-canvas').on('mousewheel wheel DOMMouseScroll', function(e) {
+        if (e.originalEvent.deltaY < 0) {
+            $('#zoom-in-btn').trigger('click');
         } else {
-            for (var i = 0; i < -e.originalEvent.wheelDelta / 120; i++) {
-                $('#zoom-out-btn').trigger('click');
-            }
+            $('#zoom-out-btn').trigger('click');
         }
         e.preventDefault();
         e.stopPropagation();
