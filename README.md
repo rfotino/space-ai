@@ -23,20 +23,21 @@ https://spaceship.codes.
 
 ## Build
 
-Building the code requires Browserify and UglifyJS for bundling the source
+Building the code requires Webpack and UglifyJS for bundling the source
 into one file and then compressing that file. You can install these
 dependencies with:
 
 ```shell
-npm install -g browserify
+npm install -g webpack
 npm install -g uglify-js
 ```
 
-Once you have these Browserify and UglifyJS installed, you can build the code
+Once you have Webpack and UglifyJS installed, you can build the code
 by running `make` (requires CMake). Other build commands include:
 
 ```shell
-make bundle  # Only runs Browserify
+make watch   # Webpack watches source and rebuilds as needed
+make bundle  # Only runs Webpack
 make minify  # Only runs UglifyJS
 make clean   # Removes already built files
 ```
@@ -49,7 +50,6 @@ two HTML files that can be viewed in the browser to run the game:
 
 ## Todo
 
-* [ ] Allow level to supply alternative win condition function
 * [x] Add health() and bounds() diagnostic functions for the user
 * [x] Explosion animations
 * [x] Viewport interactions like pan/zoom/focus
@@ -60,25 +60,28 @@ two HTML files that can be viewed in the browser to run the game:
 * [x] Be able to hover over objects and see information about them
 * [x] Togglable debug mode where you see a 100px grid, info on all game
       objects, etc.
-* [ ] More and better levels
 * [x] Packaging/minification of JavaScript files
 * [ ] Help dialog, with keyboard shortcuts
 * [x] About dialog
-* [ ] Extend the documentation
-* [ ] Add unit tests for physics.js
 * [x] Menu dropdown for changing the view
 * [x] Loading/saving of user code using local storage
 * [x] Z-index for controlling drawing order of game objects
 * [x] Some way to give a level description via initial comments, or
       have some initial code the user has to modify.
+* [ ] Weapon drops
+* [ ] CodeMirror theme selector
+* [ ] Clicking on game objects pops up a dialog with more information
+* [ ] Add examples to the docs
+* [ ] Add keyboard shortcuts to the docs
+* [ ] Add game object descriptions to the docs
+* [ ] Level design
 
 ## Wishlist
 
 * [x] Improved menu/button graphics
 * [x] Mobile support
-* [ ] Clicking on game objects pops up a dialog with more information
 * [ ] Minimap
-* [ ] Weapon drops, more weapon types
+* [ ] More weapon types
 * [x] Powerups like shields, health
 * [ ] Parallax movement of stars
 * [ ] Quad trees for efficient collision detection / scene rendering
