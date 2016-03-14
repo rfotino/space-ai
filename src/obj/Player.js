@@ -124,6 +124,8 @@ Player.prototype._generateGeometry = function() {
  * @override {GameObject}
  */
 Player.prototype.update = function() {
+    // Update the game object
+    GameObject.prototype.update.call(this);
     // Update the player's weapons
     for (var i = 0; i < this.weapons.length; i++) {
         var weapon = this.weapons[i];
@@ -153,8 +155,6 @@ Player.prototype.update = function() {
     this.accel.y = this.thrust * Math.sin(this.pos.angular);
     // Update the exhaust flicker counter
     this._flameFlicker = (this._flameFlicker + 1) % this._flameFlickerMax;
-    // Update the game object
-    GameObject.prototype.update.call(this);
 };
 
 /**

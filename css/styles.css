@@ -351,14 +351,21 @@ html, body {
     background: rgba(0, 0, 0, 0.25);
 }
 #modal-window {
+    position: absolute;
     width: 400px;
+    height: auto;
     max-width: 90%;
     max-height: 90%;
-    margin: 5% auto;
+    top: 5%;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
     background: #eee;
     padding: 5px 15px;
     border: 1px solid #ccc;
+    box-sizing: border-box;
     border-radius: 3px;
+    overflow-y: auto;
 }
 #modal-content {
     padding: 10px 0;

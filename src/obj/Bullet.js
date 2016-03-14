@@ -25,7 +25,7 @@ var Bullet = function(props) {
         // Multiply the direction by the speed to get the velocity
         var speed = props.speed || 0;
         props.pos = props.pos || {};
-        props.pos.angular = Math.atan2(dir.x, -dir.y);
+        props.pos.angular = Math.atan2(dir.y, dir.x);
         props.vel = props.vel || {};
         props.vel.x = speed * dir.x;
         props.vel.y = speed * dir.y;

@@ -61,14 +61,13 @@ two HTML files that can be viewed in the browser to run the game:
 * [x] Togglable debug mode where you see a 100px grid, info on all game
       objects, etc.
 * [x] Packaging/minification of JavaScript files
-* [ ] Help dialog, with keyboard shortcuts
 * [x] About dialog
 * [x] Menu dropdown for changing the view
 * [x] Loading/saving of user code using local storage
 * [x] Z-index for controlling drawing order of game objects
 * [x] Some way to give a level description via initial comments, or
       have some initial code the user has to modify.
-* [ ] Weapon drops
+* [x] Weapon drops
 * [ ] CodeMirror theme selector
 * [ ] Clicking on game objects pops up a dialog with more information
 * [ ] Add examples to the docs

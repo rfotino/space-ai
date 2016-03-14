@@ -17,8 +17,8 @@ var RocketBullet = function(props) {
     props = props || {};
     props.weapon = 'rocket';
     Bullet.prototype.constructor.call(this, props);
-    this.width = 8;
-    this.height = 20;
+    this.width = 20;
+    this.height = 8;
     this._generateGeometry();
 };
 
@@ -34,17 +34,17 @@ RocketBullet.prototype._generateGeometry = function() {
     this._outline = { points: [].concat(
         [ { x: -this.width / 2, y: this.height / 2 } ],
         graphics.getQuadTo(
-            { x: -this.width / 2, y: -this.height / 2 },
-            { x: 0, y: -this.height * 0.85 },
+            { x: this.width / 2, y: this.height / 2 },
+            { x: this.width * 0.85, y: 0 },
             { x: this.width / 2, y: -this.height / 2 },
             5
         ),
-        [ { x: this.width / 2, y: this.height / 2 } ]
+        [ { x: -this.width / 2, y: -this.height / 2 } ]
     ) };
     this._flameOutline = { points: [
-        { x: -this.width * 2 / 5, y: this.height / 2 },
-        { x: this.width * 2 / 5, y: this.height / 2 },
-        { x: 0, y: this.height * 0.7 }
+        { x: -this.width / 2, y: -this.height * 2 / 5 },
+        { x: -this.width / 2, y: this.height * 2 / 5 },
+        { x: -this.width * 0.7, y: 0 }
     ] };
 };
 
@@ -76,7 +76,7 @@ RocketBullet.prototype.draw = function(ctx) {
     graphics.drawShape(ctx, this._outline);
     ctx.fill();
     ctx.fillStyle = '#999';
-    ctx.fillRect(-this.width / 2, (this.height / 2) - 2, this.width, 2);
+    ctx.fillRect(-this.width / 2, -this.height / 2, 2, this.height);
     ctx.fillStyle = 'orange';
     graphics.drawShape(ctx, this._flameOutline);
     ctx.fill();

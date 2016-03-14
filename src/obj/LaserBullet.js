@@ -14,8 +14,8 @@ var LaserBullet = function(props) {
     props = props || {};
     props.weapon = 'laser';
     Bullet.prototype.constructor.call(this, props);
-    this.width = 2;
-    this.height = 20;
+    this.width = 20;
+    this.height = 2;
 };
 
 // Extend Bullet
