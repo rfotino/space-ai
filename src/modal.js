@@ -14,18 +14,21 @@ exports.isShown = function() {
 };
 
 /**
- * Shows the given content in a modal dialog.
+ * Shows the given content in a modal dialog, optionally calling the
+ * given callback when the modal closes.
  *
  * @param {String|JQueryObject} content
+ * @param {Function} doneCallback
  */
-exports.show = function(content) {
-    exports.hide();
+exports.show = function(content, doneCallback) {
+    $('#modal-shadow').remove();
     // Create elements
     var modalShadow = $('<div id="modal-shadow" />'),
         modalWindow = $('<div id="modal-window" />'),
         modalContent = $('<div id="modal-content" />'),
         buttonMenu = $('<div id="modal-button-menu" />'),
         doneButton = $('<a tabindex="1000" class="btn btn-primary">Done</a>');
+    doneButton.attr('id', 'done-btn');
     buttonMenu.append(doneButton);
     modalWindow.append(modalContent, buttonMenu);
     modalShadow.append(modalWindow);
@@ -34,7 +37,12 @@ exports.show = function(content) {
             $(this).click();
         }
     });
-    doneButton.on('click', exports.hide);
+    doneButton.on('click', function(e) {
+        $('#modal-shadow').remove();
+        if ('function' === typeof doneCallback) {
+            doneCallback();
+        }
+    });
     // Add content
     if ('string' === typeof content) {
         modalContent.text(content);
@@ -53,8 +61,5 @@ exports.show = function(content) {
  * Hides the current modal dialog.
  */
 exports.hide = function() {
-    var modalShadow = $('#modal-shadow');
-    if (modalShadow) {
-        modalShadow.remove();
-    }
+    $('#done-btn').click();
 };

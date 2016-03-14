@@ -318,7 +318,7 @@ exports.init = function() {
         }, codeConfig);
 
         // Match the console with the chosen theme
-        consoleContent.css('background', $('#code').css('background'));
+        consoleContent.css('background', $('#code').css('background-color'));
         consoleContent.css('color', $('#code').css('color'));
 
         // Set up the theme selector
@@ -343,12 +343,25 @@ exports.init = function() {
                     localStorage.setItem('theme', theme);
                 } catch (e) { }
                 codeMirror.setOption('theme', theme);
-                consoleContent.css('background', $('#code').css('background'));
+                consoleContent.css('background',
+                                   $('#code').css('background-color'));
                 consoleContent.css('color', $('#code').css('color'));
             });
             var heading = $('<h2 />')
                 .text('Code Editor Theme').css('padding-bottom', 5);
-            modal.show($('<div />').append(heading, themeSelector));
+            var div = $('<div />').append(heading, themeSelector);
+            var prevCodeHidden = codeHidden;
+            var prevConsoleHidden = consoleHidden;
+            exports.showCode();
+            exports.showConsole();
+            modal.show(div, function() {
+                if (prevCodeHidden) {
+                    exports.hideCode();
+                }
+                if (prevConsoleHidden) {
+                    exports.hideConsole();
+                }
+            });
         });
     });
 };
