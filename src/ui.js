@@ -317,6 +317,10 @@ exports.init = function() {
             elem.id = 'code';
         }, codeConfig);
 
+        // Match the console with the chosen theme
+        consoleContent.css('background', $('#code').css('background'));
+        consoleContent.css('color', $('#code').css('color'));
+
         // Set up the theme selector
         $('#themes-btn').on('click', function(e) {
             var currentTheme = codeMirror.getOption('theme');
@@ -339,6 +343,8 @@ exports.init = function() {
                     localStorage.setItem('theme', theme);
                 } catch (e) { }
                 codeMirror.setOption('theme', theme);
+                consoleContent.css('background', $('#code').css('background'));
+                consoleContent.css('color', $('#code').css('color'));
             });
             var heading = $('<h2 />')
                 .text('Code Editor Theme').css('padding-bottom', 5);
