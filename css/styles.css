@@ -144,6 +144,9 @@ html, body {
 .dropdown-menu .dropdown-item.disabled .item-label {
     color: #888;
 }
+.dropdown-menu .dropdown-separator {
+    border-top: 1px solid #999;
+}
 
 /* Level selector */
 #level-selector {

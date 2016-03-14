@@ -132,6 +132,9 @@ var addKeyDownListener = function() {
                 } else if (40 === e.keyCode && modKeys()) {
                     // down arrow
                     $('#pan-down-btn').trigger('click');
+                } else if (84 === e.keyCode && modKeys()) {
+                    // t
+                    $('#themes-btn').trigger('click');
                 } else {
                     return;
                 }

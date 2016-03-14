@@ -44,6 +44,9 @@ exports.show = function(content) {
     // Show the dialog
     $('body').append(modalShadow);
     doneButton.focus();
+    // Make sure it is scrolled to the top
+    modalWindow[0].offsetHeight; // Flush cached CSS changes
+    modalWindow.scrollTop(0);
 };
 
 /**
