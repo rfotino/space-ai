@@ -15,6 +15,13 @@ var levels = require('./levels.js');
 var state, selectedLevel = null, levelsDiv, showLevelsBtn, hideLevelsBtn,
     loadLevelBtn, restartBtn, runBtn, levelDivsArr = [];
 
+// Try to set default local storage for saved files, if not set
+try {
+    if (!localStorage.hasOwnProperty('savedFiles')) {
+        localStorage.setItem('savedFiles', JSON.stringify({}));
+    }
+} catch (e) { }
+
 /**
  * setState(state);
  * Sets the menu state to 'running', 'paused', or 'waiting'.
@@ -225,8 +232,14 @@ exports.init = function() {
             }
             // Update load buttons
             $('.file-load-btn').remove();
-            for (var i = 0; i < localStorage.length; i++) {
-                var fileName = localStorage.key(i);
+            savedFiles = {};
+            try {
+                savedFiles = JSON.parse(localStorage.getItem('savedFiles'));
+            } catch (e) { }
+            for (fileName in savedFiles) {
+                if (!savedFiles.hasOwnProperty(fileName)) {
+                    continue;
+                }
                 var loadBtn = $('<tr />')
                     .addClass('dropdown-item file-load-btn')
                     .data('name', fileName);
@@ -235,13 +248,13 @@ exports.init = function() {
                     .text('Load \'' + fileName + '\'');
                 var loadBtnShortcut = $('<td />');
                 loadBtn.append(loadBtnLabel).append(loadBtnShortcut);
-                loadBtn.on('click', (function(fileName) {
+                loadBtn.on('click', (function(fileName, fileData) {
                     return function(e) {
                         currentFileName = fileName;
-                        ui.setCode(localStorage.getItem(currentFileName));
+                        ui.setCode(fileData);
                         updateFileMenuItems();
                     };
-                })(fileName));
+                })(fileName, savedFiles[fileName]));
                 $('#file-menu .dropdown-menu').append(loadBtn);
             }
         }
@@ -255,7 +268,11 @@ exports.init = function() {
                     warnedAboutLocalStorage = true;
                 }
             }
-            localStorage.setItem(currentFileName, ui.getCode());
+            try {
+                var savedFiles = JSON.parse(localStorage.getItem('savedFiles'));
+                savedFiles[currentFileName] = ui.getCode();
+                localStorage.setItem('savedFiles', JSON.stringify(savedFiles));
+            } catch (e) { }
         });
         $('#file-save-as-btn').on('click', function(e) {
             var newFileName = prompt('New file name:');
@@ -270,7 +287,11 @@ exports.init = function() {
             if (null === currentFileName) {
                 return;
             }
-            localStorage.removeItem(currentFileName);
+            try {
+                var savedFiles = JSON.parse(localStorage.getItem('savedFiles'));
+                delete savedFiles[currentFileName];
+                localStorage.setItem('savedFiles', JSON.stringify(savedFiles));
+            } catch (e) { }
             currentFileName = null;
             updateFileMenuItems();
         });
