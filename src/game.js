@@ -289,7 +289,7 @@ var showClickedObj = function() {
     infoDiv.append($('<pre />').text(getPrettyObj(obj, '')));
     container.append(infoCanvas, infoDiv);
     modal.show(container);
-    $('#modal-window').css('width', '800px').css('overflow', 'hidden');
+    $('#modal-window').css('width', '800px');
     exports.pause();
 }
 
