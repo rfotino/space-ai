@@ -206,6 +206,9 @@ var addMouseDragListener = function() {
         if (e.originalEvent.touches) {
             e.screenX = e.originalEvent.touches[0].screenX;
             e.screenY = e.originalEvent.touches[0].screenY;
+        } else if (1 !== e.which) {
+            // Not a touch event, and not left mouse button
+            return;
         }
         var prevX = e.screenX;
         var prevY = e.screenY;

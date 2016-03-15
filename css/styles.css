@@ -236,7 +236,6 @@ html, body {
 /* Game canvas */
 #game-canvas {
     outline: none;
-    background: #000;
 }
 
 /* Code window */

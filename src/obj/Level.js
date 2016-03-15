@@ -170,9 +170,10 @@ Level.prototype._checkWinConditions = function() {
  */
 Level.prototype.draw = function(ctx) {
     var player = this._state.player;
-    // Clear the canvas
+    // Clear the canvas by painting it black
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     // Update the graphics context transform for the viewport
     this.viewport.update(ctx);
     // Draw the stars
