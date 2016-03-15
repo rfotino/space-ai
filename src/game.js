@@ -305,21 +305,15 @@ exports.init = function() {
             name: 'Select Level',
             stateFunc: function() { return {}; }
         }));
-        var holdTimeout;
         var moved = true;
         $(canvas).on('mousedown touchstart', function(e) {
-            if ('touchstart' === e.type) {
-                holdTimeout = setTimeout(showClickedObj, 1000);
-            }
             moved = false;
         });
-        $(canvas).on([ 'mousemove',  'touchmove',
-                       'touchleave', 'touchcancel',
-                       'touchend' ].join(' '), function() {
+        $(canvas).on('mousemove touchmove touchleave touchcancel',
+		     function() {
             moved = true;
-            clearTimeout(holdTimeout);
         });
-        $(canvas).on('mouseup', function() {
+        $(canvas).on('mouseup touchend', function() {
             if (!moved) {
                 showClickedObj();
             }

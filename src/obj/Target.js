@@ -19,7 +19,9 @@ var Target = function(props) {
     props.type = props.type || 'target';
     props.isTarget = true;
     GameObject.prototype.constructor.call(this, props);
-    this.name = props.name || '';
+    if ('string' === typeof props.name) {
+	this.name = props.name;
+    }
     this.objective = props.objective || null;
     this.radius = props.radius || 50;
     this.win = 'undefined' === typeof props.win ? false : props.win;
