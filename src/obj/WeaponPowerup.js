@@ -57,7 +57,7 @@ WeaponPowerup.prototype.applyTo = function(player) {
 WeaponPowerup.prototype.getObj = function() {
     var obj = Powerup.prototype.getObj.call(this);
     return $.extend(obj, {
-        weapon: this.weapon
+        weapon: this.weapon.getObj()
     });
 };
 
