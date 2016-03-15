@@ -46,6 +46,7 @@ Target.prototype.complete = function(player) { return false; }
 Target.prototype.getObj = function() {
     var obj = GameObject.prototype.getObj.call(this);
     return $.extend(obj, {
+        name: this.name,
         objective: this.objective,
         radius: this.radius,
         win: this.win,

@@ -241,7 +241,8 @@ var addMouseDragListener = function() {
 // Listen for mouse movements on the canvas, so that we can show info
 // about game objects
 var addMouseMoveListener = function() {
-    $('#game-canvas').on('mousemove touchmove', function(e) {
+    $('#game-canvas').on('mousemove mousedown touchmove touchstart',
+                         function(e) {
         if (e.originalEvent.touches) {
             var touch = e.originalEvent.touches[0];
             var offset = $(e.target).offset();

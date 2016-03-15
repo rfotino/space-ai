@@ -20,17 +20,15 @@ var StarField = require('./StarField.js');
  */
 function Level(props) {
     props = props || {};
-    if (!props.name) {
-        throw 'No name found when initializing Level object.';
-    } else if (!props.stateFunc) {
+    if (!props.stateFunc) {
         throw 'No stateFunc found when initializing Level object.';
     }
     this.name = props.name;
     this.help = props.help || null;
     this._stateFunc = props.stateFunc;
     this._mousePos = null;
-    this._highlightedObj = null;
     this._debugMode = false;
+    this.highlightedObj = null;
     this.viewport = new Viewport();
 };
 
@@ -218,9 +216,9 @@ Level.prototype.draw = function(ctx) {
         this._state.objects.pop();
     } else {
         this._updateHighlightedObj();
-        if (this._highlightedObj) {
-            this._drawHighlightedObj(ctx, this._highlightedObj);
-            this._drawToolTip(ctx, this._highlightedObj);
+        if (this.highlightedObj) {
+            this._drawHighlightedObj(ctx, this.highlightedObj);
+            this._drawToolTip(ctx, this.highlightedObj);
         }
     }
     // Draw win/lose screen if necessary
@@ -404,7 +402,7 @@ Level.prototype._updateHighlightedObj = function() {
     // Convert mouse position to in game coordinates
     var gameCoords = this.viewport.getGameCoords(this._mousePos);
     // Get the game object that is being hovered over, if any
-    this._highlightedObj = null;
+    this.highlightedObj = null;
     this._state.objects.push(this._state.player);
     var sortedObjList = this._state.objects.slice();
     sortedObjList.sort(function(a, b) {
@@ -417,7 +415,7 @@ Level.prototype._updateHighlightedObj = function() {
     for (var i = sortedObjList.length - 1; 0 <= i; i--) {
         var obj = sortedObjList[i];
         if (obj.alive && physics.pointInObj(gameCoords, obj)) {
-            this._highlightedObj = obj;
+            this.highlightedObj = obj;
             break;
         }
     }
@@ -566,10 +564,10 @@ Level.prototype._drawGrid = function(ctx) {
  * @param {CanvasRenderingContext2D} ctx
  */
 Level.prototype.highlightObjAt = function(mousePos, ctx) {
-    var prevHighlightedObj = this._highlightedObj;
+    var prevHighlightedObj = this.highlightedObj;
     this._mousePos = { x: mousePos.x, y: mousePos.y };
     this._updateHighlightedObj();
-    if (ctx && this._highlightedObj !== prevHighlightedObj) {
+    if (ctx && this.highlightedObj !== prevHighlightedObj) {
         this.draw(ctx);
     }
 };
@@ -580,5 +578,34 @@ Level.prototype.highlightObjAt = function(mousePos, ctx) {
 Level.prototype.setDebugMode = function(debugMode) {
     this._debugMode = debugMode;
 }
+
+/**
+ * Draws the given game object centered on the graphics context, with the
+ * current level's star field in the background. The level must be
+ * initialized.
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {GameObject} obj
+ */
+Level.prototype.drawCenteredObject = function(ctx, obj) {
+    if (!this._state) {
+        return;
+    }
+    var viewport = new Viewport();
+    var bounds = obj.bounds();
+    var padding = 20;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    bounds.x -= padding;
+    bounds.y -= padding;
+    bounds.width += 2 * padding;
+    bounds.height += 2 * padding;
+    viewport.fixToBounds(bounds, ctx.canvas.width, ctx.canvas.height);
+    viewport.update(ctx);
+    this._state.starField.draw(ctx, viewport);
+    ctx.translate(obj.pos.x, obj.pos.y);
+    ctx.rotate(obj.pos.angular);
+    obj.draw(ctx);
+};
 
 module.exports = Level;

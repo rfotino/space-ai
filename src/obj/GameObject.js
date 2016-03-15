@@ -135,7 +135,6 @@ GameObject.prototype.getObj = function() {
         pos: $.extend({}, this.pos),
         vel: $.extend({}, this.vel),
         accel: $.extend({}, this.accel),
-        name: this.name,
         type: this.type
     };
 };

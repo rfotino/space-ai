@@ -69,7 +69,7 @@ two HTML files that can be viewed in the browser to run the game:
       have some initial code the user has to modify.
 * [x] Weapon drops
 * [x] CodeMirror theme selector
-* [ ] Clicking on game objects pops up a dialog with more information
+* [x] Clicking on game objects pops up a dialog with more information
 * [ ] Add examples to the docs
 * [ ] Add keyboard shortcuts to the docs
 * [ ] Add game object descriptions to the docs

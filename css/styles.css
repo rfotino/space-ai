@@ -364,7 +364,7 @@ html, body {
     margin: 0 auto;
     background: #eee;
     padding: 5px 15px;
-    border: 1px solid #ccc;
+    border: 1px solid #999;
     box-sizing: border-box;
     border-radius: 3px;
     overflow-y: auto;
@@ -376,6 +376,26 @@ html, body {
     text-align: right;
     padding-top: 5px;
     border-top: 1px solid #ccc;
+}
+
+/* Game object info styles */
+.game-obj-info canvas {
+    width: 60%;
+    display: inline-block;
+    vertical-align: top;
+}
+.game-obj-info div {
+    padding: 0 15px;
+    width: 40%;
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: top;
+}
+.game-obj-info div h2 {
+    text-transform: capitalize;
+}
+.game-obj-info div pre {
+    padding-top: 5px;
 }
 
 /* Mobile styles */

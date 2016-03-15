@@ -214,6 +214,85 @@ exports.draw = function() {
     level.draw(ctx);
 };
 
+// Used to display extra information when a highlighted object is clicked
+var showClickedObj = function() {
+    if (!level) {
+        return;
+    }
+    if (!level.highlightedObj) {
+        return;
+    }
+    // Draw object centered on a canvas by itself
+    var container = $('<div />').addClass('game-obj-info');
+    var canvasWidth = 500;
+    var canvasHeight = 500;
+    var infoCanvas = $('<canvas width="' + canvasWidth + '" ' +
+                       'height="' + canvasHeight + '" />');
+    var infoCtx = infoCanvas[0].getContext('2d');
+    level.drawCenteredObject(infoCtx, level.highlightedObj);
+    var infoDiv = $('<div />');
+    var obj = level.highlightedObj.getObj();
+    infoDiv.append($('<h2 />').text(obj.type));
+    var indent = '  ';
+    var getPrettyObj = function(o, prefix) {
+        var str = '';
+        if (Array.isArray(o)) {
+            if (o.length) {
+                str += prefix + '[\n';
+                for (var i = 0; i < o.length; i++) {
+                    str += prefix + indent +
+                        getPrettyObj(o[i], prefix + indent) + '\n';
+                }
+                str += prefix + ']\n';
+            } else {
+                str += prefix + '[]\n';
+            }
+        } else if (o && 'object' === typeof(o)) {
+            var propNames = [];
+            for (propName in o) {
+                propNames.push(propName);
+            }
+            var propOrder = [
+                'id', 'type', 'name', 'objective', 'health', 'fired',
+                'equipped', 'weapons', 'win', 'lose', 'radius', 'width',
+                'height', 'bounds', 'pos', 'vel', 'accel', 'thrust',
+                'thrustPower', 'turnPower'
+            ];
+            propNames.sort(function(a, b) {
+                var aIndex = propOrder.indexOf(a),
+                    bIndex = propOrder.indexOf(b);
+                if (-1 === aIndex) {
+                    aIndex = propOrder.length;
+                }
+                if (-1 === bIndex) {
+                    bIndex = propOrder.length;
+                }
+                return aIndex - bIndex;
+            });
+            if (propNames.length) {
+                str += prefix + '{\n';
+                for (var i = 0; i < propNames.length; i++) {
+                    var propName = propNames[i];
+                    var prop  = o[propName];
+                    str += prefix + indent + propName + ': ' +
+                        getPrettyObj(prop, prefix + indent) + '\n';
+                }
+                str += prefix + '}\n';
+            } else {
+                str += prefix + '{}\n';
+            }
+        } else {
+            str += prefix + o + '\n';
+        }
+        return str.trim();
+    }
+    infoDiv.append($('<pre />').text(getPrettyObj(obj, '')));
+    container.append(infoCanvas, infoDiv);
+    modal.show(container);
+    $('#modal-window').css('width', '800px').css('overflow', 'hidden');
+    exports.pause();
+}
+
 /**
  * Binds DOM elements to variables and loads a blank level via jQuery
  * ready() function.
@@ -226,6 +305,25 @@ exports.init = function() {
             name: 'Select Level',
             stateFunc: function() { return {}; }
         }));
+        var holdTimeout;
+        var moved = true;
+        $(canvas).on('mousedown touchstart', function(e) {
+            if ('touchstart' === e.type) {
+                holdTimeout = setTimeout(showClickedObj, 1000);
+            }
+            moved = false;
+        });
+        $(canvas).on([ 'mousemove',  'touchmove',
+                       'touchleave', 'touchcancel',
+                       'touchend' ].join(' '), function() {
+            moved = true;
+            clearTimeout(holdTimeout);
+        });
+        $(canvas).on('mouseup', function() {
+            if (!moved) {
+                showClickedObj();
+            }
+        });
     });
 };
 
