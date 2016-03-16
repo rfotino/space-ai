@@ -305,6 +305,7 @@ exports.init = function() {
             name: 'Select Level',
             stateFunc: function() { return {}; }
         }));
+        exports.install('');
         var moved = true;
         $(canvas).on('mousedown touchstart', function(e) {
             moved = false;

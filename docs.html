@@ -9,46 +9,168 @@
     <link rel="stylesheet" type="text/css" href="css/docs.css" />
   </head>
   <body>
-    <h1>API Reference</h1>
+    <h1>Space AI Documentation</h1>
 
-    <h2 class="function-class">Diagnostics</h2>
+    <!-- Table of Contents -->
+    <a name="table-of-contents"></a>
+    <h2 class="section">Table of Contents</h2>
+    <ol id="table-of-contents">
+      <li><a href="#shortcuts">Keyboard Shortcuts</a></li>
+      <li><a href="#examples">Code Examples</a></li>
+      <li>
+        <a href="#function-ref">Function Reference</a>
+        <ol>
+          <li>
+            <a href="#movement">Movement</a>
+            <ol>
+              <li><a href="#thrust">thrust([power])</a></li>
+              <li><a href="#turn">turn([power])</a></li>
+            </ol>
+          </li>
+          <li>
+            <a href="#diagnostics">Diagnostics</a>
+            <ol>
+              <li><a href="#accel">accel()</a></li>
+              <li><a href="#bounds">bounds()</a></li>
+              <li><a href="#health">health()</a></li>
+              <li><a href="#pos">pos()</a></li>
+              <li><a href="#vel">vel()</a></li>
+            </ol>
+          </li>
+          <li>
+            <a href="#radar-class">Radar</a>
+            <ol>
+              <li><a href="#radar-func">radar([filter])</a></li>
+            </ol>
+          </li>
+          <li>
+            <a href="#weapons-class">Weapons</a>
+            <ol>
+              <li><a href="#fire">fire(x, y)</a></li>
+              <li><a href="#equip">equip([weapon])</a></li>
+              <li><a href="#equipped">equipped()</a></li>
+              <li><a href="#weapons">weapons()</a></li>
+            </ol>
+          </li>
+          <li>
+            <a href="#storage">Storage</a>
+            <ol>
+              <li><a href="#load">load(key, [defaultValue])</a></li>
+              <li><a href="#store">store(key, value)</a></li>
+            </ol>
+          </li>
+          <li>
+            <a href="#logging">Logging</a>
+            <ol>
+              <li><a href="#console.error">console.error(message)</a></li>
+              <li><a href="#console.log">console.log(message)</a></li>
+              <li><a href="#console.warn">console.warn(message)</a></li>
+            </ol>
+          </li>
+        </ol>
+      </li>
+      <li><a href="#object-ref">Object Reference</a></li>
+      <li><a href="#examples">Code Examples</a></li>
+    </ol>
 
-    <a name="health"></a>
-    <div class="function">
-      <div class="name">
-        <code>Number <strong>health</strong>()</code>
-      </div>
-      <p class="description">Gets the player's current health.</p>
-      <div class="returns">
-        <strong>Returns:</strong> &lt;Number&gt;
-      </div>
-    </div>
+    <!-- Keyboard Shortcuts -->
+    <a name="shortcuts"></a>
+    <h2 class="section">Keyboard Shortcuts</h2>
+    <table id="shortcuts-table">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>Shortcut</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Install &amp; Restart</td><td>R</td>
+          <td>Installs new code and restarts the level.</td>
+        </tr>
+        <tr>
+          <td>Run/Pause</td><td>Spacebar</td>
+          <td>Runs or pauses the game.</td>
+        </tr>
+        <tr>
+          <td>Show Code</td><td>I</td>
+          <td>Pops out the code window - use Escape to close.</td>
+        </tr>
+        <tr>
+          <td>Hide Code</td><td>Escape</td>
+          <td>Hides the code window or a modal dialog if shown.</td>
+        </tr>
+        <tr>
+          <td>Toggle Console</td><td>C</td>
+          <td>Shows or hides the console window.</td>
+        </tr>
+        <tr>
+          <td>Change Theme</td><td>T</td>
+          <td>Shows the theme selector for the code window so you can change the syntax highlighting.</td>
+        </tr>
+        <tr>
+          <td>Level Selector</td><td>S</td>
+          <td>Shows the level selector in a dialog.</td>
+        </tr>
+        <tr>
+          <td>Next Level</td><td>N</td>
+          <td>When the level selector is visible, highlights the next level.</td>
+        </tr>
+        <tr>
+          <td>Previous Level</td><td>P</td>
+          <td>When the level selector is visible, highlights the previous level.</td>
+        </tr>
+        <tr>
+          <td>Save</td><td>Ctrl+S</td>
+          <td>Saves your code to local storage.</td>
+        </tr>
+        <tr>
+          <td>Save As</td><td>Shift+Ctrl+S</td>
+          <td>Prompts you for a new name, then saves your code to local storage.</td>
+        </tr>
+        <tr>
+          <td>Focus Player</td><td>F</td>
+          <td>Changes the view so that the player is centered. The view follows the player until the user pans away.</td>
+        </tr>
+        <tr>
+          <td>Focus Bounds</td><td>B</td>
+          <td>Changes the view so that all game objects are in view, if possible with maximum zoom-out.</td>
+        </tr>
+        <tr>
+          <td>Debug Mode</td><td>X</td>
+          <td>Toggles debug mode. When on, a 100x100px grid is shown along with tooltips for all game objects.</td>
+        </tr>
+        <tr>
+          <td>Zoom In/Out</td><td>+/-</td>
+          <td>Zooms in or out with the center of the screen as the origin. You can also use the scroll wheel or pinch to zoom.</td>
+        </tr>
+        <tr>
+          <td>Pan</td><td>Arrow Keys</td>
+          <td>Translates the view. You can also drag the mouse or touch and drag.</td>
+        </tr>
+        <tr>
+          <td>Docs</td><td>D</td>
+          <td>Opens the documentation in a new tab.</td>
+        </tr>
+        <tr>
+          <td>About</td><td>A</td>
+          <td>Shows the about dialog.</td>
+        </tr>
+      </tbody>
+    </table>
 
-    <h2 class="function-class">Movement</h2>
+    <!-- Code Examples -->
+    <a name="examples"></a>
+    <h2 class="section">Code Examples</h2>
+    <p>TODO: Add code examples.</p>
 
-    <a name="accel"></a>
-    <div class="function">
-      <div class="name">
-        <code>Object <strong>accel</strong>()</code>
-      </div>
-      <p class="description">Gets the x, y, and angular acceleration of the player ship. The x and y acceleration are computed from the angular position of the ship and the power setting of its main engines, and are given in pixels/second^2. The angular acceleration is computed from the power setting of the ship's turning engines, and is given in radians/sec^2.</p>
-      <div class="returns">
-        <strong>Returns:</strong> &lt;Object&gt;
-        <p>An object with numeric 'x', 'y', and 'angular' properties.</p>
-      </div>
-    </div>
+    <!-- Function Reference -->
+    <a name="function-ref"></a>
+    <h2 class="section">Function Reference</h2>
 
-    <a name="bounds"></a>
-    <div class="function">
-      <div class="name">
-        <code>Object <strong>bounds</strong>()</code>
-      </div>
-      <p class="description">Gets the player ship's current bounding box.</p>
-      <div class="returns">
-        <strong>Returns</strong> &lt;Object&gt;
-        <p>An object with numeric 'x', 'y', 'width', and 'height' properties.</p>
-      </div>
-    </div>
+    <a name="movement"></a>
+    <h3 class="function-class">Movement</h3>
 
     <a name="thrust"></a>
     <div class="function">
@@ -92,6 +214,44 @@
       </div>
     </div>
 
+    <a name="diagnostics"></a>
+    <h3 class="function-class">Diagnostics</h3>
+
+    <a name="accel"></a>
+    <div class="function">
+      <div class="name">
+        <code>Object <strong>accel</strong>()</code>
+      </div>
+      <p class="description">Gets the x, y, and angular acceleration of the player ship. The x and y acceleration are computed from the angular position of the ship and the power setting of its main engines, and are given in pixels/second^2. The angular acceleration is computed from the power setting of the ship's turning engines, and is given in radians/sec^2.</p>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;Object&gt;
+        <p>An object with numeric 'x', 'y', and 'angular' properties.</p>
+      </div>
+    </div>
+
+    <a name="bounds"></a>
+    <div class="function">
+      <div class="name">
+        <code>Object <strong>bounds</strong>()</code>
+      </div>
+      <p class="description">Gets the player ship's current bounding box.</p>
+      <div class="returns">
+        <strong>Returns</strong> &lt;Object&gt;
+        <p>An object with numeric 'x', 'y', 'width', and 'height' properties.</p>
+      </div>
+    </div>
+
+    <a name="health"></a>
+    <div class="function">
+      <div class="name">
+        <code>Number <strong>health</strong>()</code>
+      </div>
+      <p class="description">Gets the player's current health.</p>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;Number&gt;
+      </div>
+    </div>
+
     <a name="pos"></a>
     <div class="function">
       <div class="name">
@@ -116,7 +276,7 @@
       </div>
     </div>
 
-    <h2 class="function-class">Radar</h2>
+    <h3 class="function-class">Radar</h3>
 
     <a name="radar"></a>
     <div class="function">
@@ -139,7 +299,8 @@
       </div>
     </div>
 
-    <h2 class="function-class">Weapons</h2>
+    <a name="weapons-class"></a>
+    <h3 class="function-class">Weapons</h3>
 
     <a name="fire"></a>
     <div class="function">
@@ -190,7 +351,7 @@
       </div>
     </div>
 
-    <a name="weapons"></a>
+    <a name="weapons-func"></a>
     <div class="function">
       <div class="name">
         <code>Array <strong>weapons</strong>()</code>
@@ -202,7 +363,8 @@
       </div>
     </div>
 
-    <h2 class="function-class">Storage</h2>
+    <a name="storage"></a>
+    <h3 class="function-class">Storage</h3>
 
     <a name="load"></a>
     <div class="function">
@@ -250,7 +412,8 @@
       </div>
     </div>
 
-    <h2 class="function-class">Logging</h2>
+    <a name="logging"></a>
+    <h3 class="function-class">Logging</h3>
 
     <a name="console.error"></a>
     <div class="function">
@@ -302,5 +465,10 @@
         </ul>
       </div>
     </div>
+
+    <!-- Object Reference -->
+    <a name="object-ref"></a>
+    <h2 class="section">Object Reference</h2>
+    <p>TODO: Add object reference.</p>
   </body>
 </html>

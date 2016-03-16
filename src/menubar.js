@@ -347,8 +347,11 @@ exports.init = function() {
                     'After you have written new code, click the Install & ' +
                     'Restart button and then click the Run button. To ' +
                     'discover the functions available to control the ship, ' +
-                    'visit the Docs.</p>' +
-                    '<p><em>Developed by Robert Fotino, 2016.</em></p>'));
+                    'visit the <a href="docs.html" target="_blank">Docs</a>.' +
+                    '</p>' +
+                    '<p><em>Developed by Robert Fotino, 2016. ' +
+                    '<a href="https://github.com/rfotino/space-ai" ' +
+                    'target="_blank">Source</a>.</em></p>'));
             e.preventDefault();
             return false;
         });
