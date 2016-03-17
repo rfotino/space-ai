@@ -28,7 +28,6 @@ module.exports = [
         stateFunc: function() { return {
             objects: [
                 new ReachTarget({
-                    name: 'target1',
                     win: true,
                     pos: { x: 0, y: 250 }
                 })
@@ -45,7 +44,6 @@ module.exports = [
             }),
             objects: [
                 new EnemyTarget({
-                    name: 'enemy1',
                     win: true,
                     pos: { x: 0, y: 250 },
                     health: 25
@@ -60,7 +58,6 @@ module.exports = [
             player: new Player({ weapons: [ new RocketWeapon({ ammo: 1 }) ] }),
             objects: [
                 new EnemyTarget({
-                    name: 'enemy1',
                     win: true,
                     pos: { x: 0, y: 250 },
                     health: 25
@@ -78,7 +75,6 @@ module.exports = [
                     radius: 150
                 }),
                 new ReachTarget({
-                    name: 'target1',
                     win: true,
                     pos: { x: -250, y: 0 }
                 })
@@ -94,7 +90,6 @@ module.exports = [
             return {
                 objects: [
                     new ReachTarget({
-                        name: 'target1',
                         win: true,
                         pos: {
                             x: radius * Math.cos(angle),
@@ -118,7 +113,6 @@ module.exports = [
                 }),
                 objects: [
                     new EnemyTarget({
-                        name: 'enemy1',
                         win: true,
                         pos: {
                             x: radius * Math.cos(angle),
@@ -141,7 +135,6 @@ module.exports = [
                     radius: 150
                 }),
                 new ReachTarget({
-                    name: 'target1',
                     win: true,
                     pos: { x: 500, y: 0 }
                 })

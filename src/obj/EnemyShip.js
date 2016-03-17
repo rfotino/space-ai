@@ -6,6 +6,7 @@
  * at the player.
  */
 
+var $ = require('../../lib/jquery/jquery.js');
 var physics = require('../physics.js');
 var GameObject = require('./GameObject.js');
 var EnemyTarget = require('./EnemyTarget.js');
@@ -24,7 +25,6 @@ var EnemyShip = function(props) {
     this.hoverRange = props.hoverRange || 200;
     this.radius = props.radius || 50;
     this.weapon = props.weapon || new LaserWeapon();
-    this.mobile = 'undefined' !== props.mobile ? props.mobile : false;
     this.zDepth = 60;
     this._maxPathAccel = 0.1;
     this._maxChaseAccel = 1;
@@ -258,6 +258,17 @@ EnemyShip.prototype.draw = function(ctx) {
         ctx.stroke();
     }
     ctx.restore();
+};
+
+/**
+ * @override {EnemyTarget}
+ * @return {Object}
+ */
+EnemyShip.prototype.getObj = function() {
+    var obj = EnemyTarget.prototype.getObj.call(this);
+    return $.extend(obj, {
+        weapon: this.weapon.getObj()
+    });
 };
 
 module.exports = EnemyShip;

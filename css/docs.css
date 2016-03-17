@@ -21,6 +21,9 @@ ol, ul {
 h2, h3 {
     margin-top: 30px;
 }
+h3 {
+    font-size: 1.3em;
+}
 
 /* Table of Contents */
 #table-of-contents {
@@ -38,18 +41,18 @@ h2, h3 {
     vertical-align: top;
 }
 
-/* Function Reference */
-.function-class {
-    font-size: 1.3em;
-}
-.function {
+/* Function Reference, Object Reference */
+.function, .object {
     padding: 20px 10px;
     border-bottom: 1px solid #000;
 }
-.function .name {
+.function .name, .object .name {
     font-size: 1.2em;
     padding-bottom: 5px;
 }
-.function .params, .function .returns {
+.function .params, .function .returns, .object .members {
     margin-top: 15px;
+}
+.object .members .description {
+    margin-bottom: 5px;
 }

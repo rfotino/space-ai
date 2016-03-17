@@ -19,9 +19,6 @@ var Target = function(props) {
     props.type = props.type || 'target';
     props.isTarget = true;
     GameObject.prototype.constructor.call(this, props);
-    if ('string' === typeof props.name) {
-	this.name = props.name;
-    }
     this.objective = props.objective || null;
     this.radius = props.radius || 50;
     this.win = 'undefined' === typeof props.win ? false : props.win;
@@ -48,7 +45,6 @@ Target.prototype.complete = function(player) { return false; }
 Target.prototype.getObj = function() {
     var obj = GameObject.prototype.getObj.call(this);
     return $.extend(obj, {
-        name: this.name,
         objective: this.objective,
         radius: this.radius,
         win: this.win,

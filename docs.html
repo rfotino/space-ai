@@ -4,6 +4,7 @@
   <head>
     <title>Space AI Game | Docs</title>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="css/docs.css" />
@@ -49,7 +50,7 @@
               <li><a href="#fire">fire(x, y)</a></li>
               <li><a href="#equip">equip([weapon])</a></li>
               <li><a href="#equipped">equipped()</a></li>
-              <li><a href="#weapons">weapons()</a></li>
+              <li><a href="#weapons-func">weapons()</a></li>
             </ol>
           </li>
           <li>
@@ -69,8 +70,33 @@
           </li>
         </ol>
       </li>
-      <li><a href="#object-ref">Object Reference</a></li>
-      <li><a href="#examples">Code Examples</a></li>
+      <li>
+        <a href="#object-ref">Object Reference</a>
+        <ol>
+          <li>
+            <a href="#gameobject">GameObject</a>
+            <ol>
+              <li><a href="#ammo">Ammo</a></li>
+              <li><a href="#asteroid">Asteroid</a></li>
+              <li><a href="#bullet">Bullet</a></li>
+              <li><a href="#healthpack">HealthPack</a></li>
+              <li>
+                <a href="#target">Target</a>
+                <ol>
+                  <li><a href="#enemyship">EnemyShip</a></li>
+                  <li><a href="#enemytarget">EnemyTarget</a></li>
+                  <li><a href="#friendlytarget">FriendlyTarget</a></li>
+                  <li><a href="#reachtarget">ReachTarget</a></li>
+                  <li><a href="#spacemine">SpaceMine</a></li>
+                </ol>
+              </li>
+            </ol>
+          </li>
+          <li><a href="#rectangle">Rectangle</a></li>
+          <li><a href="#vector">Vector</a></li>
+          <li><a href="#weapon-obj">Weapon</a></li>
+        </ol>
+      </li>
     </ol>
 
     <!-- Keyboard Shortcuts -->
@@ -220,11 +246,11 @@
     <a name="accel"></a>
     <div class="function">
       <div class="name">
-        <code>Object <strong>accel</strong>()</code>
+        <code><a href="#vector">Vector</a> <strong>accel</strong>()</code>
       </div>
       <p class="description">Gets the x, y, and angular acceleration of the player ship. The x and y acceleration are computed from the angular position of the ship and the power setting of its main engines, and are given in pixels/second^2. The angular acceleration is computed from the power setting of the ship's turning engines, and is given in radians/sec^2.</p>
       <div class="returns">
-        <strong>Returns:</strong> &lt;Object&gt;
+        <strong>Returns:</strong> &lt;<a href="#vector">Vector</a>&gt;
         <p>An object with numeric 'x', 'y', and 'angular' properties.</p>
       </div>
     </div>
@@ -232,11 +258,11 @@
     <a name="bounds"></a>
     <div class="function">
       <div class="name">
-        <code>Object <strong>bounds</strong>()</code>
+        <code><a href="#rectangle">Rectangle</a> <strong>bounds</strong>()</code>
       </div>
       <p class="description">Gets the player ship's current bounding box.</p>
       <div class="returns">
-        <strong>Returns</strong> &lt;Object&gt;
+        <strong>Returns</strong> &lt;<a href="#rectangle">Rectangle</a>&gt;
         <p>An object with numeric 'x', 'y', 'width', and 'height' properties.</p>
       </div>
     </div>
@@ -255,11 +281,11 @@
     <a name="pos"></a>
     <div class="function">
       <div class="name">
-        <code>Object <strong>pos</strong>()</code>
+        <code><a href="#vector">Vector</a> <strong>pos</strong>()</code>
       </div>
       <p class="description">Gets the x, y, and angular position of the player ship. The x and y position are given in pixels. The angular position, or rotation, is given in radians.</p>
       <div class="returns">
-        <strong>Returns:</strong> &lt;Object&gt;
+        <strong>Returns:</strong> &lt;<a href="#vector">Vector</a>&gt;
         <p>An object with numeric 'x', 'y', and 'angular' properties.</p>
       </div>
     </div>
@@ -267,18 +293,19 @@
     <a name="vel"></a>
     <div class="function">
       <div class="name">
-        <code>Object <strong>vel</strong>()</code>
+        <code><a href="#vector">Vector</a> <strong>vel</strong>()</code>
       </div>
       <p class="description">Gets the x, y, and angular velocity of the player ship. The x and y velocity are given in pixels/second. The angular velocity is given in radians/sec.</p>
       <div class="returns">
-        <strong>Returns:</strong> &lt;Object&gt;
+        <strong>Returns:</strong> &lt;<a href="#vector">Vector</a>&gt;
         <p>Extra info on the return value.</p>
       </div>
     </div>
 
+    <a name="radar-class"></a>
     <h3 class="function-class">Radar</h3>
 
-    <a name="radar"></a>
+    <a name="radar-func"></a>
     <div class="function">
       <div class="name">
         <code>Array <strong>radar</strong>( [ filter ] )</code>
@@ -295,7 +322,7 @@
       </div>
       <div class="returns">
         <strong>Returns:</strong> &lt;Array&gt;
-        <p>The array of game objects.</p>
+        <p>The array of <a href="#gameobject">GameObject</a>s.</p>
       </div>
     </div>
 
@@ -305,7 +332,7 @@
     <a name="fire"></a>
     <div class="function">
       <div class="name">
-        <code><strong>fire</strong>( x, y )</code>
+        <code>void <strong>fire</strong>( x, y )</code>
       </div>
       <p class="description">Fires the currently equipped weapon in the direction (x, y). If called more than once, the latest direction will be used. If x and y are both zero, the weapon will not be fired.</p>
       <div class="params">
@@ -325,14 +352,14 @@
     <a name="equip"></a>
     <div class="function">
       <div class="name">
-        <code><strong>equip</strong>( [ weapon ] )</code>
+        <code>void <strong>equip</strong>( [ weapon ] )</code>
       </div>
       <p class="description">If weapon is falsey or not set, unequips the currently equipped weapon. If weapon is set and equippable, equips the given weapon.</p>
        <div class="params">
         <strong>Parameters</strong>
         <ul>
           <li>
-            <code><strong>weapon</strong> &lt;String|Object&gt;</code>
+            <code><strong>weapon</strong> &lt;String|<a href="#weapon-obj">Weapon</a>&gt;</code>
             <p>If weapon is a String, it is treated as representing a weapon name. If weapon is an Object, it is treated as a complete weapon object with a 'name' property.</p>
           </li>
         </ul>
@@ -342,11 +369,11 @@
     <a name="equipped"></a>
     <div class="function">
       <div class="name">
-        <code>Object <strong>equipped</strong>()</code>
+        <code><a href="#weapon-obj">Weapon</a> <strong>equipped</strong>()</code>
       </div>
       <p class="description">Returns the currently equipped weapon object, or null if no weapon is currently equipped.</p>
       <div class="returns">
-        <strong>Returns:</strong> &lt;Object&gt;
+        <strong>Returns:</strong> &lt;<a href="#weapon-obj">Weapon</a>&gt;
         <p>The currently equipped weapon.</p>
       </div>
     </div>
@@ -359,7 +386,7 @@
       <p class="description">Gets an array of weapons available to the player ship.</p>
       <div class="returns">
         <strong>Returns:</strong> &lt;Array&gt;
-        <p>The array of available weapon objects.</p>
+        <p>The array of available <a href="#weapon-obj">Weapon</a> objects.</p>
       </div>
     </div>
 
@@ -394,7 +421,7 @@
     <a name="store"></a>
     <div class="function">
       <div class="name">
-        <code><strong>store</strong>( key, value )</code>
+        <code>void <strong>store</strong>( key, value )</code>
       </div>
       <p class="description">Stores a value at the given key in persistent storage.</p>
       <div class="params">
@@ -418,7 +445,7 @@
     <a name="console.error"></a>
     <div class="function">
       <div class="name">
-        <code><strong>console.error</strong>( message )</code>
+        <code>void <strong>console.error</strong>( message )</code>
       </div>
       <p class="description">Prints the given message to the console as an error. Pops out the console window if it is currently hidden.</p>
       <div class="params">
@@ -435,7 +462,7 @@
     <a name="console.log"></a>
     <div class="function">
       <div class="name">
-        <code><strong>console.log</strong>( message )</code>
+        <code>void <strong>console.log</strong>( message )</code>
       </div>
       <p class="description">Prints the given message to the console.</p>
       <div class="params">
@@ -452,7 +479,7 @@
     <a name="console.warn"></a>
     <div class="function">
       <div class="name">
-        <code><strong>console.warn</strong>( message )</code>
+        <code>void <strong>console.warn</strong>( message )</code>
       </div>
       <p class="description">Prints the given message to the console as a warning.</p>
       <div class="params">
@@ -469,6 +496,248 @@
     <!-- Object Reference -->
     <a name="object-ref"></a>
     <h2 class="section">Object Reference</h2>
-    <p>TODO: Add object reference.</p>
+
+    <a name="gameobject"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>GameObject</strong></code>
+      </div>
+      <p class="description">The root game object.</p>
+      <ul class="members">
+        <li>
+          <code>Number <strong>id</strong></code>
+          <p class="description">A unique identifier for tracking GameObjects across frames.</p>
+        </li>
+        <li>
+          <code>String <strong>type</strong></code>
+          <p class="description">Used to distinguish between classes of objects.</p>
+        </li>
+        <li>
+          <code><a href="#vector">Vector</a> <strong>pos</strong></code>
+          <p class="description">The object's position.</p>
+        </li>
+        <li>
+          <code><a href="#vector">Vector</a> <strong>vel</strong></code>
+          <p class="description">The object's velocity.</p>
+        </li>
+        <li>
+          <code><a href="#vector">Vector</a> <strong>accel</strong></code>
+          <p class="description">The object's acceleration.</p>
+        </li>
+      </ul>
+    </div>
+
+    <a name="ammo"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>Ammo</strong> extends <a href="#gameobject">GameObject</a></code>
+      </div>
+      <p class="description">A GameObject with a <code>type</code> of <code>'ammo'</code>. Adds a new Weapon to the player, or increases an existing Weapon's ammo if the player already has a weapon of the same type.</p>
+      <ul class="members">
+        <li>
+          <code><a href="#weapon-obj">Weapon</a> <strong>weapon</strong></code>
+          <p class="description">The Weapon for the user to pick up.</p>
+        </li>
+      </ul>
+    </div>
+
+    <a name="asteroid"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>Asteroid</strong> extends <a href="#gameobject">GameObject</a></code>
+      </div>
+      <p class="description">A GameObject with a <code>type</code> of <code>'asteroid'</code>. If the player comes into contact with an Asteroid, they lose.</p>
+      <ul class="members">
+        <li>
+          <code>Number <strong>radius</strong></code>
+          <p class="description">The maximum radius of the Asteroid.</p>
+        </li>
+      </ul>
+    </div>
+
+    <a name="bullet"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>Bullet</strong> extends <a href="#gameobject">GameObject</a></code>
+      </div>
+      <p class="description">A GameObject with a <code>type</code> of <code>'bullet'</code>. If an object with a <code>health</code> property comes into contact with a Bullet, the object's health decreases.</p>
+      <ul class="members">
+        <li>
+          <code>Number <strong>damage</strong></code>
+          <p class="description">The amount of damage the Bullet does to an object with health.</p>
+        </li>
+        <li>
+          <code>String <strong>weapon</strong></code>
+          <p class="description">The name of the weapon that fired this Bullet.</p>
+        </li>
+        <li>
+          <code>String <strong>owner</strong></code>
+          <p class="description">The owner of the Bullet, either 'player' or 'enemy'.</p>
+        </li>
+      </ul>
+    </div>
+
+    <a name="healthpack"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>HealthPack</strong> extends <a href="#gameobject">GameObject</a></code>
+      </div>
+      <p class="description">A GameObject that with a <code>type</code> of <code>'health'</code>. When the player touches a HealthPack, their health increases.</p>
+      <ul class="members">
+        <li>
+          <code>Number <strong>health</strong></code>
+          <p class="description">The amount by which the player's health will be increased.</p>
+        </li>
+      </ul>
+    </div>
+
+    <a name="target"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>Target</strong> extends <a href="#gameobject">GameObject</a></code>
+      </div>
+      <p class="description">A GameObject with a <code>type</code> of <code>'target'</code>. Each Target has an objective which may be necessary for the player to win if the <code>win</code> property is true, or may cause the player to lose if the <code>lose</code> property is set to true.</p>
+      <ul class="members">
+        <li>
+          <code>Number <strong>radius</strong></code>
+        </li>
+        <li>
+          <code>String <strong>objective</strong></code>
+          <p class="description">The objective the player needs to complete with this target in order to win the level.</p>
+        </li>
+        <li>
+          <code>Boolean <strong>win</strong></code>
+          <p class="description">If true, completing this target is necessary for the player to win.</p>
+        </li>
+        <li>
+          <code>Boolean <strong>lose</strong></code>
+          <p class="description">If true, completing this target will cause the player to lose.</p>
+        </li>
+      </ul>
+    </div>
+
+    <a name="enemyship"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>EnemyShip</strong> extends <a href="#target">Target</a></code>
+      </div>
+      <p class="description">A flying saucer that chases after and shoots at the player's ship when it gets too close. EnemyShip has a <code>type</code> of <code>'ship'</code> and an <code>objective</code> of <code>'destroy'</code>.</p>
+      <ul class="members">
+        <li><code>Number <strong>health</strong></code></li>
+        <li><code><a href="#weapon-obj">Weapon</a> <strong>weapon</strong></code></li>
+      </ul>
+    </div>
+
+    <a name="enemytarget"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>EnemyTarget</strong> extends <a href="#target">Target</a></code>
+      </div>
+      <p class="description">A Target with an <code>objective</code> of <code>'destroy'</code>. EnemyTargets are immobile and do not shoot back.</p>
+      <ul class="members">
+        <li><code>Number <strong>health</strong></code></li>
+      </ul>
+    </div>
+
+    <a name="friendlytarget"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>FriendlyTarget</strong> extends <a href="#target">Target</a></code>
+      </div>
+      <p class="description">A Target with an <code>objective</code> of <code>'defend'</code>. FriendlyTargets are immobile and cannot shoot.</p>
+      <ul class="members">
+        <li><code>Number <strong>health</strong></code></li>
+      </ul>
+    </div>
+
+    <a name="reachtarget"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>ReachTarget</strong> extends <a href="#target">Target</a></code>
+      </div>
+      <p class="description">A Target with an <code>objective</code> of <code>'reach'</code>. The player must land inside a ReachTarget in order to complete it.</p>
+    </div>
+
+    <a name="spacemine"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>SpaceMine</strong> extends <a href="#target">Target</a></code>
+      </div>
+      <p class="description">A Target with a <code>type</code> of <code>'mine'</code> and an <code>objective</code> of <code>'evade'</code>.</p>
+      <ul class="members">
+        <li>
+          <code>Number <strong>damage</strong></code>
+          <p class="description">The amount that the mine decreases an object's health when it explodes.</p>
+        </li>
+        <li>
+          <code>Number <strong>range</strong></code>
+          <p class="description">The range at which a SpaceMine will be attracted to the player.</p>
+        </li>
+      </ul>
+    </div>
+
+    <a name="rectangle"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>Rectangle</strong></code>
+      </div>
+      <p class="description">A shape with x, y, width, and height components.</p>
+      <ul class="members">
+        <li><code>Number <strong>x</strong></code></li>
+        <li><code>Number <strong>y</strong></code></li>
+        <li><code>Number <strong>width</strong></code></li>
+        <li><code>Number <strong>height</strong></code></li>
+      </ul>
+    </div>
+
+    <a name="vector"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>Vector</strong></code>
+      </div>
+      <p class="description">A vector with x, y, and angular components.</p>
+      <ul class="members">
+        <li><code>Number <strong>x</strong></code></li>
+        <li><code>Number <strong>y</strong></code></li>
+        <li><code>Number <strong>angular</strong></code></li>
+      </ul>
+    </div>
+
+    <a name="weapon-obj"></a>
+    <div class="object">
+      <div class="name">
+        <code><strong>Weapon</strong></code>
+      </div>
+      <p class="description">A weapon that can be wielded by the player or another ship. Fires Bullet objects.</p>
+      <ul class="members">
+        <li>
+          <code>String <strong>name</strong></code>
+          <p class="description">The name used to identify the type of weapon.</p>
+        </li>
+        <li>
+          <code>Number <strong>damage</strong></code>
+          <p class="description">The amount of damage done with each Bullet from this Weapon.</p>
+        </li>
+        <li>
+          <code>Number <strong>ammo</strong></code>
+          <p class="description">The amount of Bullets the Weapon has left, or null if the Weapon has unlimited ammo.</p>
+        <li>
+          <code>Number <strong>range</strong></code>
+          <p class="description">The distance a Bullet from this Weapon can travel in a given reference frame.</p>
+        </li>
+        <li>
+          <code>Number <strong>speed</strong></code>
+          <p class="description">The speed at which Bullets travel when fired from this Weapon.</p>
+        </li>
+        <li>
+          <code>Number <strong>cooldown</strong></code>
+          <p class="description">The number of frames necessary between shots of this Weapon.</p>
+        </li>
+        <li>
+          <code>Number <strong>cooldownTimer</strong></code>
+          <p class="description">The number of frames left before this Weapon can be fired again.</p>
+        </li>
+      </ul>
+    </div>
   </body>
 </html>
