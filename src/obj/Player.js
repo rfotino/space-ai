@@ -62,56 +62,52 @@ Object.defineProperty(Player.prototype, 'health', {
  * detection. Should only be called by the constructor.
  */
 Player.prototype._generateGeometry = function() {
-    var halfOutline = graphics.getQuadTo({ x: 50, y: 0 },
-                                         { x: 40, y: 13 },
-                                         { x: 0, y: 15 },
-                                         10).concat([ { x: -7, y: 12 },
-                                                      { x: -10, y: 12 } ]);
     var reflectXFunc = function(p) { return { x: p.x, y: -p.y }; };
+    var halfOutline = graphics.getQuadTo({ x: 30, y: 0 },
+                                         { x: 25, y: 8 },
+                                         { x: 15, y: 10 },
+                                         7).concat([ { x: -25, y: 10 } ]);
     var otherHalfOutline = halfOutline.map(reflectXFunc).reverse();
     this._outline = { points: halfOutline.concat(otherHalfOutline) };
-    this._drawPolys = [
-        {
-            color: '#aaa', // upper hull
+    var leftFin = [
+        { x: -8, y: 9 },
+        { x: -20, y: 15 },
+        { x: -30, y: 15 },
+        { x: -25, y: 10 }
+    ];
+    var middleFin = [
+        { x: -10, y: 1 },
+        { x: -30, y: 1 },
+        { x: -30, y: -1 },
+        { x: -10, y: -1 }
+    ];
+    var detailColor = '#06f';
+    this._drawPolys = [ {
+            color: detailColor, // left fin
+            points: leftFin
+        }, {
+            color: detailColor, // right fin
+            points: leftFin.map(reflectXFunc)
+        }, {
+            color: '#ccc', // upper hull
             points: this._outline.points
-        },
-        {
-            color: '#999', // lower hull
-            points: [
-                { x: 0, y: -15 },
-                { x: 0, y: 15 },
-                { x: -7, y: 12 },
-                { x: -7, y: -12 }
-            ]
-        },
-        {
-            color: '#ddd', // exhaust port
-            points: [
-                { x: -7, y: -12 },
-                { x: -7, y: 12 },
-                { x: -10, y: 12 },
-                { x: -10, y: -12 }
-            ]
+        }, {
+            color: detailColor, // middle fin
+            points: middleFin
+        }, {
+            color: detailColor, // cockpit
+            x: 15,
+            y: 0,
+            radius: 5
         }
     ];
-    // Add the cockpit separately
-    var halfCockpit = graphics.getQuadTo({ x: 40, y: 0 },
-                                         { x: 35, y: 5 },
-                                         { x: 16, y: 6 },
-                                         5);
-    var otherHalfCockpit = halfCockpit.map(reflectXFunc).reverse();
-    this._drawPolys.push({
-        color: '#0f9',
-        points: halfCockpit.concat(otherHalfCockpit)
-    });
     // Set up geometry and constants for the thrust flame
     this._flamePoly = { points: [
-        { x: 0, y: -10 },
-        { x: 0, y: 10 },
+        { x: 0, y: -9 },
+        { x: 0, y: 9 },
         { x: -15, y: 0 }
     ] };
-    var bounds = physics.getPolyBounds(this._outline);
-    this._flamePosX = bounds.x;
+    this._flamePosX = -24;
     this._flameFlicker = 0;
     this._flameFlickerThreshold = 6;
     this._flameFlickerMax = 8;
@@ -162,24 +158,24 @@ Player.prototype.update = function() {
  * @param {CanvasRenderingContext2D} ctx
  */
 Player.prototype.draw = function(ctx) {
-    // Draw the polygons
-    for (var i = 0; i < this._drawPolys.length; i++) {
-        var poly = this._drawPolys[i];
-        ctx.fillStyle = poly.color;
-        graphics.drawShape(ctx, poly);
-        ctx.fill();
-    }
     // Draw the exhaust
-    if (this._flameFlicker < this._flameFlickerThreshold) {
+    if (this._flameFlicker < this._flameFlickerThreshold && this.thrustPower) {
         var flameScale = {
-            x: this.thrustPower,
-            y: 0.5 + (this.thrustPower / 2),
+            x: 0.25 + (0.75 * this.thrustPower),
+            y: 0.5 + (0.5 * this.thrustPower)
         };
         var translateTransform = physics.getTranslate(this._flamePosX, 0);
         var transform = physics.getScale(flameScale, translateTransform);
         var flamePoly = { points: this._flamePoly.points.map(transform) };
         ctx.fillStyle = 'orange';
         graphics.drawShape(ctx, flamePoly);
+        ctx.fill();
+    }
+    // Draw the polygons
+    for (var i = 0; i < this._drawPolys.length; i++) {
+        var poly = this._drawPolys[i];
+        ctx.fillStyle = poly.color;
+        graphics.drawShape(ctx, poly);
         ctx.fill();
     }
 };
