@@ -218,12 +218,10 @@ exports.init = function() {
         function updateFileMenuItems() {
             // Update save/save-as/delete buttons
             if (null === currentFileName) {
-                $('#file-save-btn').addClass('disabled');
                 $('#file-save-btn .item-label').text('Save');
                 $('#file-delete-btn').addClass('disabled');
                 $('#file-delete-btn .item-label').text('Delete');
             } else {
-                $('#file-save-btn').removeClass('disabled');
                 $('#file-save-btn .item-label')
                     .text('Save \'' + currentFileName + '\'');
                 $('#file-delete-btn').removeClass('disabled');
@@ -260,6 +258,7 @@ exports.init = function() {
         }
         $('#file-save-btn').on('click', function(e) {
             if (null === currentFileName) {
+                $('#file-save-as-btn').trigger('click');
                 return;
             }
             if (!checkForLocalStorage()) {
