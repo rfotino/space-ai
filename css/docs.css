@@ -41,6 +41,11 @@ h3 {
     vertical-align: top;
 }
 
+/* Code Examples */
+.CodeMirror {
+    height: auto;
+}
+
 /* Function Reference, Object Reference */
 .function, .object {
     padding: 20px 10px;

@@ -6,7 +6,37 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
+    <!-- JavaScript -->
+    <script type="text/javascript" src="lib/jquery/jquery.js"></script>
+    <script type="text/javascript" src="lib/codemirror/lib/codemirror.js"></script>
+    <script type="text/javascript" src="lib/codemirror/mode/javascript/javascript.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('iframe.example').each(function(index, iframe) {
+          $(iframe).on('load', function() {
+            var theme = 'elegant';
+            try {
+              if (localStorage.hasOwnProperty('theme')) {
+                theme = localStorage.getItem('theme');
+              }
+            } catch (e) { }
+            var config = {
+              value: $(iframe).contents().text(),
+              mode: 'javascript',
+              theme: theme,
+              lineNumbers: true
+            };
+            CodeMirror(function(elem) {
+              iframe.parentNode.replaceChild(elem, iframe);
+            }, config);
+          });
+        });
+      });
+    </script>
+
     <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="lib/codemirror/lib/codemirror.css" />
+    <link rel="stylesheet" type="text/css" href="lib/codemirror/theme/bundle.css" />
     <link rel="stylesheet" type="text/css" href="css/docs.css" />
   </head>
   <body>
@@ -17,7 +47,12 @@
     <h2 class="section">Table of Contents</h2>
     <ol id="table-of-contents">
       <li><a href="#shortcuts">Keyboard Shortcuts</a></li>
-      <li><a href="#examples">Code Examples</a></li>
+      <li>
+        <a href="#examples">Code Examples</a>
+        <ol>
+          <li><a href="#servo-example">Servo</a></li>
+        </ol>
+      </li>
       <li>
         <a href="#function-ref">Function Reference</a>
         <ol>
@@ -189,7 +224,10 @@
     <!-- Code Examples -->
     <a name="examples"></a>
     <h2 class="section">Code Examples</h2>
-    <p>TODO: Add code examples.</p>
+
+    <a name="servo-example"></a>
+    <h3>Servo</h3>
+    <iframe class="example" src="examples/servo.js"></iframe>
 
     <!-- Function Reference -->
     <a name="function-ref"></a>

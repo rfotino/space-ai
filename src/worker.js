@@ -30,27 +30,36 @@
         // Change console context in user code
         console: {
             log: function(message) {
-                postMessage({ type: 'console', level: 'log', value: message });
+                postMessage({ type: 'console',
+                              level: 'log', value: message });
             },
             warn: function(message) {
-                postMessage({ type: 'console', level: 'warn', value: message });
+                postMessage({ type: 'console',
+                              level: 'warn', value: message });
             },
             error: function(message) {
-                postMessage({ type: 'console', level: 'error', value: message });
+                postMessage({ type: 'console',
+                              level: 'error', value: message });
             }
         },
         // API functions accessible from user code
         // Diagnostic functions:
-        health: hideFunc(function() {
-            return world.player.health;
-        }),
-        // Movement-related functions:
         accel: hideFunc(function() {
             return JSON.parse(JSON.stringify(world.player.accel));
         }),
         bounds: hideFunc(function() {
             return JSON.parse(JSON.stringify(world.player.bounds));
         }),
+        health: hideFunc(function() {
+            return world.player.health;
+        }),
+        pos: hideFunc(function() {
+            return JSON.parse(JSON.stringify(world.player.pos));
+        }),
+        vel: hideFunc(function() {
+            return JSON.parse(JSON.stringify(world.player.vel));
+        }),
+        // Movement-related functions:
         thrust: hideFunc(function(power) {
             var player = world.player;
             if ('number' === typeof power) {
@@ -63,6 +72,8 @@
                 var thrust = maxThrust * power;
                 player.thrustPower = power;
                 player.thrust = maxThrust * player.thrustPower;
+                player.accel.x = player.thrust * Math.cos(player.pos.angular);
+                player.accel.y = player.thrust * Math.sin(player.pos.angular);
             }
             return player.thrustPower;
         }),
@@ -79,12 +90,6 @@
                 player.accel.angular = maxAngularAccel * player.turnPower;
             }
             return player.turnPower;
-        }),
-        pos: hideFunc(function() {
-            return JSON.parse(JSON.stringify(world.player.pos));
-        }),
-        vel: hideFunc(function() {
-            return JSON.parse(JSON.stringify(world.player.vel));
         }),
         // Radar-related functions
         radar: hideFunc(function(filter) {
