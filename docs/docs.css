@@ -21,8 +21,18 @@ ol, ul {
 h2, h3 {
     margin-top: 30px;
 }
+h2 {
+    font-size: 1.6em;
+}
 h3 {
     font-size: 1.3em;
+}
+p {
+    margin: 10px 0;
+}
+a.breadcrumb {
+    display: inline-block;
+    margin-top: 10px;
 }
 
 /* Table of Contents */
@@ -32,6 +42,7 @@ h3 {
 
 /* Keyboard Shortcuts */
 #shortcuts-table {
+    margin-top: 30px;
     border-spacing: 0;
 }
 #shortcuts-table th, #shortcuts-table td {

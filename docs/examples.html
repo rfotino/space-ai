@@ -1,0 +1,59 @@
+<!-- Copyright (c) 2016 Robert Fotino. -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Space AI Game | Docs</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!-- JavaScript -->
+    <script type="text/javascript" src="docs.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('iframe.example').each(function(index, iframe) {
+          $(iframe).on('load', function() {
+            var config = {
+              value: $(iframe).contents().text(),
+              mode: 'javascript',
+              theme: 'elegant',
+              lineNumbers: true,
+              lineWrapping: true,
+              readOnly: true
+            };
+            CodeMirror(function(elem) {
+              iframe.parentNode.replaceChild(elem, iframe);
+            }, config);
+          });
+        });
+      });
+    </script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="../lib/codemirror/lib/codemirror.css" />
+    <link rel="stylesheet" type="text/css" href="../lib/codemirror/theme/bundle.css" />
+    <link rel="stylesheet" type="text/css" href="docs.css" />
+  </head>
+  <body>
+    <h1>Space AI Documentation</h1>
+
+    <a class="breadcrumb" href="index.html">Table of Contents</a>
+
+    <h2>Code Examples</h2>
+
+    <a name="radar"></a>
+    <h3>Radar Usage</h3>
+    <iframe class="example" src="examples/radar.js"></iframe>
+
+    <a name="weapons"></a>
+    <h3>Weapons Usage</h3>
+    <iframe class="example" src="examples/weapons.js"></iframe>
+
+    <a name="persistent"></a>
+    <h3>Persistent Variables</h3>
+    <iframe class="example" src="examples/persistent.js"></iframe>
+
+    <a name="state-machines"></a>
+    <h3>State Machines</h3>
+    <iframe class="example" src="examples/state-machines.js"></iframe>
+  </body>
+</html>

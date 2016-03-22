@@ -394,7 +394,7 @@ exports.init = function() {
                     'After you have written new code, click the Install & ' +
                     'Restart button and then click the Run button. To ' +
                     'discover the functions available to control the ship, ' +
-                    'visit the <a href="docs.html" target="_blank">Docs</a>.' +
+                    'visit the <a href="docs" target="_blank">Docs</a>.' +
                     '</p>' +
                     '<p><em>Developed by Robert Fotino, 2016. ' +
                     '<a href="https://github.com/rfotino/space-ai" ' +

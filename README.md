@@ -70,7 +70,7 @@ two HTML files that can be viewed in the browser to run the game:
 * [x] Weapon drops
 * [x] CodeMirror theme selector
 * [x] Clicking on game objects pops up a dialog with more information
-* [ ] Add examples to the docs
+* [x] Add examples to the docs
 * [x] Add keyboard shortcuts to the docs
 * [x] Add game object descriptions to the docs
 * [ ] Level design

@@ -157,6 +157,11 @@ exports.pause = function() {
  */
 exports.load = (function() {
     var showHelp = true;
+    try {
+        if ('showHelp' in localStorage) {
+            showHelp = JSON.parse(localStorage.getItem('showHelp'));
+        }
+    } catch (e) { }
     return function(newLevel) {
         // Save the initial state and start the game
         playerFocus = true;
@@ -178,6 +183,10 @@ exports.load = (function() {
             var checkboxTag = $('<input tabIndex="999" type="checkbox" />')
                 .on('change', function() {
                     showHelp = !$(this).is(':checked');
+                    try {
+                        localStorage.setItem('showHelp',
+                                             JSON.stringify(showHelp));
+                    } catch (e) { }
                 });
             labelTag.append(checkboxTag, ' Prevent showing help dialogs.');
             divTag.append(labelTag);

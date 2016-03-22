@@ -1,0 +1,317 @@
+<!-- Copyright (c) 2016 Robert Fotino. -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Space AI Game | Docs</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="docs.css" />
+  </head>
+  <body>
+    <h1>Space AI Documentation</h1>
+
+    <a class="breadcrumb" href="index.html">Table of Contents</a>
+
+    <h2>Function Reference</h2>
+
+    <a name="movement"></a>
+    <h3 class="function-class">Movement</h3>
+
+    <a name="thrust"></a>
+    <div class="function">
+      <div class="name">
+        <code>Number <strong>thrust</strong>( [ power ] )</code>
+      </div>
+      <p class="description">Optionally updates the power setting of the player ship's main engines to a value between 0 and 1, then returns the power setting.</p>
+      <div class="params">
+        <strong>Parameters</strong>
+        <ul>
+          <li>
+            <code><strong>power</strong> &lt;Number&gt;</code>
+            <p>Optional, clipped to the range [0, 1].</p>
+          </li>
+        </ul>
+      </div>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;Number&gt;
+        <p>The current power setting of the player ship's main engines.</p>
+      </div>
+    </div>
+
+    <a name="turn"></a>
+    <div class="function">
+      <div class="name">
+        <code>Number <strong>turn</strong>( [ power ] )</code>
+      </div>
+      <p class="description">Optionally updates the power setting of the player ship's turning engines to a value between 1 (counterclockwise) and -1 (clockwise), then returns the power setting.</p>
+      <div class="params">
+        <strong>Parameters</strong>
+        <ul>
+          <li>
+            <code><strong>power</strong> &lt;Number&gt;</code>
+            <p>Clipped to the range [-1, 1].</p>
+          </li>
+        </ul>
+      </div>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;Number&gt;
+        <p>The power setting of the player ship's turning engines.</p>
+      </div>
+    </div>
+
+    <a name="diagnostics"></a>
+    <h3 class="function-class">Diagnostics</h3>
+
+    <a name="accel"></a>
+    <div class="function">
+      <div class="name">
+        <code><a href="objects.html#vector">Vector</a> <strong>accel</strong>()</code>
+      </div>
+      <p class="description">Gets the x, y, and angular acceleration of the player ship. The x and y acceleration are computed from the angular position of the ship and the power setting of its main engines, and are given in pixels/second^2. The angular acceleration is computed from the power setting of the ship's turning engines, and is given in radians/sec^2.</p>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;<a href="objects.html#vector">Vector</a>&gt;
+        <p>An object with numeric 'x', 'y', and 'angular' properties.</p>
+      </div>
+    </div>
+
+    <a name="bounds"></a>
+    <div class="function">
+      <div class="name">
+        <code><a href="objects.html#rectangle">Rectangle</a> <strong>bounds</strong>()</code>
+      </div>
+      <p class="description">Gets the player ship's current bounding box.</p>
+      <div class="returns">
+        <strong>Returns</strong> &lt;<a href="objects.html#rectangle">Rectangle</a>&gt;
+        <p>An object with numeric 'x', 'y', 'width', and 'height' properties.</p>
+      </div>
+    </div>
+
+    <a name="health"></a>
+    <div class="function">
+      <div class="name">
+        <code>Number <strong>health</strong>()</code>
+      </div>
+      <p class="description">Gets the player's current health.</p>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;Number&gt;
+      </div>
+    </div>
+
+    <a name="pos"></a>
+    <div class="function">
+      <div class="name">
+        <code><a href="objects.html#vector">Vector</a> <strong>pos</strong>()</code>
+      </div>
+      <p class="description">Gets the x, y, and angular position of the player ship. The x and y position are given in pixels. The angular position, or rotation, is given in radians.</p>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;<a href="objects.html#vector">Vector</a>&gt;
+        <p>An object with numeric 'x', 'y', and 'angular' properties.</p>
+      </div>
+    </div>
+
+    <a name="vel"></a>
+    <div class="function">
+      <div class="name">
+        <code><a href="objects.html#vector">Vector</a> <strong>vel</strong>()</code>
+      </div>
+      <p class="description">Gets the x, y, and angular velocity of the player ship. The x and y velocity are given in pixels/second. The angular velocity is given in radians/sec.</p>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;<a href="objects.html#vector">Vector</a>&gt;
+        <p>Extra info on the return value.</p>
+      </div>
+    </div>
+
+    <a name="radar-class"></a>
+    <h3 class="function-class">Radar</h3>
+
+    <a name="radar-func"></a>
+    <div class="function">
+      <div class="name">
+        <code>Array <strong>radar</strong>( [ filter ] )</code>
+      </div>
+      <p class="description">Gets an array of game objects that the player ship can pick up on its sensors, optionally filtered by the given filter.</p>
+      <div class="params">
+        <strong>Parameters</strong>
+        <ul>
+          <li>
+            <code><strong>filter</strong> &lt;String|Object|Function&gt;</code>
+            <p>Optional, if set this will filter the output. If the filter is of type String, the output will be filtered by the 'type' property. If the filter is of type Object, the output will be filtered by all of its properties; for example, if the filter is { type: 'target', objective: 'reach' }, the output will only contain game objects that have a type of 'target' and an objective of 'reach'. If the filter is of type Function, it will pass each game object to the filter as an argument and will include it in the output only if the filter returns true. For example, radar('asteroid'), radar({ type: 'asteroid' }), and radar(function(obj) { return 'asteroid' === obj.type; }) all have the same return value.</p>
+          </li>
+        </ul>
+      </div>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;Array&gt;
+        <p>The array of <a href="objects.html#gameobject">GameObject</a>s.</p>
+      </div>
+    </div>
+
+    <a name="weapons-class"></a>
+    <h3 class="function-class">Weapons</h3>
+
+    <a name="fire"></a>
+    <div class="function">
+      <div class="name">
+        <code>void <strong>fire</strong>( x, y )</code>
+      </div>
+      <p class="description">Fires the currently equipped weapon in the direction (x, y). If called more than once, the latest direction will be used. If x and y are both zero, the weapon will not be fired.</p>
+      <div class="params">
+        <strong>Parameters</strong>
+        <ul>
+          <li>
+            <code><strong>x</strong> &lt;Number&gt;</code>
+            <p>The x-coordinate to aim at.</p>
+          </li>
+          <li>
+            <code><strong>y</strong> &lt;Number&gt;</code>
+            <p>The y-coordinate to aim at.</p>
+        </ul>
+      </div>
+    </div>
+
+    <a name="equip"></a>
+    <div class="function">
+      <div class="name">
+        <code>void <strong>equip</strong>( [ weapon ] )</code>
+      </div>
+      <p class="description">If <code>weapon</code> is of type String, the weapon with that name is equipped. If <code>weapon</code> is of type Weapon, the weapon with a name of <code>weapon.name</code> is equipped. If no matching weapon is found or <code>weapon</code> is not set, the current weapon is unequipped.</p>
+       <div class="params">
+        <strong>Parameters</strong>
+        <ul>
+          <li>
+            <code><strong>weapon</strong> &lt;String|<a href="objects.html#weapon-obj">Weapon</a>&gt;</code>
+            <p>The weapon or name of the weapon to be equipped.</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <a name="equipped"></a>
+    <div class="function">
+      <div class="name">
+        <code><a href="objects.html#weapon-obj">Weapon</a> <strong>equipped</strong>()</code>
+      </div>
+      <p class="description">Returns the currently equipped weapon object, or null if no weapon is currently equipped.</p>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;<a href="objects.html#weapon-obj">Weapon</a>&gt;
+        <p>The currently equipped weapon.</p>
+      </div>
+    </div>
+
+    <a name="weapons-func"></a>
+    <div class="function">
+      <div class="name">
+        <code>Array <strong>weapons</strong>()</code>
+      </div>
+      <p class="description">Gets an array of weapons available to the player ship.</p>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;Array&gt;
+        <p>The array of available <a href="objects.html#weapon-obj">Weapon</a> objects.</p>
+      </div>
+    </div>
+
+    <a name="storage"></a>
+    <h3 class="function-class">Storage</h3>
+
+    <a name="load"></a>
+    <div class="function">
+      <div class="name">
+        <code>Object <strong>load</strong>( key, [ defaultValue ] )</code>
+      </div>
+      <p class="description">Loads a value from the given key from persistent storage.</p>
+      <div class="params">
+        <strong>Parameters</strong>
+        <ul>
+          <li>
+            <code><strong>key</strong> &lt;String&gt;</code>
+            <p>The key from which to load the value.</p>
+          </li>
+          <li>
+            <code><strong>defaultValue</strong> &lt;Object&gt;</code>
+            <p>The default value to return if no value stored at key.
+          </li>
+        </ul>
+      </div>
+      <div class="returns">
+        <strong>Returns:</strong> &lt;Object&gt;
+        <p>The value stored at the given key, or the defaultValue.</p>
+      </div>
+    </div>
+
+    <a name="store"></a>
+    <div class="function">
+      <div class="name">
+        <code>void <strong>store</strong>( key, value )</code>
+      </div>
+      <p class="description">Stores a value at the given key in persistent storage.</p>
+      <div class="params">
+        <strong>Parameters</strong>
+        <ul>
+          <li>
+            <code><strong>key</strong> &lt;String&gt;</code>
+            <p>The key at which to store the given value.</p>
+          </li>
+          <li>
+            <code><strong>value</strong> &lt;Object&gt;</code>
+            <p>The value to store at the given key.</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <a name="logging"></a>
+    <h3 class="function-class">Logging</h3>
+
+    <a name="console.error"></a>
+    <div class="function">
+      <div class="name">
+        <code>void <strong>console.error</strong>( message )</code>
+      </div>
+      <p class="description">Prints the given message to the console as an error. Pops out the console window if it is currently hidden.</p>
+      <div class="params">
+        <strong>Parameters</strong>
+        <ul>
+          <li>
+            <code><strong>message</strong> &lt;String|Object&gt;</code>
+            <p>If the message is of type Object, its JSON representation is printed instead.</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <a name="console.log"></a>
+    <div class="function">
+      <div class="name">
+        <code>void <strong>console.log</strong>( message )</code>
+      </div>
+      <p class="description">Prints the given message to the console.</p>
+      <div class="params">
+        <strong>Parameters</strong>
+        <ul>
+          <li>
+            <code><strong>message</strong> &lt;String|Object&gt;</code>
+            <p>If the message is of type Object, its JSON representation is printed instead.</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <a name="console.warn"></a>
+    <div class="function">
+      <div class="name">
+        <code>void <strong>console.warn</strong>( message )</code>
+      </div>
+      <p class="description">Prints the given message to the console as a warning.</p>
+      <div class="params">
+        <strong>Parameters</strong>
+        <ul>
+          <li>
+            <code><strong>message</strong> &lt;String|Object&gt;</code>
+            <p>If the message is of type Object, its JSON representation is printed instead.</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
