@@ -189,12 +189,11 @@ html, body {
 #level-selector #levels .level {
     display: inline-block;
     width: 130px;
-    height: 130px;
     margin: 10px;
     background: #eee;
     border-radius: 10px;
     border: 1px solid #999;
-    vertical-align: bottom;
+    vertical-align: top;
 }
 #level-selector #levels .level:hover {
     background: #ddd;
@@ -215,10 +214,7 @@ html, body {
     background: #000;
 }
 #level-selector #levels .level .name {
-    height: 30px;
-    line-height: 30px;
-    padding: 0 10px;
-    white-space: nowrap;
+    padding: 5px 10px;
     overflow: hidden;
     border-top: 1px solid #999;
 }

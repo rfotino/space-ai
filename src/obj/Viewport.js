@@ -22,8 +22,8 @@ var Viewport = function() {
 Viewport.prototype.scale = function(scale, clamp) {
     this._scale *= scale;
     if (clamp) {
-        var minScale = 0.5;
-        var maxScale = 2.5;
+        var minScale = 0.25;
+        var maxScale = 5;
         if (this._scale < minScale) {
             this._scale = minScale;
         } else if (maxScale < this._scale) {

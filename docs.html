@@ -14,17 +14,12 @@
       $(document).ready(function() {
         $('iframe.example').each(function(index, iframe) {
           $(iframe).on('load', function() {
-            var theme = 'elegant';
-            try {
-              if (localStorage.hasOwnProperty('theme')) {
-                theme = localStorage.getItem('theme');
-              }
-            } catch (e) { }
             var config = {
               value: $(iframe).contents().text(),
               mode: 'javascript',
-              theme: theme,
-              lineNumbers: true
+              theme: 'elegant',
+              lineNumbers: true,
+              readOnly: true
             };
             CodeMirror(function(elem) {
               iframe.parentNode.replaceChild(elem, iframe);

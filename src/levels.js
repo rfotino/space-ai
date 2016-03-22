@@ -141,6 +141,10 @@ module.exports = [
             ]
         }; }
     }),
+    new Level({
+        name: 'This is a test level with quite a long name!',
+        stateFunc: function() { return {}; }
+    }),
     // Testing some new types of objects
     new Level({
         name: 'Space Mines',
