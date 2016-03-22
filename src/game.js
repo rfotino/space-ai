@@ -106,6 +106,9 @@ exports.install = function(code) {
                     running = false;
                     updateMenu();
                 }
+                if ('win' === level.complete()) {
+                    menubar.addWonLevel(level.name);
+                }
             }
             frameComplete = true;
             if (timerComplete && running) {

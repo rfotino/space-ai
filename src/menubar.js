@@ -13,14 +13,58 @@ var levels = require('./levels.js');
 
 // Declare variables for DOM elements and handling state
 var state, selectedLevel = null, levelsDiv, showLevelsBtn, hideLevelsBtn,
-    loadLevelBtn, restartBtn, runBtn, levelDivsArr = [];
+    loadLevelBtn, restartBtn, runBtn, levelDivsArr = [], wonLevels = [];
 
 // Try to set default local storage for saved files, if not set
 try {
-    if (!localStorage.hasOwnProperty('savedFiles')) {
+    if (!('savedFiles' in localStorage)) {
         localStorage.setItem('savedFiles', JSON.stringify({}));
     }
 } catch (e) { }
+
+// Try to read won levels from local storage
+try {
+    if ('wonLevels' in localStorage) {
+        wonLevels = JSON.parse(localStorage.getItem('wonLevels'));
+    }
+} catch (e) { }
+
+// Draws green checkmarks on top of level thumbnails that have been completed
+var drawWinIndicators = function() {
+    for (var i = 0; i < levelDivsArr.length; i++) {
+        var item = levelDivsArr[i];
+        if (item.winIndicator || -1 === wonLevels.indexOf(item.level.name)) {
+            continue;
+        }
+        item.winIndicator = true;
+        var ctx = item.div.find('canvas')[0].getContext('2d');
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.strokeStyle = '#0f0';
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(ctx.canvas.width * 0.35, ctx.canvas.height * 0.5);
+        ctx.lineTo(ctx.canvas.width * 0.5, ctx.canvas.height * 0.7);
+        ctx.lineTo(ctx.canvas.width * 0.75, ctx.canvas.height * 0.2);
+        ctx.stroke();
+    }
+};
+
+/**
+ * Adds a level to the list of won levels and draws a green checkmark on top
+ * of the level thumbnail. Also saves the list of won levels to local storage.
+ *
+ * @param {String} levelName
+ */
+exports.addWonLevel = function(levelName) {
+    if (-1 !== wonLevels.indexOf(levelName)) {
+        return;
+    }
+    wonLevels.push(levelName);
+    try {
+        localStorage.setItem('wonLevels', JSON.stringify(wonLevels));
+    } catch (e) { }
+    drawWinIndicators();
+};
 
 /**
  * setState(state);
@@ -180,9 +224,13 @@ exports.init = function() {
             // Add to level divs array
             levelDivsArr.push({
                 level: level,
-                div: div
+                div: div,
+                winIndicator: false
             });
         }
+
+        // Draw win indicators for levels won in other sessions
+        drawWinIndicators();
 
         // Set up show/hide/load button listeners for level selector
         showLevelsBtn.on('click', function(e) {

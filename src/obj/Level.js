@@ -282,7 +282,7 @@ Level.prototype.updateWorld = function(world) {
  */
 Level.prototype.complete = function() {
     return 'undefined' !== typeof this._state &&
-        'undefined' !== typeof this._state.gameOver;
+        this._state.gameOver;
 };
 
 /**
