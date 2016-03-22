@@ -19,6 +19,7 @@
               mode: 'javascript',
               theme: 'elegant',
               lineNumbers: true,
+              lineWrapping: true,
               readOnly: true
             };
             CodeMirror(function(elem) {
@@ -45,7 +46,10 @@
       <li>
         <a href="#examples">Code Examples</a>
         <ol>
-          <li><a href="#servo-example">Servo</a></li>
+          <li><a href="#radar-example">Radar Usage</a></li>
+          <li><a href="#weapons-example">Weapons Usage</a></li>
+          <li><a href="#persistent-example">Persistent Variables</a></li>
+          <li><a href="#state-machines-example">State Machines</a></li>
         </ol>
       </li>
       <li>
@@ -220,9 +224,21 @@
     <a name="examples"></a>
     <h2 class="section">Code Examples</h2>
 
-    <a name="servo-example"></a>
-    <h3>Servo</h3>
-    <iframe class="example" src="examples/servo.js"></iframe>
+    <a name="radar-example"></a>
+    <h3>Radar Usage</h3>
+    <iframe class="example" src="examples/radar.js"></iframe>
+
+    <a name="weapons-example"></a>
+    <h3>Weapons Usage</h3>
+    <iframe class="example" src="examples/weapons.js"></iframe>
+
+    <a name="persistent-example"></a>
+    <h3>Persistent Variables</h3>
+    <iframe class="example" src="examples/persistent.js"></iframe>
+
+    <a name="state-machines-example"></a>
+    <h3>State Machines</h3>
+    <iframe class="example" src="examples/state-machines.js"></iframe>
 
     <!-- Function Reference -->
     <a name="function-ref"></a>
@@ -387,13 +403,13 @@
       <div class="name">
         <code>void <strong>equip</strong>( [ weapon ] )</code>
       </div>
-      <p class="description">If weapon is falsey or not set, unequips the currently equipped weapon. If weapon is set and equippable, equips the given weapon.</p>
+      <p class="description">If <code>weapon</code> is of type String, the weapon with that name is equipped. If <code>weapon</code> is of type Weapon, the weapon with a name of <code>weapon.name</code> is equipped. If no matching weapon is found or <code>weapon</code> is not set, the current weapon is unequipped.</p>
        <div class="params">
         <strong>Parameters</strong>
         <ul>
           <li>
             <code><strong>weapon</strong> &lt;String|<a href="#weapon-obj">Weapon</a>&gt;</code>
-            <p>If weapon is a String, it is treated as representing a weapon name. If weapon is an Object, it is treated as a complete weapon object with a 'name' property.</p>
+            <p>The weapon or name of the weapon to be equipped.</p>
           </li>
         </ul>
       </div>

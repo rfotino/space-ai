@@ -123,17 +123,14 @@
         }),
         // Weapons-related functions
         equip: hideFunc(function(weapon) {
-            if (!weapon) {
-                // Unequip weapon
-                world.player.equipped = null;
-            } else {
-                // Find the weapon to equip and equip it. The weapon can
-                // be either a name or a weapon object
-                for (var i = 0; i < world.player.weapons.length; i++) {
-                    var w = world.player.weapons[i];
-                    if (w.name === weapon.name || w.name === weapon) {
-                        world.player.equipped = w.name;
-                    }
+            // Unequip weapon by default
+            world.player.equipped = null;
+            // Find the weapon to equip and equip it. The weapon can
+            // be either a name or a weapon object
+            for (var i = 0; i < world.player.weapons.length; i++) {
+                var w = world.player.weapons[i];
+                if (w.name === weapon.name || w.name === weapon) {
+                    world.player.equipped = w.name;
                 }
             }
         }),
