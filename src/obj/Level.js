@@ -26,6 +26,11 @@ function Level(props) {
     this.name = props.name;
     this.help = props.help || null;
     this._stateFunc = props.stateFunc;
+    if (props.gameOverFunc) {
+        this._checkWinConditions = function() {
+            this._state.gameOver = props.gameOverFunc(this._state);
+        };
+    }
     this._mousePos = null;
     this._debugMode = false;
     this.highlightedObj = null;

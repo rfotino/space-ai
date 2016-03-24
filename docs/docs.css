@@ -27,15 +27,15 @@ h2 {
 h3 {
     font-size: 1.3em;
 }
-p {
-    margin: 10px 0;
-}
 a.breadcrumb {
     display: inline-block;
     margin-top: 10px;
 }
 
 /* Table of Contents */
+p.intro {
+    margin: 10px 0;
+}
 #table-of-contents {
     padding-top: 10px;
 }

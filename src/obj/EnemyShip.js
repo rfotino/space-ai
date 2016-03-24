@@ -20,9 +20,9 @@ var EnemyShip = function(props) {
     props.type = 'ship';
     EnemyTarget.prototype.constructor.call(this, props);
     this.path = props.path || [ { x: this.pos.x, y: this.pos.y } ];
-    this.chaseRange = props.chaseRange || 750;
-    this.shootRange = props.shootRange || 500;
-    this.hoverRange = props.hoverRange || 200;
+    this.chaseRange = props.chaseRange || 400;
+    this.shootRange = Math.min(props.shootRange || 300, this.chaseRange);
+    this.hoverRange = Math.min(props.hoverRange || 150, this.shootRange);
     this.radius = props.radius || 50;
     this.weapon = props.weapon || new LaserWeapon();
     this.zDepth = 60;
@@ -90,15 +90,15 @@ EnemyShip.prototype._updatePath = function() {
 };
 
 /**
- * Shoot at the player.
+ * Shoot at the given object.
  *
- * @param {Player} player
+ * @param {Object} obj
  */
-EnemyShip.prototype._shootPlayer = function(player) {
-    var dirVector = physics.dif(player.pos, this.pos);
+EnemyShip.prototype._shootObj = function(obj) {
+    var dirVector = physics.dif(obj.pos, this.pos);
     var dist = physics.dist(dirVector);
-    dirVector.x += player.vel.x * dist / this.weapon.bulletSpeed;
-    dirVector.y += player.vel.y * dist / this.weapon.bulletSpeed;
+    dirVector.x += obj.vel.x * dist / this.weapon.bulletSpeed;
+    dirVector.y += obj.vel.y * dist / this.weapon.bulletSpeed;
     if (0 === dirVector.x && 0 === dirVector.y) {
         dirVector.x = 1;
     }
@@ -113,21 +113,21 @@ EnemyShip.prototype._shootPlayer = function(player) {
 };
 
 /**
- * Chase the player to get a better shot.
+ * Chase the object to get a better shot.
  *
- * @param {Player} player
+ * @param {GameObject} obj
  */
-EnemyShip.prototype._chasePlayer = function(player) {
-    var dist = physics.dist(player.pos, this.pos);
+EnemyShip.prototype._chaseObj = function(obj) {
+    var dist = physics.dist(obj.pos, this.pos);
     if (dist <= this.chaseRange) {
-        // Project a vector from the player out toward the enemy ship at
-        // a distance of this.hoverRange from the player. This is the point
+        // Project a vector from obj out toward the enemy ship at
+        // a distance of this.hoverRange from obj. This is the point
         // at which we want to hover and fire.
         var hoverPos =
             physics.sum(
-                player.pos,
+                obj.pos,
                 physics.mul(this.hoverRange,
-                            physics.unit(physics.dif(this.pos, player.pos))));
+                            physics.unit(physics.dif(this.pos, obj.pos))));
         var distToHover = physics.dist(this.pos, hoverPos);
         var speed = physics.dist(this.vel);
         var decelDist = Math.pow(speed, 2) / this._maxAccel;
@@ -165,21 +165,28 @@ EnemyShip.prototype.update = function(objList) {
     if (this.weapon) {
         this.weapon.update();
     }
-    // Get the player from the list of objects
-    var player = null;
-    objList.forEach(function(obj) {
-        if ('player' === obj.type) {
-            player = obj;
+    // Get the closest Player or FriendlyTarget
+    var objToAttack = null;
+    var objDist = Infinity;
+    for (var i = 0; i < objList.length; i++) {
+        var obj = objList[i];
+        if ('player' === obj.type ||
+            ('target' === obj.type && 'defend' === obj.objective)) {
+            var dist = physics.dist(obj.pos, this.pos);
+            if (dist < objDist) {
+                objToAttack = obj;
+                objDist = dist;
+            }
         }
-    });
+    }
     // Decide what to do based on the state
-    var playerInRange =
-        null !== player &&
-        physics.dist(player.pos, this.pos) <= Math.max(this.shootRange, this.chaseRange);
+    var objInRange =
+        null !== objToAttack &&
+        objDist <= Math.max(this.shootRange, this.chaseRange);
     switch (this._state) {
     case 'idle':
         this._maxAccel = this._maxPathAccel;
-        if (playerInRange) {
+        if (objInRange) {
             this._state = 'attacking';
         } else {
             this._updatePath();
@@ -187,16 +194,16 @@ EnemyShip.prototype.update = function(objList) {
         break;
     case 'attacking':
         this._maxAccel = this._maxChaseAccel;
-        if (playerInRange) {
-            this._shootPlayer(player);
-            this._chasePlayer(player);
+        if (objInRange) {
+            this._shootObj(objToAttack);
+            this._chaseObj(objToAttack);
         } else {
             this._state = 'returning';
         }
         break;
     case 'returning':
         this._maxAccel = this._maxChaseAccel;
-        if (playerInRange) {
+        if (objInRange) {
             this._state = 'attacking';
         } else if (0 === this.vel.x && 0 === this.vel.y) {
             this._pathElapsedDuration = 0;
@@ -267,6 +274,9 @@ EnemyShip.prototype.draw = function(ctx) {
 EnemyShip.prototype.getObj = function() {
     var obj = EnemyTarget.prototype.getObj.call(this);
     return $.extend(obj, {
+        chaseRange: this.chaseRange,
+        shootRange: this.shootRange,
+        hoverRange: this.hoverRange,
         weapon: this.weapon.getObj()
     });
 };
