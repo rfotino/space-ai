@@ -24,7 +24,7 @@
       <div class="name">
         <code>Number <strong>thrust</strong>( [ power ] )</code>
       </div>
-      <p class="description">Optionally updates the power setting of the player ship's main engines to a value between 0 and 1, then returns the power setting.</p>
+      <p class="description">Optionally updates the power setting of the player ship's main engines to a value between 0 and 1, then returns the power setting. A thrust value of 0 corresponds to 0 acceleration, and a thrust value of 1 corresponds to 0.5 units/frame^2 of acceleration in the direction the player's ship is pointing.</p>
       <div class="params">
         <strong>Parameters</strong>
         <ul>
@@ -45,7 +45,7 @@
       <div class="name">
         <code>Number <strong>turn</strong>( [ power ] )</code>
       </div>
-      <p class="description">Optionally updates the power setting of the player ship's turning engines to a value between 1 (counterclockwise) and -1 (clockwise), then returns the power setting.</p>
+      <p class="description">Optionally updates the power setting of the player ship's turning engines to a value between 1 (counterclockwise) and -1 (clockwise), then returns the power setting. A turn value of 1 corresponds to 0.005 radians/frame^2 of angular acceleration and a turn value of -1 corresponds to -0.005 radians/frame^2 of angular acceleration.</p>
       <div class="params">
         <strong>Parameters</strong>
         <ul>
