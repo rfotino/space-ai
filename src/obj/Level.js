@@ -93,8 +93,14 @@ Level.prototype._updateGameObjects = function() {
     // Do collision detection between all game objects
     for (var i = 0; i < this._state.objects.length; i++) {
         var objA = this._state.objects[i];
+        if (!objA.alive) {
+            continue;
+        }
         for (var j = i + 1; j < this._state.objects.length; j++) {
             var objB = this._state.objects[j];
+            if (!objB.alive) {
+                continue;
+            }
             // If the two objects intersect each other, call their collide
             // functions on each other
             if (physics.testIntersection(objA, objB)) {
