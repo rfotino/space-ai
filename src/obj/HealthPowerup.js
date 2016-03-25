@@ -15,7 +15,7 @@ var HealthPowerup = function(props) {
     props.type = 'health';
     Powerup.prototype.constructor.call(this, props);
     this.health = props.health || 25;
-    this.radius = props.radius || 15;
+    this.radius = props.radius || 20;
 };
 
 // Extend Powerup

@@ -264,10 +264,7 @@ module.exports = [
                 }));
             }
             return {
-                player: new Player({
-                    health: 5,
-                    weapons: [ new LaserWeapon() ]
-                }),
+                player: new Player({ health: 5 }),
                 objects: [
                     new WeaponPowerup({
                         pos: {
@@ -340,6 +337,148 @@ module.exports = [
                 return 'lose';
             } else if (allEnemyShipsDestroyed) {
                 return 'win';
+            }
+        }
+    }),
+    // A level with a randomly generated asteroid field and a reach
+    // target on the other side
+    new Level({
+        name: 'Asteroid Field',
+        help: 'Sir, the odds of successfully navigating an asteroid ' +
+            'field are 3,720 to 1!',
+        stateFunc: function() {
+            var asteroids = [];
+            for (var i = 0; i < 12; i++) {
+                // Top wall of asteroids
+                asteroids.push(new Asteroid({
+                    pos: { x: (i - 1) * 150, y: 375 },
+                    radius: 75
+                }));
+                // Bottom wall of asteroids
+                asteroids.push(new Asteroid({
+                    pos: { x: (i - 1) * 150, y: -375 },
+                    radius: 75
+                }));
+                // Left wall of asteroids
+                if (i < 4) {
+                    asteroids.push(new Asteroid({
+                        pos: { x: -150, y: (i - 1.5) * 150 },
+                        radius: 75
+                    }));
+                }
+                // Asteroid field
+                if (i < 4) {
+                    asteroids.push(new Asteroid({
+                        pos: {
+                            x: 250 + (400 * i),
+                            y: 300 * (Math.random() - 0.5)
+                        },
+                        radius: 150
+                    }));
+                }
+            }
+            return {
+                objects: [
+                    new ReachTarget({ pos: { x: 1250, y: 0 }, win: true })
+                ].concat(asteroids)
+            };
+        }
+    }),
+    // Navigate through a mine field to get to the reach target
+    new Level({
+        name: 'Mine Field',
+        help: 'Don\'t touch any of those mines!',
+        stateFunc: function() {
+            var asteroids = [];
+            for (var i = 0; i < 12; i++) {
+                // Top wall of asteroids
+                asteroids.push(new Asteroid({
+                    pos: { x: (i - 1) * 150, y: 375 },
+                    radius: 75
+                }));
+                // Bottom wall of asteroids
+                asteroids.push(new Asteroid({
+                    pos: { x: (i - 1) * 150, y: -375 },
+                    radius: 75
+                }));
+                // Left wall of asteroids
+                if (i < 4) {
+                    asteroids.push(new Asteroid({
+                        pos: { x: -150, y: (i - 1.5) * 150 },
+                        radius: 75
+                    }));
+                }
+            }
+            var mines = [];
+            var inTheWayIndex = Math.floor(10 * Math.random());
+            for (var i = 0; i < 10; i++) {
+                var y;
+                if (i === inTheWayIndex) {
+                    y = 0;
+                } else {
+                    y = -250 + (500 * Math.random());
+                }
+                mines.push(new SpaceMine({
+                    pos: {
+                        x: 200 + (130 * i),
+                        y: y
+                    }
+                }));
+            }
+            return {
+                player: new Player({ health: 25 }),
+                objects: [
+                    new ReachTarget({ pos: { x: 1500, y: 0 }, win: true })
+                ].concat(asteroids, mines)
+            };
+        }
+    }),
+    // Enemy ships in a formation
+    new Level({
+        name: 'Formation',
+        help: 'It might be best to pick off those enemy ships one at a time.',
+        stateFunc: function() {
+            var enemies = [];
+            for (var i = 0; i < 4; i++) {
+                for (var j = 0; j < 3; j++) {
+                    var p = { x: -195 + (i * 130), y: 500 + (j * 130) };
+                    enemies.push(new EnemyShip({
+                        health: 25,
+                        pos: { x: p.x, y: p.y + 50 },
+                        path: [
+                            { x: p.x + 250, y: p.y + 50 },
+                            { x: p.x + 250, y: p.y - 50 },
+                            { x: p.x - 250, y: p.y - 50 },
+                            { x: p.x - 250, y: p.y + 50}
+                        ],
+                        win: true
+                    }));
+                }
+            }
+            return {
+                player: new Player({
+                    pos: { angular: Math.PI / 2 },
+                    weapons: [ new LaserWeapon({ range: 400 }) ],
+                    equipped: 'laser'
+                }),
+                objects: [
+                    new WeaponPowerup({
+                        pos: { x: -550, y: 380 },
+                        weapon: new RocketWeapon({ ammo: 6 })
+                    }),
+                    new HealthPowerup({
+                        pos: { x: 550, y: 380 },
+                        health: 50
+                    }),
+                    new WeaponPowerup({
+                        pos: { x: 550, y: 880 },
+                        weapon: new RocketWeapon({ ammo: 6 })
+                    }),
+                    new HealthPowerup({
+                        pos: { x: -550, y: 880 },
+                        health: 50
+                    })
+                ].concat(enemies)
             }
         }
     })
