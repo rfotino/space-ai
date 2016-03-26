@@ -69,6 +69,15 @@ Viewport.prototype.focus = function(gameObj) {
 };
 
 /**
+ * Returns true if the viewport is focused on a game object, false otherwise.
+ *
+ * @return {Boolean}
+ */
+Viewport.prototype.isFocused = function() {
+    return !!this._focusObj;
+};
+
+/**
  * Fixes the viewport to the given in-game bounds, given the pixel
  * dimensions of the view bounds.
  *

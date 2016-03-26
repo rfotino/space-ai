@@ -33,6 +33,7 @@ function Level(props) {
     }
     this._mousePos = null;
     this._debugMode = false;
+    this._initialBounds = props.bounds || 'level';
     this.highlightedObj = null;
     this.viewport = new Viewport();
 };
@@ -57,6 +58,25 @@ Level.prototype.init = function() {
     });
     // Set up the star field
     this._state.starField = new StarField();
+};
+
+/**
+ * Initializes the viewport bounds, which can vary in initial value
+ * depending on the level.
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ */
+Level.prototype.initBounds = function(ctx) {
+    if ('player' === this._initialBounds) {
+        this.viewToPlayer();
+    } else if (ctx && 'level' === this._initialBounds) {
+        this.viewToBounds(ctx.canvas.width, ctx.canvas.height);
+    } else if (ctx) {
+        this.viewport.fixToBounds(this._initialBounds,
+                                  ctx.canvas.width,
+                                  ctx.canvas.height,
+                                  true);
+    }
 };
 
 /**

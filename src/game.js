@@ -14,7 +14,7 @@ var Level = require('./obj/Level.js');
 // Declare variables for DOM elements and handling state
 var canvas, ctx, worker = null, running = false,
     frameComplete = true, timerComplete = true,
-    level = null, installedCode = null, playerFocus = true,
+    level = null, installedCode = null,
     mousePos = null, debugMode = false;
 
 // Update the run/pause button in the menu to the correct state
@@ -164,7 +164,6 @@ exports.load = (function() {
     } catch (e) { }
     return function(newLevel) {
         // Save the initial state and start the game
-        playerFocus = true;
         level = newLevel;
         level.viewport.reset();
         if (mousePos) {
@@ -172,6 +171,8 @@ exports.load = (function() {
         }
         level.setDebugMode(debugMode);
         exports.restart();
+        level.initBounds(ctx);
+        exports.draw();
         // Show the help dialog if this level has help text
         if (newLevel.help && showHelp) {
             var helpTag = $('<p />')
@@ -206,6 +207,7 @@ exports.restart = function() {
         running = false;
     }
     if (null !== level) {
+        var playerFocus = level.viewport.isFocused();
         level.init();
         if (playerFocus) {
             level.viewToPlayer();
@@ -315,6 +317,7 @@ exports.init = function() {
         ctx = canvas.getContext('2d');
         exports.load(new Level({
             name: 'Select Level',
+            bounds: 'player',
             stateFunc: function() { return {}; }
         }));
         exports.install('');
@@ -350,7 +353,6 @@ exports.viewToPlayer = function() {
  */
 exports.viewToBounds = function() {
     if (level) {
-        playerFocus = false;
         level.viewToBounds(ctx.canvas.width, ctx.canvas.height);
         exports.draw();
     }
@@ -365,7 +367,6 @@ exports.viewToBounds = function() {
  */
 exports.viewTranslate = function(x, y) {
     if (level) {
-        playerFocus = false;
         level.viewport.focus(null);
         level.viewTranslate(x, y);
         exports.draw();

@@ -61,6 +61,7 @@ module.exports = [
         name: 'Destroy',
         help: 'To complete this level you will need to equip a weapon and ' +
             'fire at the enemy target.',
+        bounds: { x: -320, y: -320, width: 640, height: 640 },
         stateFunc: function() {
             var angle = Math.random() * Math.PI * 2;
             var radius = 250;
@@ -92,6 +93,7 @@ module.exports = [
         help: 'You turned a quarter rotation counterclockwise before - ' +
             'how about turning an arbitrary amount? Hint: use the ' +
             'Math.atan2(y, x) function.',
+        bounds: { x: -320, y: -320, width: 640, height: 640 },
         stateFunc: function() {
             var angle = Math.random() * Math.PI * 2;
             var radius = 250;
@@ -115,6 +117,7 @@ module.exports = [
         help: 'There is an obstacle in the way of the reach target! You ' +
             'will need a more sophisticated flight path to complete this ' +
             'level.',
+        bounds: { x: -50, y: -250, width: 600, height: 500 },
         stateFunc: function() { return {
             objects: [
                 new Asteroid({
@@ -133,6 +136,7 @@ module.exports = [
         name: 'Lure',
         help: 'Be careful of the space mines! You will need to lure them ' +
             'away before charging in.',
+        bounds: { x: -50, y: -250, width: 700, height: 500 },
         stateFunc: function() {
             var mines = [];
             var xPos = 500;
@@ -161,6 +165,7 @@ module.exports = [
         name: 'Grab Ammo',
         help: 'You might want to grab some ammunition before taking on ' +
             'those enemy ships!',
+        bounds: { x: -50, y: -300, width: 1075, height: 600 },
         stateFunc: function() {
             var theta = Math.PI / 4,
                 r = 75,
@@ -203,6 +208,7 @@ module.exports = [
         name: 'Hostage Crisis',
         help: 'Those space mines are holding a friendly target hostage! ' +
             'Destroy the mines before they blow your friend to bits.',
+        bounds: { x: -50, y: -250, width: 675, height: 500 },
         stateFunc: function() {
             var mines = [];
             for (var i = 0; i < 8; i++) {
@@ -235,6 +241,7 @@ module.exports = [
     new Level({
         name: 'Sentries',
         help: 'Destroy the enemy targets, but don\'t let those ships see you!',
+        bounds: { x: -50, y: -670, width: 1350, height: 1340 },
         stateFunc: function() {
             var targetPositions = [
                 { x: 1000, y: 350 },
@@ -281,6 +288,7 @@ module.exports = [
     new Level({
         name: 'Aggro',
         help: 'Don\'t let the enemy ships destroy your targets!',
+        bounds: { x: -320, y: -220, width: 640, height: 690 },
         stateFunc: function() {
             var friendlies = [];
             for (var i = 0; i < 3; i++) {
