@@ -18,6 +18,145 @@ var EnemyShip = require('./obj/EnemyShip.js');
 var HealthPowerup = require('./obj/HealthPowerup.js');
 var WeaponPowerup = require('./obj/WeaponPowerup.js');
 
+/**
+ * A function to generate a concentric square maze out of asteroids. Takes
+ * in an array of numbers that each represent the length of one of the sides
+ * of that square. Each concentric square layer has a gap of two asteroids
+ * to allow passage into the next layer. Each layer also has an asteroid to
+ * block the path somewhere along its route. All square layers are centered
+ * around (0, 0).
+ *
+ * @param {Number[]} squareSizes
+ * @return {Object} An object with a Vector property called 'playerPos' that
+ * should be used as the starting position of the player's ship, and an
+ * Asteroid array property that is the maze of asteroids itself.
+ */
+function getSquareMaze(squareSizes) {
+    // Make sure the squareSizes are in decending order
+    squareSizes.sort(function(a, b) { return a - b; }).reverse();
+    // Define a function to add one square layer to the maze
+    var asteroids = [];
+    var addSquare = function(width, innerWidth, outerInfo) {
+        var radius = 70; // Asteroid radius
+        var diameter = radius * 2; // Asteroid diameter
+        var count = Math.ceil(width / diameter); // Asteroids per side
+        var top = [], right = [], bottom = [], left = []; // 4 asteroid lines
+        // Generate all 4 sides of the square as coordinates
+        for (var i = 0; i < count; i++) {
+            var p = {
+                x: (i - ((count - 1) / 2))
+                    * ((width + diameter) / count),
+                y: width / 2
+            };
+            top.push(p);
+            bottom.push({ x: p.x, y: -p.y });
+            if (i !== 0 && i !== count - 1) {
+                left.push({ x: -p.y, y: p.x });
+                right.push({ x: p.y, y: p.x });
+            }
+        }
+        // Concatenate all 4 sides into a square such that the order of
+        // coordinates is always clockwise
+        var square = top.concat(right.reverse(),
+                                bottom.reverse(), left);
+        // Store data about the layer's gap and blocker asteroid in 'info'
+        var info = {};
+        while (true) {
+            // Choose a random pair of adjacent asteroids to be the gap, and
+            // do some math to figure out which side the gap is on
+            var gap = Math.floor((square.length - 1) * Math.random());
+            var info = { gap: {
+                x: (square[gap].x + square[gap + 1].x) / 2,
+                y: (square[gap].y + square[gap + 1].y) / 2
+            } };
+            var gapAngle = Math.atan2(info.gap.y, info.gap.x);
+            var sideAngle = ((9 * Math.PI / 4) + gapAngle) % (2 * Math.PI);
+            // 0, 1, 2, 3 = right, top, left, bottom
+            info.gap.side = Math.floor(sideAngle * 2 / Math.PI);
+            // If the gap is on the same side as the outer layer's blocker
+            // asteroid, reset 'info' and try again
+            if ((outerInfo && outerInfo.blocker
+                 && info.gap.side === outerInfo.blocker.side)
+                || (outerInfo && info.gap.side === outerInfo.gap.side)) {
+                info = {};
+            } else {
+                // Add all the asteroids to the main array except the ones
+                // that are part of the gap
+                for (var i = 0; i < square.length; i++) {
+                    if (i === gap || i === gap + 1) {
+                        continue;
+                    }
+                    var p = square[i];
+                    asteroids.push(new Asteroid({
+                        pos: { x: p.x, y: p.y },
+                        radius: radius + 5 // Increase radius to tighten gaps
+                    }));
+                }
+                break;
+            }                
+        }
+        // If there is no more inner layer, do not have a blocker asteroid for
+        // this layer
+        if (!innerWidth) {
+            return info;
+        }
+        // Otherwise create a blocker asteroid for this layer and add it to the
+        // overall list of asteroids; make sure it is not on the same side as
+        // the gap
+        info.blocker = {};
+        do {
+            info.blocker.side = Math.floor(4 * Math.random());
+        } while (info.blocker.side === info.gap.side);
+        var blockerRadius = ((width - innerWidth) / 4) - radius;
+        var blockerRange = innerWidth - (2 * blockerRadius);
+        var blockerPos = blockerRange * (Math.random() - 0.5);
+        var p = { x: (width + innerWidth) / 4, y: blockerPos };
+        switch (info.blocker.side) {
+        case 0:
+        default:
+            info.blocker.pos = { x: p.x, y: p.y };
+            break;
+        case 1:
+            info.blocker.pos = { x: p.y, y: p.x };
+            break;
+        case 2:
+            info.blocker.pos = { x: -p.x, y: p.y };
+            break;
+        case 3:
+            info.blocker.pos = { x: p.y, y: -p.x };
+            break;
+        }
+        asteroids.push(new Asteroid({
+            pos: {
+                x: info.blocker.pos.x,
+                y: info.blocker.pos.y
+            },
+            radius: blockerRadius
+        }));
+        return info;
+    }; // End addSquare() helper function
+    // Add all layers of squares given in squareSizes to the list of asteroids.
+    var playerPos;
+    for (var squareInfo, i = 0; i < squareSizes.length; i++) {
+        var innerWidth = i + 1 < squareSizes.length ? squareSizes[i + 1] : 0;
+        squareInfo = addSquare(squareSizes[i], innerWidth, squareInfo);
+        // Place the player in the gap of the outermost layer, facing
+        // the origin
+        if (0 === i) {
+            playerPos = {
+                x: squareInfo.gap.x,
+                y: squareInfo.gap.y,
+                angular: Math.atan2(-squareInfo.gap.y, -squareInfo.gap.x)
+            };
+        }
+    }
+    return {
+        asteroids: asteroids,
+        playerPos: playerPos
+    };
+}
+
+
 // An array of levels that can be loaded from the level selector
 module.exports = [
     // A reach target straight ahead
@@ -488,6 +627,53 @@ module.exports = [
                     })
                 ].concat(enemies)
             }
+        }
+    }),
+    // A circular maze with a reach target in the middle
+    new Level({
+        name: 'Circular Maze',
+        help: 'You will need to enter and navigate this maze to get to the ' +
+            'reach target within.',
+        stateFunc: function() {
+            var asteroids = [];
+            var addRing = function(radius, gap) {
+                var count = Math.floor(2 * radius * Math.PI / 150);
+                if ('undefined' === typeof gap) {
+                    gap = Math.floor(count * Math.random());
+                }
+                for (var i = 0; i < count; i++) {
+                    if (i === gap) {
+                        continue;
+                    }
+                    var angle = 2 * Math.PI * i / count;
+                    asteroids.push(new Asteroid({
+                        pos: {
+                            x: radius * Math.cos(angle),
+                            y: radius * Math.sin(angle)
+                        },
+                        radius: 75
+                    }));
+                }
+            };
+            addRing(1000, 0);
+            addRing(600);
+            addRing(200);
+            return {
+                player: new Player({ pos: { x: 1000, angular: Math.PI } }),
+                objects: [ new ReachTarget({ win: true }) ].concat(asteroids)
+            };
+        }
+    }),
+    // A square maze
+    new Level({
+        name: 'Square Maze',
+        help: 'Solve this randomly-generated maze to get to the reach target.',
+        stateFunc: function() {
+            var maze = getSquareMaze([ 2000, 1250, 500 ]);
+            return {
+                player: new Player({ pos: maze.playerPos }),
+                objects: [ new ReachTarget({ win: true }) ].concat(maze.asteroids)
+            };
         }
     })
 ];
