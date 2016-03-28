@@ -84,6 +84,9 @@ StarField.prototype.draw = function(ctx, viewport) {
     // Repeat the starfield from the minimum indices to the maximum indices,
     // which should completely cover the viewport
     ctx.fillStyle = this._color;
+    var effectiveRadius = this._starRadius * viewport.getScale();
+    var drawAsSquare = effectiveRadius < 1.5;
+    var starDiameter = 2 * this._starRadius;
     for (var i = minXIndex; i < maxXIndex; i++) {
         for (var j = minYIndex; j < maxYIndex; j++) {
             // Define a new random number generator for this iteration of
@@ -106,10 +109,14 @@ StarField.prototype.draw = function(ctx, viewport) {
                 // Check if star is in view before drawing
                 if (viewBounds.x <= adjX && adjX <= viewBoundsRight &&
                     viewBounds.y <= adjY && adjY <= viewBoundsTop) {
-                    ctx.beginPath();
                     // Use -adjY because y-axis is flipped in-game
-                    ctx.arc(adjX, -adjY, this._starRadius, 0, Math.PI * 2);
-                    ctx.fill();
+                    if (drawAsSquare) {
+                        ctx.fillRect(adjX, -adjY, starDiameter, starDiameter);
+                    } else {
+                        ctx.beginPath();
+                        ctx.arc(adjX, -adjY, this._starRadius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 }
             }
         }

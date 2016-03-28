@@ -201,8 +201,7 @@ Level.prototype.draw = function(ctx) {
     var player = this._state.player;
     // Clear the canvas by painting it black
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     // Update the graphics context transform for the viewport
     this.viewport.update(ctx);
     // Draw the stars
@@ -625,8 +624,7 @@ Level.prototype.drawCenteredObject = function(ctx, obj) {
     var viewport = new Viewport();
     var bounds = obj.bounds();
     var padding = 20;
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     bounds.x -= padding;
     bounds.y -= padding;
     bounds.width += 2 * padding;

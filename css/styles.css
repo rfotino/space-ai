@@ -231,6 +231,7 @@ html, body {
 
 /* Game canvas */
 #game-canvas {
+    background-color: #000;
     outline: none;
 }
 
@@ -376,6 +377,7 @@ html, body {
 
 /* Game object info styles */
 .game-obj-info canvas {
+    background-color: #000;
     width: 60%;
     display: inline-block;
     vertical-align: top;
