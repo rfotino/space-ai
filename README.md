@@ -83,7 +83,8 @@ two HTML files that can be viewed in the browser to run the game:
 * [ ] More weapon types
 * [x] Powerups like shields, health
 * [ ] Parallax movement of stars
-* [ ] Quad trees for efficient collision detection / scene rendering
+* [x] Quad trees for efficient collision detection
+* [ ] Quad trees for efficient scene rendering
 * [ ] Planets with gravity mechanics
 * [ ] Better styling for docs
 * [ ] Multiplayer versus mode

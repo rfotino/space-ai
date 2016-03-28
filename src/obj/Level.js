@@ -9,6 +9,7 @@ var graphics = require('../graphics.js');
 var Player = require('./Player.js');
 var Viewport = require('./Viewport.js');
 var StarField = require('./StarField.js');
+var QuadTree = require('./QuadTree.js');
 
 /**
  * Creates a game level with a name and function for getting an initial
@@ -116,24 +117,7 @@ Level.prototype._updateGameObjects = function() {
         }
     }
     // Do collision detection between all game objects
-    for (var i = 0; i < this._state.objects.length; i++) {
-        var objA = this._state.objects[i];
-        if (!objA.alive) {
-            continue;
-        }
-        for (var j = i + 1; j < this._state.objects.length; j++) {
-            var objB = this._state.objects[j];
-            if (!objB.alive) {
-                continue;
-            }
-            // If the two objects intersect each other, call their collide
-            // functions on each other
-            if (physics.testIntersection(objA, objB)) {
-                objA.collide(objB);
-                objB.collide(objA);
-            }
-        }
-    }
+    (new QuadTree(this.bounds(), this._state.objects)).doCollision();
     // Add generated game objects and remove dead ones
     for (var i = this._state.objects.length - 1; 0 <= i; i--) {
         var obj = this._state.objects[i];
