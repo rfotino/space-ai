@@ -218,22 +218,21 @@ Level.prototype.draw = function(ctx) {
     if (this._debugMode) {
         this._state.objects.push(player);
         this._state.objects.forEach(function(obj) {
-            if (obj.alive) {
+            if (obj.alive && obj !== this.highlightedObj) {
                 this._drawHighlightedObj(ctx, obj);
             }
         }, this);
         this._state.objects.forEach(function(obj) {
-            if (obj.alive) {
+            if (obj.alive && obj !== this.highlightedObj) {
                 this._drawToolTip(ctx, obj);
             }
         }, this);
         this._state.objects.pop();
-    } else {
-        this._updateHighlightedObj();
-        if (this.highlightedObj) {
-            this._drawHighlightedObj(ctx, this.highlightedObj);
-            this._drawToolTip(ctx, this.highlightedObj);
-        }
+    }
+    this._updateHighlightedObj();
+    if (this.highlightedObj) {
+        this._drawHighlightedObj(ctx, this.highlightedObj);
+        this._drawToolTip(ctx, this.highlightedObj);
     }
     // Draw win/lose screen if necessary
     if ('undefined' !== typeof this._state.gameOver) {
@@ -463,25 +462,33 @@ Level.prototype._drawHighlightedObj = function(ctx, obj) {
 Level.prototype._drawToolTip = function(ctx, obj) {
     ctx.save();
     var infoArray = [];
-    infoArray.push('type: ' + obj.type);
-    if ('undefined' !== typeof obj.objective) {
-        infoArray.push('objective: ' + obj.objective);
-    }
-    if ('undefined' !== typeof obj.damage) {
-        infoArray.push('damage: ' + obj.damage);
-    }
-    if ('undefined' !== typeof obj.health) {
-        infoArray.push('health: ' + obj.health);
-    }
-    if ('undefined' !== typeof obj.radius) {
-        infoArray.push('radius: ' + obj.radius);
-    }
-    infoArray.push('position: (' + Math.round(obj.pos.x) + ', ' +
-                   Math.round(obj.pos.y) + ')');
-    var piMultiple = obj.pos.angular / Math.PI;
     var piSymbol = '\u03C0';
-    infoArray.push('rotation: ' +
-                   (Math.round(piMultiple * 100) / 100) + piSymbol);
+    var piMultiple = Math.round(100 * obj.pos.angular / Math.PI) / 100;
+    if (obj === this.highlightedObj) {
+        infoArray.push('type: ' + obj.type);
+        if ('undefined' !== typeof obj.objective) {
+            infoArray.push('objective: ' + obj.objective);
+        }
+        if ('undefined' !== typeof obj.damage) {
+            infoArray.push('damage: ' + obj.damage);
+        }
+        if ('undefined' !== typeof obj.health) {
+            infoArray.push('health: ' + obj.health);
+        }
+        if ('undefined' !== typeof obj.radius) {
+            infoArray.push('radius: ' + obj.radius);
+        }
+        infoArray.push('position: (' + Math.round(obj.pos.x) + ', ' +
+                       Math.round(obj.pos.y) + ')');
+        infoArray.push('rotation: ' + piMultiple + piSymbol);
+    } else {
+        infoArray.push(obj.type);
+        infoArray.push('(' + Math.round(obj.pos.x)
+                       + ', ' + Math.round(obj.pos.y) + ')');
+        if (piMultiple) {
+            infoArray.push(piMultiple + piSymbol);
+        }
+    }
     if (infoArray.length) {
         var lineHeight = 20;
         var margin = 10;
