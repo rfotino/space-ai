@@ -414,37 +414,52 @@ exports.testIntersectionPolyPoly = function(poly1, poly2) {
 };
 
 /**
- * Tests if the two game objects intersect.
+ * Tests if the two game objects intersect. Uses object IDs to cache the
+ * most recent result of testing intersection if the outlines remain the
+ * same.
  *
  * @param {GameObject} objA
  * @param {GameObject} objB
  * @return {Boolean}
  */
-exports.testIntersection = function(objA, objB) {
-    // First check if the bounding boxes intersect
-    var boundsA = objA.bounds();
-    var boundsB = objB.bounds();
-    if (!exports.testIntersectionRectRect(boundsA, boundsB)) {
-        return false;
-    }
-    // Then check if the outlines intersect
-    var outlineA = objA.outline();
-    var outlineB = objB.outline();
-    if (outlineA.hasOwnProperty('radius')) {
-        if (outlineB.hasOwnProperty('radius')) {
-            return exports.testIntersectionCircleCircle(outlineA, outlineB);
-        } else if (outlineB.hasOwnProperty('points')) {
-            return exports.testIntersectionCirclePoly(outlineA, outlineB);
+exports.testIntersection = (function() {
+    var intersectionCache = {};
+    return function(objA, objB) {
+        // First check the cache
+        var cacheKey = objA.id + '-' + objB.id;
+        if (intersectionCache.hasOwnProperty(cacheKey)) {
+            if (objA.unchanged && objB.unchanged) {
+                return intersectionCache[cacheKey];
+            }
         }
-    } else if (outlineA.hasOwnProperty('points')) {
-        if (outlineB.hasOwnProperty('radius')) {
-            return exports.testIntersectionCirclePoly(outlineB, outlineA);
-        } else if (outlineB.hasOwnProperty('points')) {
-            return exports.testIntersectionPolyPoly(outlineA, outlineB);
+        // First check if the bounding boxes intersect
+        var boundsA = objA.bounds();
+        var boundsB = objB.bounds();
+        if (!exports.testIntersectionRectRect(boundsA, boundsB)) {
+            intersectionCache[cacheKey] = false;
+            return false;
         }
-    }
-    return false;
-};
+        // Then check if the outlines intersect
+        var ret = false;
+        var outlineA = objA.outline();
+        var outlineB = objB.outline();
+        if (outlineA.hasOwnProperty('radius')) {
+            if (outlineB.hasOwnProperty('radius')) {
+                ret = exports.testIntersectionCircleCircle(outlineA, outlineB);
+            } else if (outlineB.hasOwnProperty('points')) {
+                ret = exports.testIntersectionCirclePoly(outlineA, outlineB);
+            }
+        } else if (outlineA.hasOwnProperty('points')) {
+            if (outlineB.hasOwnProperty('radius')) {
+                ret = exports.testIntersectionCirclePoly(outlineB, outlineA);
+            } else if (outlineB.hasOwnProperty('points')) {
+                ret = exports.testIntersectionPolyPoly(outlineA, outlineB);
+            }
+        }
+        intersectionCache[cacheKey] = ret;
+        return ret;
+    };
+})();
 
 /**
  * Tests if the polygon is completely enclosed by the circle.
