@@ -12,6 +12,69 @@ var GameObject = require('./GameObject.js');
 var EnemyTarget = require('./EnemyTarget.js');
 var LaserWeapon = require('./LaserWeapon.js');
 
+// Create a function for getting an array of prerendered enemy ship
+// images. If the same radius is requested more than once, a cached
+// copy is returned
+var getEnemyShipImages, numEnemyShipImages = 30;
+(function() {
+    var enemyShipImages = {};
+    getEnemyShipImages = function(radius) {
+        var key = radius.toString();
+        if (!enemyShipImages.hasOwnProperty(key)) {
+            var images = [];
+            for (var i = 0; i < numEnemyShipImages; i++) {
+                var spin = i * Math.PI / (6 * numEnemyShipImages);
+                var canvas = document.createElement('canvas');
+                canvas.width = canvas.height = Math.ceil(radius * 2);
+                var ctx = canvas.getContext('2d');
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                // Draw outer circle
+                ctx.fillStyle = '#999';
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                ctx.fill();
+                // Draw cockpit
+                ctx.fillStyle = '#666';
+                ctx.beginPath();
+                ctx.arc(0, 0, radius / 1.75, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.save();
+                ctx.clip();
+                ctx.fillStyle = '#888';
+                ctx.beginPath();
+                ctx.arc(-0.1 * radius, 0.1 * radius,
+                        radius / 1.75, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, radius / 1.75, 0, Math.PI * 2);
+                ctx.stroke();
+                // Draw decorations
+                var decRadius = radius / 10;
+                var decPerimeter = radius - (2 * decRadius);
+                var numDecorations = 12;
+                for (var j  = 0; j < numDecorations; j++) {
+                    var angle = spin + (j * Math.PI / 6);
+                    ctx.fillStyle = '#f33';
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(decPerimeter * Math.cos(angle),
+                            decPerimeter * Math.sin(angle),
+                            decRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+                images.push(ctx.canvas);
+            }
+            enemyShipImages[key] = images;
+        }
+        return enemyShipImages[key];
+    };
+})();
+
 /**
  * A constructor for enemy ships.
  */
@@ -32,9 +95,7 @@ var EnemyShip = function(props) {
     this._accelList = [];
     this._state = 'idle';
     // Used for spinning the ship's decorations
-    this._spin = 0;
-    this._spinVel = 0.02;
-    this._numDecorations = 12;
+    this._spinIndex = 0;
 };
 
 // Extend EnemyTarget
@@ -215,7 +276,7 @@ EnemyShip.prototype.update = function(objList) {
         break;
     }
     // Spin the ship's decorations
-    this._spin += this._spinVel;
+    this._spinIndex = (this._spinIndex + 1) % numEnemyShipImages;
     // Call superclass's update function
     GameObject.prototype.update.call(this);
 };
@@ -225,46 +286,8 @@ EnemyShip.prototype.update = function(objList) {
  * @param {CanvasRenderingContext2D} ctx
  */
 EnemyShip.prototype.draw = function(ctx) {
-    ctx.save();
-    // Draw outer circle
-    ctx.fillStyle = '#999';
-    ctx.beginPath();
-    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-    ctx.fill();
-    // Draw cockpit
-    ctx.fillStyle = '#666';
-    ctx.beginPath();
-    ctx.arc(0, 0, this.radius / 1.75, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.save();
-    ctx.clip();
-    ctx.fillStyle = '#888';
-    ctx.beginPath();
-    ctx.arc(-0.1 * this.radius, 0.1 * this.radius,
-            this.radius / 1.75, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(0, 0, this.radius / 1.75, 0, Math.PI * 2);
-    ctx.stroke();
-    // Draw decorations
-    var decRadius = this.radius / 10;
-    var decPerimeter = this.radius - (2 * decRadius);
-    for (var i = 0; i < this._numDecorations; i++) {
-        var angle = this._spin + (i * Math.PI * 2 / this._numDecorations);
-        ctx.fillStyle = '#f33';
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(decPerimeter * Math.cos(angle),
-                decPerimeter * Math.sin(angle),
-                decRadius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-    }
-    ctx.restore();
+    var image = getEnemyShipImages(this.radius)[this._spinIndex];
+    ctx.drawImage(image, -image.width / 2, -image.height / 2);
 };
 
 /**
