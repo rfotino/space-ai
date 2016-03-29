@@ -26,6 +26,16 @@ function Level(props) {
     }
     this.name = props.name;
     this.help = props.help || null;
+    if ('number' === typeof props.radarRange) {
+        this.radarRange = props.radarRange;
+    } else {
+        this.radarRange = Infinity;
+    }
+    if ('number' === typeof props.radarMaxObjs) {
+        this.radarMaxObjs = props.radarMaxObjs;
+    } else {
+        this.radarMaxObjs = Infinity;
+    }
     this._stateFunc = props.stateFunc;
     if (props.gameOverFunc) {
         this._checkWinConditions = function() {
@@ -277,9 +287,25 @@ Level.prototype.draw = function(ctx) {
 Level.prototype.getWorld = function() {
     var getObj = function(obj) { return obj.getObj(); };
     var isObj = function(obj) { return obj && ('object' === typeof obj); };
+    var playerObj = this._state.player.getObj();
+    var objList = this._state.objects.map(getObj).filter(isObj);
+    if (Infinity !== this.radarRange) {
+        var radarRangeSq = Math.pow(this.radarRange, 2);
+        var isInRange = function(obj) {
+            return physics.distSq(obj.pos, playerObj.pos) < radarRangeSq;
+        };
+        objList = objList.filter(isInRange);
+    }
+    if (Infinity !== this.radarMaxObjs) {
+        var closest = function(objA, objB) {
+            return physics.distSq(objA.pos, playerObj.pos)
+                - physics.distSq(objB.pos, playerObj.pos);
+        };
+        objList = objList.sort(closest).slice(0, this.radarMaxObjs);
+    }
     return {
-        player: this._state.player.getObj(),
-        objects: this._state.objects.map(getObj).filter(isObj)
+        player: playerObj,
+        objects: objList
     };
 };
 

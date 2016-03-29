@@ -7,6 +7,21 @@
  */
 
 /**
+ * Returns the squared distance between two points, or a point and the origin
+ * if only one point is given.
+ *
+ * @param {Point} p1
+ * @param {Point} [p2] Defaults to (0, 0).
+ * @return {Number}
+ */
+exports.distSq = function(p1, p2) {
+    if ('undefined' === typeof p2) {
+        p2 = { x: 0, y: 0 };
+    }
+    return Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2);
+};
+
+/**
  * Returns the distance between two points, or a point and the origin
  * if only one point is given.
  *
@@ -15,10 +30,7 @@
  * @return {Number}
  */
 exports.dist = function(p1, p2) {
-    if ('undefined' === typeof p2) {
-        p2 = { x: 0, y: 0 };
-    }
-    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+    return Math.sqrt(exports.distSq(p1, p2));
 };
 
 /**
