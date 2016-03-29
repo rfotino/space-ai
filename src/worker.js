@@ -6,7 +6,7 @@
 // a global context where user code is executed
 (function() {
     var userFunc = null;
-    var world = null;
+    var world = { player: null, objects: [] };
     var storage = {};
     var hideFunc = function(funcToHide) {
         var hiddenFunc = funcToHide;
@@ -215,7 +215,27 @@
             break;
         case 'execute':
             // Refresh the world and execute the user code again
-            world = message.world;
+            world.player = message.world.player;
+            world.objects.sort(function(a, b) { return a.id - b.id; });
+            message.world.removeIds.sort(function(a, b) { return a - b; });
+            var i = world.objects.length - 1;
+            var j = message.world.removeIds.length - 1;
+            while (0 <= i && 0 <= j) {
+                var objId = world.objects[i].id;
+                var removeId = message.world.removeIds[j];
+                if (removeId < objId) {
+                    i--;
+                } else if (objId < removeId) {
+                    j--;
+                } else {
+                    world.objects.splice(i, 1);
+                    i--;
+                    j--;
+                }
+            }
+            for (var i = 0; i < message.world.addObjs.length; i++) {
+                world.objects.push(message.world.addObjs[i]);
+            }
             execute();
             break;
         }

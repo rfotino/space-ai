@@ -14,7 +14,7 @@ var Level = require('./obj/Level.js');
 // Declare variables for DOM elements and handling state
 var canvas, ctx, worker = null, running = false,
     frameComplete = true, timerComplete = true,
-    level = null, installedCode = null,
+    level = null, installedCode = null, prevWorldObjs = [],
     mousePos = null, debugMode = false;
 
 // Update the run/pause button in the menu to the correct state
@@ -26,6 +26,21 @@ var updateMenu = function() {
     } else {
         menubar.setState('paused');
     }
+}
+
+// A function for doing a deep equality comparison on simple objects
+function simpleDeepEquals(a, b) {
+    if (a === b) {
+        return true;
+    } else if ('object' === typeof a && 'object' === typeof b) {
+        for (var i in a) {
+            if (!simpleDeepEquals(a[i], b[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
 }
 
 // Begins executing the user's code for the next frame, and sets a timer
@@ -51,7 +66,50 @@ var execute = function() {
             updateMenu();
         }
     } else {
-        worker.postMessage({ type: 'execute', world: level.getWorld() });
+        // Diff the previous and the new world objects so we send as little
+        // as possible to the web worker. Sort the objects by ID so that we
+        // can optimize getting the difference of arrays
+        var newWorld = level.getWorld();
+        var newWorldObjs = newWorld.objects;
+        newWorldObjs.sort(function(a, b) { return a.id - b.id; });
+        var addObjs = [];
+        var removeObjs = [];
+        var i = 0, j = 0;
+        while (i < newWorldObjs.length && j < prevWorldObjs.length) {
+            var objA = newWorldObjs[i], objB = prevWorldObjs[j];
+            if (objA.id < objB.id) {
+                addObjs.push(objA);
+                i++;
+            } else if (objB.id < objA.id) {
+                removeObjs.push(objB);
+                j++;
+            } else {
+                if (!simpleDeepEquals(objA, objB)) {
+                    addObjs.push(objA);
+                    removeObjs.push(objB);
+                }
+                i++;
+                j++;
+            }
+        }
+        while (i < newWorldObjs.length) {
+            addObjs.push(newWorldObjs[i]);
+            i++;
+        }
+        while (j < prevWorldObjs.length) {
+            removeObjs.push(prevWorldObjs[j]);
+            j++;
+        }
+        var removeIds = removeObjs.map(function(a) { return a.id; });
+        worker.postMessage({
+            type: 'execute',
+            world: {
+                player: newWorld.player,
+                removeIds: removeIds,
+                addObjs: addObjs
+            }
+        });
+        prevWorldObjs = newWorld.objects;
     }
 }
 
@@ -202,6 +260,7 @@ exports.load = (function() {
  */
 exports.restart = function() {
     // Reset the game to the level's initial conditions and redraw
+    prevWorldObjs = [];
     if (null !== installedCode) {
         exports.install(installedCode);
         running = false;
