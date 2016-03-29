@@ -100,20 +100,27 @@ Level.prototype._updateGameObjects = function() {
     if (player.alive) {
         this._state.objects.unshift(player);
     }
-    // Get a list of game objects that we can pass each individual
-    // object's update function
-    var prevObjList = [];
+    // Get a list of Player and FriendlyTarget objects that we can pass to
+    // enemy ships
+    var friendlies = [];
     for (var i = 0; i < this._state.objects.length; i++) {
-        var obj = this._state.objects[i].getObj();
-        if (obj && 'object' === typeof obj) {
-            prevObjList.push(obj);
+        var obj = this._state.objects[i];
+        if ('player' === obj.type ||
+            ('target' === obj.type && 'defend' === obj.objective)) {
+            friendlies.push(obj.getObj());
         }
     }
     // Update all game objects
     for (var i = 0; i < this._state.objects.length; i++) {
         var obj = this._state.objects[i];
         if (!this.complete() || obj.updateOnGameOver) {
-            obj.update(prevObjList);
+            if ('mine' === obj.type) {
+                obj.update(player.alive ? player : null);
+            } else if ('ship' === obj.type) {
+                obj.update(friendlies);
+            } else {
+                obj.update();
+            }
         }
     }
     // Do collision detection between all game objects

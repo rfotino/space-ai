@@ -428,7 +428,7 @@ exports.testIntersection = (function() {
         // First check the cache
         var cacheKey = objA.id + '-' + objB.id;
         if (intersectionCache.hasOwnProperty(cacheKey)) {
-            if (objA.unchanged && objB.unchanged) {
+            if (!objA.boundsChanged && !objB.boundsChanged) {
                 return intersectionCache[cacheKey];
             }
         }

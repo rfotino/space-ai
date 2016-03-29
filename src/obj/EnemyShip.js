@@ -219,9 +219,9 @@ EnemyShip.prototype._slowDown = function() {
 
 /**
  * @override {GameObject}
- * @param {Object[]} objList
+ * @param {Object[]} friendlies
  */
-EnemyShip.prototype.update = function(objList) {
+EnemyShip.prototype.update = function(friendlies) {
     // Update weapon, if equipped
     if (this.weapon) {
         this.weapon.update();
@@ -229,15 +229,12 @@ EnemyShip.prototype.update = function(objList) {
     // Get the closest Player or FriendlyTarget
     var objToAttack = null;
     var objDist = Infinity;
-    for (var i = 0; i < objList.length; i++) {
-        var obj = objList[i];
-        if ('player' === obj.type ||
-            ('target' === obj.type && 'defend' === obj.objective)) {
-            var dist = physics.dist(obj.pos, this.pos);
-            if (dist < objDist) {
-                objToAttack = obj;
-                objDist = dist;
-            }
+    for (var i = 0; i < friendlies.length; i++) {
+        var obj = friendlies[i];
+        var dist = physics.dist(obj.pos, this.pos);
+        if (dist < objDist) {
+            objToAttack = obj;
+            objDist = dist;
         }
     }
     // Decide what to do based on the state

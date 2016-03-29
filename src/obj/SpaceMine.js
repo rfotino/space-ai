@@ -95,16 +95,10 @@ SpaceMine.prototype.constructor = SpaceMine;
  * If they are near enough, space mines accelerate toward the player.
  *
  * @override {DestructibleTarget}
- * @param {GameObject[]} objList
+ * @param {Object} player
  */
-SpaceMine.prototype.update = function(objList) {
-    var player = null;
-    objList.forEach(function(obj) {
-        if ('player' === obj.type) {
-            player = obj;
-        }
-    });
-    if (null !== player) {
+SpaceMine.prototype.update = function(player) {
+    if (player) {
         var dirVector = {
             x: player.pos.x - this.pos.x,
             y: player.pos.y - this.pos.y
@@ -132,7 +126,7 @@ SpaceMine.prototype.update = function(objList) {
         this._blinkCounter = 0;
     }
     // Call parent update function
-    DestructibleTarget.prototype.update.call(this, objList);
+    DestructibleTarget.prototype.update.call(this);
 };
 
 /**

@@ -27,9 +27,9 @@ var GameObject = function(props) {
     // If the alive flag is set to false, the object is removed from the
     // list of game objects
     this.alive = true;
-    // An unchanged flag, true if the object's bounds have not changed
+    // A bounds changed flag, true if the object's bounds have not changed
     // since the last frame - used for caching intersection data
-    this.unchanged = true;
+    this.boundsChanged = false;
     // A list of new game objects to add to the scene, usually generated
     // in this.update() or this.collide()
     this.newObjects = [];
@@ -48,12 +48,12 @@ var GameObject = function(props) {
  * Updates position and velocity.
  */
 GameObject.prototype.update = function() {
-    this.unchanged = true;
+    this.boundsChanged = false;
     this.vel.x += this.accel.x;
     this.vel.y += this.accel.y;
     this.vel.angular += this.accel.angular;
     if (this.vel.x || this.vel.y || this.vel.angular) {
-        this.unchanged = false;
+        this.boundsChanged = true;
         this.pos.x += this.vel.x;
         this.pos.y += this.vel.y;
         this.pos.angular += this.vel.angular;
