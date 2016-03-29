@@ -18,6 +18,16 @@ var QuadTree = require('./QuadTree.js');
  * @param {String} props.name
  * @param {String} props.help Help text to go with this level.
  * @param {Function} props.stateFunc A function that returns an initial state.
+ * @param {Number} props.radarRange The maximum distance from the player that
+ *     an object can be and still show up in the radar() function's results.
+ *     Defaults to Infinity.
+ * @param {Number} props.radarMaxObjs The maximum number of objects returned
+ *     by the radar() function. Closest objects are chosen first. Defaults to
+ *     Infinity.
+ * @param {Function} props.gameOverFunc A function that checks win and lose
+ *     conditions for levels that require custom conditions. Takes the game
+ *     state as a parameter. Returns 'win' if the player has won and 'lose'
+ *     if the player has lost, or nothing if neither condition is true.
  */
 function Level(props) {
     props = props || {};
