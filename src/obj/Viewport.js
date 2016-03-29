@@ -137,7 +137,7 @@ Viewport.prototype.update = function(ctx) {
 Viewport.prototype.bounds = function(viewWidth, viewHeight) {
     return {
         x: -this._translation.x,
-        y: -this._translation.y,
+        y: this._translation.y - (viewHeight / this._scale),
         width: viewWidth / this._scale,
         height: viewHeight / this._scale
     };

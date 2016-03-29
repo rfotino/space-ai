@@ -44,7 +44,12 @@ Explosion.prototype.constructor = Explosion;
  * @return {Rectangle}
  */
 Explosion.prototype.bounds = function() {
-    return { x: this.pos.x, y: this.pos.y, width: 1, height: 1 };
+    return {
+        x: this.pos.x - this.blastRadius,
+        y: this.pos.y - this.blastRadius,
+        width: 2 * this.blastRadius,
+        height: 2 * this.blastRadius
+    };
 };
 
 /**

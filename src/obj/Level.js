@@ -206,8 +206,12 @@ Level.prototype.draw = function(ctx) {
             return a.zDepth - b.zDepth;
         }
     });
+    var viewBounds = this.viewport.bounds(ctx.canvas.width, ctx.canvas.height);
     for (var i = 0; i < drawObjects.length; i++) {
         var obj = drawObjects[i];
+        if (!physics.testIntersectionRectRect(viewBounds, obj.bounds())) {
+            continue;
+        }
         ctx.save();
         ctx.translate(obj.pos.x, obj.pos.y);
         ctx.rotate(obj.pos.angular);
@@ -391,8 +395,8 @@ Level.prototype.viewScale = function(factor, viewWidth, viewHeight) {
         var translation = this.viewport.getTranslation();
         var viewBounds = this.viewport.bounds(viewWidth, viewHeight);
         var center = {
-            x: translation.x + viewBounds.x + (viewBounds.width / 2),
-            y: translation.y + viewBounds.y + (viewBounds.height / 2)
+            x: viewBounds.width / 2,
+            y: viewBounds.height / 2
         };
         this.viewport.translate(-center.x, -center.y);
         var oldScale = this.viewport.getScale();
@@ -561,17 +565,17 @@ Level.prototype._drawGrid = function(ctx) {
     var endX = viewBounds.x + viewBounds.width;
     for (var x = startX; x <= endX; x += interval) {
         ctx.beginPath();
-        ctx.moveTo(x, -viewBounds.y);
-        ctx.lineTo(x, -viewBounds.y - viewBounds.height);
+        ctx.moveTo(x, viewBounds.y);
+        ctx.lineTo(x, viewBounds.y + viewBounds.height);
         ctx.stroke();
     }
     // Draw horizontal lines
     var startY = Math.floor(viewBounds.y / interval) * interval;
-    var endY = viewBounds.y + viewBounds.width;
+    var endY = viewBounds.y + viewBounds.height;
     for (var y = startY; y <= endY; y += interval) {
         ctx.beginPath();
-        ctx.moveTo(viewBounds.x, -y);
-        ctx.lineTo(viewBounds.x + viewBounds.width, -y);
+        ctx.moveTo(viewBounds.x, y);
+        ctx.lineTo(viewBounds.x + viewBounds.width, y);
         ctx.stroke();
     }
     ctx.restore();
