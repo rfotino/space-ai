@@ -89,7 +89,3 @@ two HTML files that can be viewed in the browser to run the game:
 * [ ] Planets with gravity mechanics
 * [ ] Better styling for docs
 * [ ] Multiplayer versus mode
-
-## Copyright
-
-Copyright (c) 2015 Robert Fotino.
