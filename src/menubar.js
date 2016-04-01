@@ -425,6 +425,19 @@ exports.init = function() {
             game.restart();
         });
 
+        // Show the about dialog if this is the first time the user is
+        // visiting the page
+        var shownAboutDialog = false;
+        try {
+            if ('shownAboutDialog' in localStorage) {
+                shownAboutDialog = localStorage.getItem('shownAboutDialog');
+            }
+            localStorage.setItem('shownAboutDialog', true);
+        } catch (e) { }
+        if (!shownAboutDialog) {
+            $('#about-btn').trigger('click');
+        }
+
         // Set the initial state
         exports.setState('waiting');
         exports.hideLevels();
