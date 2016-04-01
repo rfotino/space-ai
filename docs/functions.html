@@ -6,7 +6,29 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
+    <!-- JavaScript -->
+    <script type="text/javascript" src="docs.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('.code').each(function(index, code) {
+          var config = {
+            value: $(code).text().trim(),
+            mode: 'javascript',
+            theme: 'elegant',
+            lineNumbers: true,
+            lineWrapping: true,
+            readOnly: true
+          };
+          CodeMirror(function(elem) {
+            code.parentNode.replaceChild(elem, code);
+          }, config);
+        });
+      });
+    </script>
+
     <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="../lib/codemirror/lib/codemirror.css" />
+    <link rel="stylesheet" type="text/css" href="../lib/codemirror/theme/bundle.css" />
     <link rel="stylesheet" type="text/css" href="docs.css" />
   </head>
   <body>
@@ -38,6 +60,13 @@
         <strong>Returns:</strong> &lt;Number&gt;
         <p>The current power setting of the player ship's main engines.</p>
       </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">
+thrust(1); // Sets the thrust power to full
+var thrustPower = thrust(); // Gets the current thrust power
+        </div>
+      </div>
     </div>
 
     <a name="turn"></a>
@@ -59,6 +88,13 @@
         <strong>Returns:</strong> &lt;Number&gt;
         <p>The power setting of the player ship's turning engines.</p>
       </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">
+turn(1); // Sets the turn power to fully counterclockwise
+var turnPower = turn(); // Gets the current turn power
+        </div>
+      </div>
     </div>
 
     <a name="diagnostics"></a>
@@ -74,6 +110,15 @@
         <strong>Returns:</strong> &lt;<a href="objects.html#vector">Vector</a>&gt;
         <p>An object with numeric 'x', 'y', and 'angular' properties.</p>
       </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">
+var a = accel();
+console.log('accel.x: ' + a.x);
+console.log('accel.y: ' + a.y);
+console.log('accel.angular: ' + a.angular);
+        </div>
+      </div>
     </div>
 
     <a name="bounds"></a>
@@ -86,6 +131,16 @@
         <strong>Returns</strong> &lt;<a href="objects.html#rectangle">Rectangle</a>&gt;
         <p>An object with numeric 'x', 'y', 'width', and 'height' properties.</p>
       </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">
+var b = bounds();
+console.log('bounds.x: ' + b.x);
+console.log('bounds.y: ' + b.y);
+console.log('bounds.width: ' + b.width);
+console.log('bounds.height: ' + b.height);
+        </div>
+      </div>
     </div>
 
     <a name="health"></a>
@@ -96,6 +151,10 @@
       <p class="description">Gets the player's current health.</p>
       <div class="returns">
         <strong>Returns:</strong> &lt;Number&gt;
+      </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">var currentHealth = health();</div>
       </div>
     </div>
 
@@ -109,6 +168,15 @@
         <strong>Returns:</strong> &lt;<a href="objects.html#vector">Vector</a>&gt;
         <p>An object with numeric 'x', 'y', and 'angular' properties.</p>
       </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">
+var p = pos();
+console.log('pos.x: ' + p.x);
+console.log('pos.y: ' + p.y);
+console.log('pos.angular: ' + p.angular):
+        </div>
+      </div>
     </div>
 
     <a name="vel"></a>
@@ -120,6 +188,15 @@
       <div class="returns">
         <strong>Returns:</strong> &lt;<a href="objects.html#vector">Vector</a>&gt;
         <p>Extra info on the return value.</p>
+      </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">
+var v = vel();
+console.log('vel.x: ' + v.x);
+console.log('vel.y: ' + v.y);
+console.log('vel.angular: ' + v.angular);
+        </div>
       </div>
     </div>
 
@@ -145,6 +222,14 @@
         <strong>Returns:</strong> &lt;Array&gt;
         <p>The array of <a href="objects.html#gameobject">GameObject</a>s.</p>
       </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">
+var asteroids = radar('asteroid');
+var reachTarget = radar({ type: 'target', objective: 'reach' })[0];
+        </div>
+        <p>See the <a href="examples.html#radar">radar usage example</a> for more.</p>
+      </div>
     </div>
 
     <a name="weapons-class"></a>
@@ -168,6 +253,11 @@
             <p>The y-coordinate to aim at.</p>
         </ul>
       </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">fire(1, 0); // Fire in the (x = 1, y = 0) direction, along the positive x axis</div>
+        <p>See the <a href="examples.html#weapons">weapons usage example</a> for more.</p>
+      </div>
     </div>
 
     <a name="equip"></a>
@@ -185,6 +275,11 @@
           </li>
         </ul>
       </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">equip('rocket');</div>
+        <p>See the <a href="examples.html#weapons">weapons usage example</a> for more.</p>
+      </div>
     </div>
 
     <a name="equipped"></a>
@@ -196,6 +291,11 @@
       <div class="returns">
         <strong>Returns:</strong> &lt;<a href="objects.html#weapon-obj">Weapon</a>&gt;
         <p>The currently equipped weapon.</p>
+      </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">var ammoRemaining = equipped().ammo;</div>
+        <p>See the <a href="examples.html#weapons">weapons usage example</a> for more.</p>
       </div>
     </div>
 
@@ -209,6 +309,11 @@
         <strong>Returns:</strong> &lt;Array&gt;
         <p>The array of available <a href="objects.html#weapon-obj">Weapon</a> objects.</p>
       </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">var allWeapons = weapons(); // Gets the array of available weapons to iterate over</div>
+        <p>See the <a href="examples.html#weapons">weapons usage example</a> for more.</p>
+      </div>
     </div>
 
     <a name="storage"></a>
@@ -219,7 +324,7 @@
       <div class="name">
         <code>Object <strong>load</strong>( key, [ defaultValue ] )</code>
       </div>
-      <p class="description">Loads a value from the given key from persistent storage.</p>
+      <p class="description">Loads a value with the given key from persistent storage.</p>
       <div class="params">
         <strong>Parameters</strong>
         <ul>
@@ -236,6 +341,11 @@
       <div class="returns">
         <strong>Returns:</strong> &lt;Object&gt;
         <p>The value stored at the given key, or the defaultValue.</p>
+      </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">var prevPos = load('previous position', pos());</div>
+        <p>See the <a href="examples.html#persistent">persistent variables example</a> for more.</p>
       </div>
     </div>
 
@@ -258,6 +368,11 @@
           </li>
         </ul>
       </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">store('previous position', pos());</div>
+        <p>See the <a href="examples.html#persistent">persistent variables example</a> for more.</p>
+      </div>
     </div>
 
     <a name="logging"></a>
@@ -278,6 +393,13 @@
           </li>
         </ul>
       </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">
+console.error('Unexpected condition!'); // Logs a string to the console as an error
+console.error(pos()); // Logs an object to the console as an error
+        </div>
+      </div>
     </div>
 
     <a name="console.log"></a>
@@ -295,6 +417,13 @@
           </li>
         </ul>
       </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">
+console.log('Some text here!'); // Logs a string to the console as a plain message
+console.log(pos()); // Logs an object to the console as a plain message
+        </div>
+      </div>
     </div>
 
     <a name="console.warn"></a>
@@ -311,6 +440,13 @@
             <p>If the message is of type Object, its JSON representation is printed instead.</p>
           </li>
         </ul>
+      </div>
+      <div class="example">
+        <strong>Example:</strong>
+        <div class="code">
+console.warn('Watch out for those asteroids!'); // Logs a string to the console as a warning
+console.warn(pos()); // Logs an object to the console as a warning
+        </div>
       </div>
     </div>
   </body>

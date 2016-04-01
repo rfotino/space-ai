@@ -66,7 +66,7 @@ p.intro {
     font-size: 1.2em;
     padding-bottom: 5px;
 }
-.function .params, .function .returns, .object .members {
+.function .params, .function .returns, .function .example, .object .members {
     margin-top: 15px;
 }
 .object .members .description {
