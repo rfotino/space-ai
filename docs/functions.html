@@ -105,7 +105,7 @@ var turnPower = turn(); // Gets the current turn power
       <div class="name">
         <code><a href="objects.html#vector">Vector</a> <strong>accel</strong>()</code>
       </div>
-      <p class="description">Gets the x, y, and angular acceleration of the player ship. The x and y acceleration are computed from the angular position of the ship and the power setting of its main engines, and are given in pixels/second^2. The angular acceleration is computed from the power setting of the ship's turning engines, and is given in radians/sec^2.</p>
+      <p class="description">Gets the x, y, and angular acceleration of the player ship. The x and y acceleration are computed from the angular position of the ship and the power setting of its main engines, and are given in pixels/frame^2. The angular acceleration is computed from the power setting of the ship's turning engines, and is given in radians/frame^2.</p>
       <div class="returns">
         <strong>Returns:</strong> &lt;<a href="objects.html#vector">Vector</a>&gt;
         <p>An object with numeric 'x', 'y', and 'angular' properties.</p>
@@ -184,7 +184,7 @@ console.log('pos.angular: ' + p.angular):
       <div class="name">
         <code><a href="objects.html#vector">Vector</a> <strong>vel</strong>()</code>
       </div>
-      <p class="description">Gets the x, y, and angular velocity of the player ship. The x and y velocity are given in pixels/second. The angular velocity is given in radians/sec.</p>
+      <p class="description">Gets the x, y, and angular velocity of the player ship. The x and y velocity are given in pixels/frame. The angular velocity is given in radians/frame.</p>
       <div class="returns">
         <strong>Returns:</strong> &lt;<a href="objects.html#vector">Vector</a>&gt;
         <p>Extra info on the return value.</p>
