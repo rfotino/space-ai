@@ -19,7 +19,7 @@ of single-player challenges to complete.
 ## Demo
 
 A live demo of the latest version of the code is available at
-https://spaceship.codes.
+https://fotino.me/static/spaceship.codes.
 
 ## Build
 
