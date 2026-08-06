@@ -390,7 +390,7 @@ module.exports = [
             var enemies = [];
             for (var i = 0; i < targetPositions.length; i++) {
                 var p = targetPositions[i];
-                enemies.push(new EnemyTarget({ pos: { x: p.x, y: p.y } }));
+                enemies.push(new EnemyTarget({ win: true, pos: { x: p.x, y: p.y } }));
                 var path = [
                     { x: p.x - r, y: p.y + r },
                     { x: p.x + r, y: p.y + r },
