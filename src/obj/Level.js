@@ -326,13 +326,41 @@ Level.prototype.getWorld = function() {
  * @param {Object} world
  */
 Level.prototype.updateWorld = function(world) {
+    if (!world || !world.player) {
+        return;
+    }
+
     var player = this._state.player;
-    player.thrustPower = world.player.thrustPower;
-    player.thrust = world.player.thrust;
-    player.turnPower = world.player.turnPower;
-    player.accel.angular = world.player.accel.angular;
-    player.equipped = world.player.equipped;
-    player.fired = world.player.fired;
+    var input = world.player;
+    var finiteNumber = function(value) {
+        return 'number' === typeof value && isFinite(value);
+    };
+
+    // The worker is untrusted: accept controls, not derived physics values.
+    var thrustPower = finiteNumber(input.thrustPower)
+        ? Math.max(0, Math.min(1, input.thrustPower)) : 0;
+    var turnPower = finiteNumber(input.turnPower)
+        ? Math.max(-1, Math.min(1, input.turnPower)) : 0;
+    player.thrustPower = thrustPower;
+    player.thrust = 0.5 * thrustPower;
+    player.turnPower = turnPower;
+    player.accel.angular = 0.005 * turnPower;
+
+    // Only equip a weapon actually owned by the player.
+    player.equipped = null;
+    for (var i = 0; i < player.weapons.length; i++) {
+        if (player.weapons[i].name === input.equipped) {
+            player.equipped = input.equipped;
+            break;
+        }
+    }
+
+    // Reject malformed firing vectors.
+    player.fired = false;
+    if (input.fired && finiteNumber(input.fired.x) &&
+            finiteNumber(input.fired.y)) {
+        player.fired = { x: input.fired.x, y: input.fired.y };
+    }
 };
 
 /**

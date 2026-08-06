@@ -154,6 +154,13 @@ exports.install = function(code) {
             updateMenu();
             break;
         case 'complete':
+            // Accept exactly one completion for each execute request.
+            // Otherwise escaped user code can inject extra physics frames.
+            if (frameComplete) {
+                break;
+            }
+            frameComplete = true;
+
             // Update the game objects, redraw the frame, and set it
             // to complete
             if (null !== level) {
@@ -168,7 +175,6 @@ exports.install = function(code) {
                     menubar.addWonLevel(level.name);
                 }
             }
-            frameComplete = true;
             if (timerComplete && running) {
                 execute();
             }
